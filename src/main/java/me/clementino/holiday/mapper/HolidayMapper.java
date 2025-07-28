@@ -1,24 +1,60 @@
 package me.clementino.holiday.mapper;
 
-import me.clementino.holiday.domain.Holiday;
+import me.clementino.holiday.domain.*;
 import me.clementino.holiday.dto.CreateHolidayRequest;
 import me.clementino.holiday.dto.HolidayResponse;
 import me.clementino.holiday.dto.UpdateHolidayRequest;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
-import java.util.UUID;
+import java.util.Optional;
 
 /**
  * Mapper for converting between domain objects and DTOs.
- * Following DOP principles - pure transformation functions.
+ * Following DOP principles - pure transformation functions working with immutable data.
  */
 @Component
 public class HolidayMapper {
 
     /**
-     * Convert CreateHolidayRequest to Holiday domain object.
+     * Convert HolidayData domain object to HolidayResponse DTO.
      */
+    public HolidayResponse toResponse(HolidayData holidayData) {
+        HolidayResponse response = new HolidayResponse();
+        
+        response.setId(holidayData.id());
+        response.setName(holidayData.name());
+        response.setDate(holidayData.date());
+        response.setObserved(holidayData.observed().orElse(null));
+        response.setCountry(holidayData.location().country());
+        response.setState(holidayData.location().state().orElse(null));
+        response.setCity(holidayData.location().city().orElse(null));
+        response.setType(holidayData.type());
+        response.setRecurring(holidayData.recurring());
+        response.setDescription(holidayData.description().orElse(null));
+        response.setDateCreated(holidayData.dateCreated().orElse(null));
+        response.setLastUpdated(holidayData.lastUpdated().orElse(null));
+        response.setVersion(holidayData.version().orElse(null));
+        
+        return response;
+    }
+
+    /**
+     * Convert list of HolidayData domain objects to list of HolidayResponse DTOs.
+     */
+    public List<HolidayResponse> toHolidayDataResponseList(List<HolidayData> holidayDataList) {
+        return holidayDataList.stream()
+                .map(this::toResponse)
+                .toList();
+    }
+
+    // Legacy methods for backward compatibility with persistence layer
+
+    /**
+     * Convert CreateHolidayRequest to Holiday persistence entity.
+     * @deprecated Use DOP command pattern instead
+     */
+    @Deprecated
     public Holiday toEntity(CreateHolidayRequest request) {
         Holiday holiday = new Holiday(
             request.getName(),
@@ -37,9 +73,11 @@ public class HolidayMapper {
     }
 
     /**
-     * Convert Holiday domain object to HolidayResponse.
+     * Convert Holiday persistence entity to HolidayResponse DTO.
+     * @deprecated Use toResponse(HolidayData) instead for DOP approach
      */
-    public HolidayResponse toResponse(Holiday holiday) {
+    @Deprecated
+    public HolidayResponse toResponseFromEntity(Holiday holiday) {
         HolidayResponse response = new HolidayResponse();
         
         response.setId(holiday.getId());
@@ -60,17 +98,21 @@ public class HolidayMapper {
     }
 
     /**
-     * Convert list of Holiday domain objects to list of HolidayResponse.
+     * Convert list of Holiday persistence entities to list of HolidayResponse DTOs.
+     * @deprecated Use toHolidayDataResponseList instead for DOP approach
      */
+    @Deprecated
     public List<HolidayResponse> toResponseList(List<Holiday> holidays) {
         return holidays.stream()
-                .map(this::toResponse)
+                .map(this::toResponseFromEntity)
                 .toList();
     }
 
     /**
-     * Update existing Holiday with data from UpdateHolidayRequest.
+     * Update existing Holiday persistence entity with data from UpdateHolidayRequest.
+     * @deprecated Use DOP command pattern instead
      */
+    @Deprecated
     public void updateEntity(Holiday holiday, UpdateHolidayRequest request) {
         if (request.getName() != null) {
             holiday.setName(request.getName());

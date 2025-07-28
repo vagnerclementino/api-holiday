@@ -5,7 +5,6 @@ import jakarta.validation.constraints.Size;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.annotation.Version;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDate;
@@ -51,13 +50,12 @@ public class Holiday {
     private String description;
 
     @CreatedDate
-    private LocalDateTime dateCreated;  // Changed to LocalDateTime
+    private LocalDateTime dateCreated;
 
     @LastModifiedDate
-    private LocalDateTime lastUpdated;  // Changed to LocalDateTime
+    private LocalDateTime lastUpdated;
 
-    @Version
-    private Integer version;
+    private Integer version;  // Removed @Version annotation
 
     // Default constructor for MongoDB
     public Holiday() {}
