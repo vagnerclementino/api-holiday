@@ -1,0 +1,45 @@
+spring:
+  data:
+    mongodb:
+      uri: ${MONGODB_DATABASE_URL:mongodb://holiday_user:holiday_pass_2024@localhost:27017/holiday-api}
+      uuid-representation: standard
+      auto-index-creation: true
+  docker:
+    compose:
+      lifecycle-management: start-only
+
+server:
+  port: 8080
+
+logging:
+  level:
+    me.clementino.holiday: DEBUG
+    org.springframework.data.mongodb: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: always
+
+error:
+  handling:
+    http-status-in-json-response: true
+    exception-logging: NO_LOGGING
+    full-stacktrace-http-statuses: 5xx
+    log-levels:
+      5xx: ERROR
+
+springdoc:
+  pathsToMatch: /, /api/**
+  swagger-ui:
+    path: /swagger-ui.html
+    enabled: true
+  api-docs:
+    path: /api-docs
+    enabled: true
