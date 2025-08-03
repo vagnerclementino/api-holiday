@@ -151,9 +151,88 @@ The project follows a clean, data-oriented architecture with Spring Boot 3:
 
 ## 🚀 Quick Start
 
+### 📚 For Students (No Java Installation Required)
+
+**Perfect for learning and study purposes!** You don't need Java 24 installed locally.
+
+```bash
+# Clone the repository
+git clone https://github.com/vagnerclementino/odp-api-holiday.git
+cd odp-api-holiday
+
+# Start the complete application (builds inside Docker)
+make run
+
+# Or run in background
+make run-detached
+
+# Check status
+make status
+
+# Access the API
+curl http://localhost:8080/api/holidays
+```
+
+The application will be built inside Docker using Java 24, so you only need:
+- **Docker & Docker Compose** 
+- **Make** (optional, for convenience commands)
+
+### 🛠️ For Developers (Local Java Development)
+
+If you want to develop with local Java tools:
+
 ### Prerequisites
-- Java 17+
-- Maven 3.6+
+- **Java 24** (Amazon Corretto 24 recommended)
+- Maven 3.9.11+
+- Docker & Docker Compose
+- Make (optional, for convenience commands)
+
+### Setup and Run
+
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/vagnerclementino/odp-api-holiday.git
+   cd odp-api-holiday
+   ```
+
+2. **Build the application:**
+   ```bash
+   ./mvnw clean package -DskipTests
+   ```
+
+3. **Run the application (choose one):**
+   
+   **Option 1: Using Maven (recommended for development):**
+   ```bash
+   ./mvnw spring-boot:run
+   ```
+   
+   **Option 2: Using JAR directly:**
+   ```bash
+   java --enable-preview -jar target/holiday-api-*.jar
+   ```
+
+4. **Access the API:**
+   - API Base URL: http://localhost:8080
+   - Swagger UI: http://localhost:8080/swagger-ui.html
+   - API Docs: http://localhost:8080/api-docs
+   - Health Check: http://localhost:8080/actuator/health
+
+### Java 24 Configuration
+
+This project is configured by default to run with **Java 24 (Amazon Corretto)** and **Spring Boot 3.5.4**:
+
+✅ **Default Java 24 Support**: No special profiles or scripts needed
+✅ **Preview Features**: Automatically enabled via Maven configuration
+✅ **Spring Boot 3.5.4**: Latest version with enhanced Java 24 support
+✅ **Optimized Configuration**: Jackson, MongoDB, and Actuator configured for Java 24
+
+**Technical Details:**
+- **Runtime**: Java 24 (Amazon Corretto) with preview features enabled
+- **Compilation**: Java 24 (full Java 24 support)
+- **Spring Boot**: 3.5.4 with Spring Framework 6.2.9
+- **Build Tool**: Maven 3.9.11
+- **Build Tool**: Maven 3.9.11
 - Docker & Docker Compose
 - Make (optional, for convenience commands)
 
@@ -171,7 +250,7 @@ The project follows a clean, data-oriented architecture with Spring Boot 3:
    ```
    This will:
    - Start MongoDB 8 container
-   - Build the Spring Boot application
+   - Build the Spring Boot application with Java 24
    - Start the REST API server
    - Display the API URL
 
@@ -179,6 +258,18 @@ The project follows a clean, data-oriented architecture with Spring Boot 3:
    ```bash
    make test
    ```
+
+### Development Commands
+
+| Command | Description | Java Required |
+|---------|-------------|---------------|
+| `make run` | Build and run from source (Docker) | ❌ No |
+| `make dev` | Start development mode (Docker) | ❌ No |
+| `make run-local` | Build and run with local Java | ✅ Java 24 |
+| `make dev-local` | Development mode with local Java | ✅ Java 24 |
+| `make run-detached` | Run in background (Docker) | ❌ No |
+| `make status` | Check application status | ❌ No |
+| `make clean-dev` | Clean development containers | ❌ No |
 
 ### Manual Setup (if Make is not available)
 

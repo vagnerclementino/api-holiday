@@ -7,7 +7,7 @@ include MakefileDocumentation
 SERVICE_NAME := holiday-api
 APP_NAME := holiday-api
 DOCKER_COMPOSE := docker-compose
-MAVEN := ./mvnw
+MAVEN := JAVA_HOME=~/.asdf/installs/java/adoptopenjdk-24.0.1+9 ./mvnw
 JAVA_OPTS := -Xmx512m -Xms256m
 
 # Default target
@@ -20,21 +20,37 @@ docker-check:
 # Build and run targets
 build-artifact: ##@application Build the Spring Boot application and generate JAR
 	@echo "$(GREEN)Building Spring Boot application and generating JAR...$(NC)"
+	@echo "$(YELLOW)Checking Java version for compilation...$(NC)"
+	@java -version 2>&1 | head -1 | grep -E "\"(2[4-9]|[3-9][0-9])" > /dev/null || \
+		(echo "$(RED)❌ Java 24+ required for compilation. Current: $$(java -version 2>&1 | head -1)$(NC)" && \
+		 echo "$(YELLOW)💡 Please set JAVA_HOME to Java 24+ or use: export JAVA_HOME=~/.asdf/installs/java/adoptopenjdk-24.0.1+9$(NC)" && \
+		 exit 1)
 	@$(MAVEN) clean package -DskipTests
 	@echo "$(GREEN)JAR artifact created: target/$(APP_NAME)-*.jar$(NC)"
 	@echo "$(GREEN)Build completed successfully!$(NC)"
 
 build-image: build-artifact docker-check ##@application Build Docker image from local JAR
 	@echo "$(GREEN)Building Docker image from local JAR...$(NC)"
-	@if [ ! -f target/$(APP_NAME)-*.jar ]; then \
+	@if ! ls target/$(APP_NAME)-*.jar >/dev/null 2>&1; then \
 		echo "$(RED)❌ JAR file not found. Run 'make build-artifact' first.$(NC)"; \
 		exit 1; \
 	fi
 	@docker build --no-cache -t $(SERVICE_NAME):latest -f Dockerfile .
 	@echo "$(GREEN)Docker image built successfully!$(NC)"
 
-run: build-artifact ##@application Build and run the complete application (like the reference project)
-	@echo "$(GREEN)Building and starting Holiday API...$(NC)"
+run: ##@application Build and run the complete application from source (no local Java 24 required)
+	@echo "$(GREEN)Building and starting Holiday API from source...$(NC)"
+	@echo "$(YELLOW)🔨 Building application inside Docker (OpenJDK 24)...$(NC)"
+	@echo "$(YELLOW)📦 This will take a few minutes on first run...$(NC)"
+	@echo "services:" > docker-compose.override.yml
+	@echo "  holiday-api:" >> docker-compose.override.yml
+	@echo "    build:" >> docker-compose.override.yml
+	@echo "      dockerfile: Dockerfile.dev" >> docker-compose.override.yml
+	@$(DOCKER_COMPOSE) up --build
+	@rm -f docker-compose.override.yml
+
+run-local: build-artifact ##@application Build and run with local Java (requires Java 24)
+	@echo "$(GREEN)Building and starting Holiday API with local Java...$(NC)"
 	@echo "$(YELLOW)Starting MongoDB first...$(NC)"
 	@$(DOCKER_COMPOSE) up mongodb -d
 	@echo "$(YELLOW)Waiting for MongoDB to be ready...$(NC)"
@@ -42,7 +58,7 @@ run: build-artifact ##@application Build and run the complete application (like 
 	@echo "$(GREEN)Starting Spring Boot application...$(NC)"
 	@$(MAVEN) spring-boot:run -Dspring-boot.run.profiles=local
 
-run-docker: build-image ##@application Build and run with Docker containers
+run-docker: build-image ##@application Build and run with pre-built JAR (requires local Java 24)
 	@echo "$(GREEN)Building and starting Holiday API with Docker...$(NC)"
 	@$(DOCKER_COMPOSE) up --build
 
@@ -50,9 +66,15 @@ run-only: docker-check ##@application Run application without building (containe
 	@echo "$(GREEN)Starting application containers...$(NC)"
 	@$(DOCKER_COMPOSE) up
 
-run-detached: build-image ##@application Build and run in background
-	@echo "$(GREEN)Starting Holiday API in background...$(NC)"
+run-detached: ##@application Build and run from source in background (no local Java 24 required)
+	@echo "$(GREEN)Starting Holiday API from source in background...$(NC)"
+	@echo "$(YELLOW)🔨 Building application inside Docker (OpenJDK 24)...$(NC)"
+	@echo "services:" > docker-compose.override.yml
+	@echo "  holiday-api:" >> docker-compose.override.yml
+	@echo "    build:" >> docker-compose.override.yml
+	@echo "      dockerfile: Dockerfile.dev" >> docker-compose.override.yml
 	@$(DOCKER_COMPOSE) up --build -d
+	@rm -f docker-compose.override.yml
 	@echo "$(GREEN)Application started! Check status with 'make status'$(NC)"
 
 # Infrastructure targets
@@ -65,10 +87,17 @@ db: docker-check ##@infra Start only MongoDB database
 	@$(DOCKER_COMPOSE) up mongodb
 
 # Development targets
-dev: ##@development Start development mode (same as run)
+dev: ##@development Start development mode from source (no local Java 24 required)
+	@echo "$(GREEN)Starting development mode...$(NC)"
+	@echo "$(YELLOW)🔨 Building application inside Docker with Java 24...$(NC)"
+	@echo "$(YELLOW)📚 Perfect for study - no need to install Java 24 locally!$(NC)"
 	@$(MAKE) run
 
-dev-debug: ##@development Start development mode with debug enabled
+dev-local: ##@development Start development mode with local Java (requires Java 24)
+	@echo "$(GREEN)Starting development mode with local Java...$(NC)"
+	@$(MAKE) run-local
+
+dev-debug: ##@development Start development mode with debug enabled (requires local Java 24)
 	@echo "$(GREEN)Starting development mode with debug...$(NC)"
 	@echo "$(YELLOW)Debug port: 5005$(NC)"
 	@echo "$(YELLOW)Starting MongoDB first...$(NC)"
@@ -129,15 +158,22 @@ restart: ##@control Restart all services
 clean: ##@control Clean up everything (containers, volumes, build artifacts)
 	@echo "$(YELLOW)Cleaning up everything...$(NC)"
 	@$(DOCKER_COMPOSE) down -v --remove-orphans 2>/dev/null || true
+	@docker-compose -f docker-compose.yml -f docker-compose.dev.yml down -v --remove-orphans 2>/dev/null || true
 	@docker system prune -f 2>/dev/null || true
-	@$(MAVEN) clean
+	@$(MAVEN) clean 2>/dev/null || true
 	@rm -f app.log app.pid
 	@echo "$(GREEN)Cleanup completed$(NC)"
+
+clean-dev: ##@control Clean up development containers and images
+	@echo "$(YELLOW)Cleaning up development environment...$(NC)"
+	@docker-compose -f docker-compose.yml -f docker-compose.dev.yml down -v --remove-orphans 2>/dev/null || true
+	@docker rmi holiday-api:dev 2>/dev/null || true
+	@echo "$(GREEN)Development cleanup completed$(NC)"
 
 # Status and monitoring targets
 status: ##@monitoring Check service status
 	@echo "$(GREEN)Service Status:$(NC)"
-	@echo -n "MongoDB: "
+	@printf "MongoDB: "
 	@if $(DOCKER_COMPOSE) ps mongodb 2>/dev/null | grep -q "Up"; then \
 		echo "$(GREEN)Running$(NC)"; \
 	else \
@@ -146,7 +182,7 @@ status: ##@monitoring Check service status
 	@$(MAKE) status-local
 
 status-local: ##@monitoring Check local API status
-	@echo -n "API Health: "
+	@printf "API Health: "
 	@if curl -s http://localhost:8080/actuator/health >/dev/null 2>&1; then \
 		echo "$(GREEN)Healthy$(NC)"; \
 	else \
@@ -192,7 +228,22 @@ info: ##@utility Show environment information
 	@echo "MongoDB Version: $$($(DOCKER_COMPOSE) exec mongodb mongosh --eval 'db.version()' --quiet 2>/dev/null || echo 'Not running')"
 
 # Setup target for complete initialization
-setup: ##@setup Complete environment setup
+java-check: ##@setup Check Java version compatibility
+	@echo "$(GREEN)Checking Java version compatibility...$(NC)"
+	@echo "Current Java version: $$(java -version 2>&1 | head -1)"
+	@echo "Maven Java version: $$($(MAVEN) -version 2>&1 | grep 'Java version' | head -1)"
+	@java -version 2>&1 | head -1 | grep -E "\"(2[4-9]|[3-9][0-9])" > /dev/null && \
+		echo "$(GREEN)✅ Java version is compatible for compilation$(NC)" || \
+		(echo "$(RED)❌ Java 24+ required for compilation$(NC)" && \
+		 echo "$(YELLOW)Available Java versions:$(NC)" && \
+		 ls ~/.asdf/installs/java/ 2>/dev/null | grep -E "(24|25|26|27|28|29)" | head -5 || echo "No compatible Java versions found" && \
+		 echo "$(YELLOW)💡 To fix this issue:$(NC)" && \
+		 echo "   1. Install Java 24+: asdf install java adoptopenjdk-24.0.1+9" && \
+		 echo "   2. Set JAVA_HOME: export JAVA_HOME=~/.asdf/installs/java/adoptopenjdk-24.0.1+9" && \
+		 echo "   3. Or use: make build-artifact JAVA_HOME=~/.asdf/installs/java/adoptopenjdk-24.0.1+9" && \
+		 exit 1)
+
+setup: java-check ##@setup Complete environment setup with Java version check
 	@echo "$(GREEN)🚀 Setting up Holiday API environment...$(NC)"
 	@$(MAKE) clean
 	@$(MAKE) build-artifact
@@ -203,4 +254,4 @@ setup: ##@setup Complete environment setup
 	@echo "  3. Load sample data: make sample-data"
 	@echo "$(GREEN)🎉 Holiday API is ready for development!$(NC)"
 
-.PHONY: docker-check build-artifact build-image run run-docker run-only run-detached infra db dev dev-debug mongosh mongo-admin db-reset test unit-test test-all stop restart clean status status-local logs url health sample-data quick-test package info setup help
+.PHONY: docker-check build-artifact build-image run run-local run-docker run-only run-detached infra db dev dev-local dev-debug mongosh mongo-admin db-reset test unit-test test-all stop restart clean clean-dev status status-local logs url health sample-data quick-test package info java-check setup help

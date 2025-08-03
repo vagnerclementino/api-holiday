@@ -1,12 +1,42 @@
+# Holiday API - Default Configuration for Java 24
+# Spring Boot 3.5.4 with Java 24 Runtime
+
 spring:
+  application:
+    name: holiday-api
+  
+  # MongoDB Configuration
   data:
     mongodb:
       uri: ${MONGODB_DATABASE_URL:mongodb://localhost:27017/holiday-api}
       uuid-representation: standard
       auto-index-creation: true
+  
+  # Docker Compose Integration
   docker:
     compose:
       lifecycle-management: start-only
+
+  # Jackson Configuration optimized for Java 24 Records
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+      indent-output: true
+    deserialization:
+      fail-on-unknown-properties: false
+    default-property-inclusion: non_null
+    mapper:
+      accept-case-insensitive-enums: true
+
+# Server Configuration
+server:
+  port: 8080
+  compression:
+    enabled: true
+    mime-types: text/html,text/xml,text/plain,text/css,text/javascript,application/javascript,application/json
+    min-response-size: 1024
+
+# Error Handling
 error:
   handling:
     http-status-in-json-response: true
@@ -14,17 +44,63 @@ error:
     full-stacktrace-http-statuses: 5xx
     log-levels:
       5xx: ERROR
+
+# OpenAPI Documentation
 springdoc:
   pathsToMatch: /, /api/**
   swagger-ui:
     path: /swagger-ui.html
+    enabled: true
+    operations-sorter: method
+    tags-sorter: alpha
   api-docs:
     path: /api-docs
+  show-actuator: true
+
+# Actuator Configuration
 management:
   endpoints:
     web:
       exposure:
-        include: health,info
+        include: health,info,metrics,env,beans
+      base-path: /actuator
   endpoint:
     health:
       show-details: when-authorized
+      show-components: always
+  info:
+    java:
+      enabled: true
+    env:
+      enabled: true
+    build:
+      enabled: true
+  metrics:
+    export:
+      simple:
+        enabled: true
+
+# Logging Configuration
+logging:
+  level:
+    me.clementino.holiday: INFO
+    org.springframework.data.mongodb: WARN
+    org.springframework.web: WARN
+    org.mongodb.driver: WARN
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+
+# Application specific configuration for Java 24
+holiday-api:
+  version: 0.0.1-SNAPSHOT
+  description: "Data-Oriented Programming Holiday API with Spring Boot 3.5.4 and Java 24"
+  java24:
+    enabled: true
+    preview-features: true
+    virtual-threads: true
+    pattern-matching: enhanced
+  data-oriented-programming:
+    records: true
+    sealed-interfaces: true
+    immutable-data: true
+    pure-functions: true
