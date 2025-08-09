@@ -1,146 +1,142 @@
 package me.clementino.holiday.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import me.clementino.holiday.domain.HolidayType;
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import me.clementino.holiday.domain.HolidayType;
 
-/**
- * Response DTO for holiday data.
- * Simple POJO for JSON serialization.
- */
+/** Response DTO for holiday data. Simple POJO for JSON serialization. */
 public class HolidayResponse {
 
-    private String id;  // Changed from UUID to String
-    private String name;
-    
-    @JsonFormat(pattern = "yyyy-MM-dd")
-    private LocalDate date;
-    
-    @JsonFormat(pattern = "yyyy-MM-dd")
-    private LocalDate observed;
-    
-    private String country;
-    private String state;
-    private String city;
-    private HolidayType type;
-    private boolean recurring;
-    private String description;
-    
-    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
-    private LocalDateTime dateCreated;  // Changed to LocalDateTime
-    
-    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
-    private LocalDateTime lastUpdated;  // Changed to LocalDateTime
-    
-    private Integer version;
+  private String id; // Changed from UUID to String
+  private String name;
 
-    // Default constructor
-    public HolidayResponse() {}
+  @JsonFormat(pattern = "yyyy-MM-dd")
+  private LocalDate date;
 
-    // Getters and setters
-    public String getId() {
-        return id;
-    }
+  @JsonFormat(pattern = "yyyy-MM-dd")
+  private LocalDate observed;
 
-    public void setId(String id) {
-        this.id = id;
-    }
+  private String country;
+  private String state;
+  private String city;
+  private HolidayType type;
+  private boolean recurring;
+  private String description;
 
-    public String getName() {
-        return name;
-    }
+  @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
+  private LocalDateTime dateCreated; // Changed to LocalDateTime
 
-    public void setName(String name) {
-        this.name = name;
-    }
+  @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
+  private LocalDateTime lastUpdated; // Changed to LocalDateTime
 
-    public LocalDate getDate() {
-        return date;
-    }
+  private Integer version;
 
-    public void setDate(LocalDate date) {
-        this.date = date;
-    }
+  // Default constructor
+  public HolidayResponse() {}
 
-    public LocalDate getObserved() {
-        return observed;
-    }
+  // Getters and setters
+  public String getId() {
+    return id;
+  }
 
-    public void setObserved(LocalDate observed) {
-        this.observed = observed;
-    }
+  public void setId(String id) {
+    this.id = id;
+  }
 
-    public String getCountry() {
-        return country;
-    }
+  public String getName() {
+    return name;
+  }
 
-    public void setCountry(String country) {
-        this.country = country;
-    }
+  public void setName(String name) {
+    this.name = name;
+  }
 
-    public String getState() {
-        return state;
-    }
+  public LocalDate getDate() {
+    return date;
+  }
 
-    public void setState(String state) {
-        this.state = state;
-    }
+  public void setDate(LocalDate date) {
+    this.date = date;
+  }
 
-    public String getCity() {
-        return city;
-    }
+  public LocalDate getObserved() {
+    return observed;
+  }
 
-    public void setCity(String city) {
-        this.city = city;
-    }
+  public void setObserved(LocalDate observed) {
+    this.observed = observed;
+  }
 
-    public HolidayType getType() {
-        return type;
-    }
+  public String getCountry() {
+    return country;
+  }
 
-    public void setType(HolidayType type) {
-        this.type = type;
-    }
+  public void setCountry(String country) {
+    this.country = country;
+  }
 
-    public boolean isRecurring() {
-        return recurring;
-    }
+  public String getState() {
+    return state;
+  }
 
-    public void setRecurring(boolean recurring) {
-        this.recurring = recurring;
-    }
+  public void setState(String state) {
+    this.state = state;
+  }
 
-    public String getDescription() {
-        return description;
-    }
+  public String getCity() {
+    return city;
+  }
 
-    public void setDescription(String description) {
-        this.description = description;
-    }
+  public void setCity(String city) {
+    this.city = city;
+  }
 
-    public LocalDateTime getDateCreated() {
-        return dateCreated;
-    }
+  public HolidayType getType() {
+    return type;
+  }
 
-    public void setDateCreated(LocalDateTime dateCreated) {
-        this.dateCreated = dateCreated;
-    }
+  public void setType(HolidayType type) {
+    this.type = type;
+  }
 
-    public LocalDateTime getLastUpdated() {
-        return lastUpdated;
-    }
+  public boolean isRecurring() {
+    return recurring;
+  }
 
-    public void setLastUpdated(LocalDateTime lastUpdated) {
-        this.lastUpdated = lastUpdated;
-    }
+  public void setRecurring(boolean recurring) {
+    this.recurring = recurring;
+  }
 
-    public Integer getVersion() {
-        return version;
-    }
+  public String getDescription() {
+    return description;
+  }
 
-    public void setVersion(Integer version) {
-        this.version = version;
-    }
+  public void setDescription(String description) {
+    this.description = description;
+  }
+
+  public LocalDateTime getDateCreated() {
+    return dateCreated;
+  }
+
+  public void setDateCreated(LocalDateTime dateCreated) {
+    this.dateCreated = dateCreated;
+  }
+
+  public LocalDateTime getLastUpdated() {
+    return lastUpdated;
+  }
+
+  public void setLastUpdated(LocalDateTime lastUpdated) {
+    this.lastUpdated = lastUpdated;
+  }
+
+  public Integer getVersion() {
+    return version;
+  }
+
+  public void setVersion(Integer version) {
+    this.version = version;
+  }
 }

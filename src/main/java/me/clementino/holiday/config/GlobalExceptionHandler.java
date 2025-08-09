@@ -1,5 +1,8 @@
 package me.clementino.holiday.config;
 
+import java.time.OffsetDateTime;
+import java.util.HashMap;
+import java.util.Map;
 import me.clementino.holiday.service.HolidayNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -8,67 +11,54 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import java.time.OffsetDateTime;
-import java.util.HashMap;
-import java.util.Map;
-
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(HolidayNotFoundException.class)
-    public ResponseEntity<ErrorResponse> handleHolidayNotFound(HolidayNotFoundException ex) {
-        ErrorResponse error = new ErrorResponse(
+  @ExceptionHandler(HolidayNotFoundException.class)
+  public ResponseEntity<ErrorResponse> handleHolidayNotFound(HolidayNotFoundException ex) {
+    ErrorResponse error =
+        new ErrorResponse(
             OffsetDateTime.now(),
             HttpStatus.NOT_FOUND.value(),
             "Holiday Not Found",
-            ex.getMessage()
-        );
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
-    }
+            ex.getMessage());
+    return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+  }
 
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ValidationErrorResponse> handleValidationExceptions(
-            MethodArgumentNotValidException ex) {
-        
-        Map<String, String> errors = new HashMap<>();
-        ex.getBindingResult().getAllErrors().forEach((error) -> {
-            String fieldName = ((FieldError) error).getField();
-            String errorMessage = error.getDefaultMessage();
-            errors.put(fieldName, errorMessage);
-        });
+  @ExceptionHandler(MethodArgumentNotValidException.class)
+  public ResponseEntity<ValidationErrorResponse> handleValidationExceptions(
+      MethodArgumentNotValidException ex) {
 
-        ValidationErrorResponse errorResponse = new ValidationErrorResponse(
-            OffsetDateTime.now(),
-            HttpStatus.BAD_REQUEST.value(),
-            "Validation Failed",
-            errors
-        );
-        
-        return ResponseEntity.badRequest().body(errorResponse);
-    }
+    Map<String, String> errors = new HashMap<>();
+    ex.getBindingResult()
+        .getAllErrors()
+        .forEach(
+            (error) -> {
+              String fieldName = ((FieldError) error).getField();
+              String errorMessage = error.getDefaultMessage();
+              errors.put(fieldName, errorMessage);
+            });
 
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorResponse> handleGenericException(Exception ex) {
-        ErrorResponse error = new ErrorResponse(
+    ValidationErrorResponse errorResponse =
+        new ValidationErrorResponse(
+            OffsetDateTime.now(), HttpStatus.BAD_REQUEST.value(), "Validation Failed", errors);
+
+    return ResponseEntity.badRequest().body(errorResponse);
+  }
+
+  @ExceptionHandler(Exception.class)
+  public ResponseEntity<ErrorResponse> handleGenericException(Exception ex) {
+    ErrorResponse error =
+        new ErrorResponse(
             OffsetDateTime.now(),
             HttpStatus.INTERNAL_SERVER_ERROR.value(),
             "Internal Server Error",
-            ex.getMessage()
-        );
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
-    }
+            ex.getMessage());
+    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
+  }
 
-    public record ErrorResponse(
-        OffsetDateTime timestamp,
-        int status,
-        String error,
-        String message
-    ) {}
+  public record ErrorResponse(OffsetDateTime timestamp, int status, String error, String message) {}
 
-    public record ValidationErrorResponse(
-        OffsetDateTime timestamp,
-        int status,
-        String error,
-        Map<String, String> validationErrors
-    ) {}
+  public record ValidationErrorResponse(
+      OffsetDateTime timestamp, int status, String error, Map<String, String> validationErrors) {}
 }

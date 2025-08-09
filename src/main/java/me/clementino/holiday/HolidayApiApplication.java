@@ -6,8 +6,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @SpringBootApplication
 public class HolidayApiApplication {
 
-    public static void main(final String[] args) {
-        SpringApplication.run(HolidayApiApplication.class, args);
-    }
-
+  public static void main(final String[] args) {
+    SpringApplication.run(HolidayApiApplication.class, args);
+  }
 }
