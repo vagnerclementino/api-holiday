@@ -5,17 +5,23 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.Month;
 import java.util.List;
-import java.util.Optional;
 import me.clementino.holiday.domain.HolidayType;
 
 /**
  * Factory for creating Holiday instances following DOP principles. Based on the OOP Holiday classes
  * but with factory methods for immutable records.
  *
- * <p>DOP Principles Applied: 1. Model Data Immutably and Transparently - Creates immutable holiday
- * records 2. Model the Data, the Whole Data, and Nothing but the Data - Factory methods for
- * complete data 3. Make Illegal States Unrepresentable - Validates inputs to prevent invalid
- * holidays 4. Separate Operations from Data - Factory operations separate from holiday data
+ * <p>DOP Principles Applied:
+ *
+ * <ol>
+ *   <li><strong>Model Data Immutably and Transparently</strong> - Creates immutable holiday records
+ *   <li><strong>Model the Data, the Whole Data, and Nothing but the Data</strong> - Factory methods
+ *       for complete data
+ *   <li><strong>Make Illegal States Unrepresentable</strong> - Validates inputs to prevent invalid
+ *       holidays
+ *   <li><strong>Separate Operations from Data</strong> - Factory operations separate from holiday
+ *       data
+ * </ol>
  */
 public final class HolidayFactory {
 
@@ -118,349 +124,90 @@ public final class HolidayFactory {
     return new FixedHoliday(name, description, date, localities, type);
   }
 
-  /** Creates a moveable holiday with all required fields. */
-  public static MoveableHoliday createMoveable(
-      String name,
-      String description,
-      int day,
-      Month month,
-      List<Locality> localities,
-      HolidayType type,
-      boolean mondayisation,
-      MoveableHolidayType moveableType,
-      Optional<Holiday> baseHoliday,
-      int dayOffset) {
+  // ===== SPECIFIC HOLIDAY FACTORY METHODS =====
 
-    // For moveable holidays, we'll use a placeholder date that should be calculated by operations
-    LocalDate placeholderDate = LocalDate.of(LocalDate.now().getYear(), month, Math.max(1, day));
-
-    return new MoveableHoliday(
-        name,
-        description,
-        placeholderDate,
-        localities,
-        type,
-        mondayisation,
-        moveableType,
-        baseHoliday,
-        dayOffset);
-  }
-
-  /** Creates a moveable holiday with minimal required fields. */
-  public static MoveableHoliday createMoveable(
-      String name, List<Locality> localities, HolidayType type, MoveableHolidayType moveableType) {
-
-    return createMoveable(
-        name, "", 0, Month.JANUARY, localities, type, false, moveableType, Optional.empty(), 0);
-  }
-
-  /** Creates a lunar-based moveable holiday (like Easter). */
-  public static MoveableHoliday createLunarBased(
-      String name,
-      String description,
-      List<Locality> localities,
-      HolidayType type,
-      boolean mondayisation) {
-
-    return createMoveable(
-        name,
-        description,
-        0,
-        Month.JANUARY,
-        localities,
-        type,
-        mondayisation,
-        MoveableHolidayType.LUNAR_BASED,
-        Optional.empty(),
-        0);
-  }
-
-  /** Creates a holiday relative to another holiday. */
-  public static MoveableHoliday createRelativeToHoliday(
-      String name,
-      String description,
-      List<Locality> localities,
-      HolidayType type,
-      Holiday baseHoliday,
-      int dayOffset,
-      boolean mondayisation) {
-
-    return createMoveable(
-        name,
-        description,
-        0,
-        Month.JANUARY,
-        localities,
-        type,
-        mondayisation,
-        MoveableHolidayType.RELATIVE_TO_HOLIDAY,
-        Optional.of(baseHoliday),
-        dayOffset);
-  }
-
-  /** Creates a weekday-based moveable holiday. */
-  public static MoveableHoliday createWeekdayBased(
-      String name,
-      String description,
-      int day,
-      Month month,
-      List<Locality> localities,
-      HolidayType type,
-      boolean mondayisation) {
-
-    return createMoveable(
-        name,
-        description,
-        day,
-        month,
-        localities,
-        type,
-        mondayisation,
-        MoveableHolidayType.WEEKDAY_BASED,
-        Optional.empty(),
-        0);
-  }
-
-  // Pre-defined common holidays
-
-  // Helper method to create country locality from name
-  private static Locality.Country getCountryByName(String countryName) {
-    return switch (countryName.toLowerCase()) {
-      case "brazil" -> Locality.brazil();
-      case "united states" -> Locality.unitedStates();
-      case "canada" -> Locality.canada();
-      default ->
-          new Locality.Country(
-              countryName.substring(0, Math.min(2, countryName.length())).toUpperCase(),
-              countryName);
-    };
-  }
-
-  // Helper method to get full state name from code
-  private static String getStateFullName(String stateCode) {
-    return switch (stateCode.toUpperCase()) {
-      case "SP" -> "São Paulo";
-      case "RJ" -> "Rio de Janeiro";
-      case "MG" -> "Minas Gerais";
-      case "RS" -> "Rio Grande do Sul";
-      case "PR" -> "Paraná";
-      case "SC" -> "Santa Catarina";
-      case "BA" -> "Bahia";
-      case "GO" -> "Goiás";
-      case "ES" -> "Espírito Santo";
-      case "DF" -> "Distrito Federal";
-      case "CA" -> "California";
-      case "NY" -> "New York";
-      case "TX" -> "Texas";
-      case "FL" -> "Florida";
-      default -> stateCode; // Fallback to code if not found
-    };
-  }
-
-  /**
-   * Creates Christmas Day for a specific country - uses ObservedHoliday since it often has
-   * mondayisation.
-   */
-  public static ObservedHoliday createChristmas(String country) {
-    return createObserved(
+  /** Creates Christmas Day for a specific country. */
+  public static FixedHoliday createChristmas(String country) {
+    var countryObj = getCountryByName(country);
+    return createFixed(
         "Christmas Day",
-        "Christian holiday celebrating the birth of Jesus Christ",
+        "Christian celebration of the birth of Jesus Christ",
         25,
         Month.DECEMBER,
-        List.of(getCountryByName(country)),
-        HolidayType.RELIGIOUS,
-        true);
+        List.of(countryObj),
+        HolidayType.RELIGIOUS);
   }
 
-  /**
-   * Creates New Year's Day for a specific country - uses ObservedHoliday since it often has
-   * mondayisation.
-   */
-  public static ObservedHoliday createNewYear(String country) {
-    return createObserved(
+  /** Creates New Year's Day for a specific country. */
+  public static FixedHoliday createNewYear(String country) {
+    var countryObj = getCountryByName(country);
+    return createFixed(
         "New Year's Day",
         "First day of the Gregorian calendar year",
         1,
         Month.JANUARY,
-        List.of(getCountryByName(country)),
-        HolidayType.NATIONAL,
-        true);
+        List.of(countryObj),
+        HolidayType.NATIONAL);
   }
 
-  /** Creates Independence Day for Brazil (September 7). */
+  /** Creates Independence Day for Brazil. */
   public static FixedHoliday createBrazilIndependenceDay() {
     return createFixed(
         "Independence Day",
         "Brazil's independence from Portugal",
         7,
         Month.SEPTEMBER,
-        List.of(Locality.brazil()),
+        List.of(new Locality.Country("BR", "Brazil")),
         HolidayType.NATIONAL);
   }
 
-  /** Creates Independence Day for the United States (July 4). */
+  /** Creates Independence Day for the United States. */
   public static FixedHoliday createUSIndependenceDay() {
     return createFixed(
         "Independence Day",
-        "Celebrates the Declaration of Independence",
+        "United States independence celebration",
         4,
         Month.JULY,
-        List.of(Locality.unitedStates()),
+        List.of(new Locality.Country("US", "United States")),
         HolidayType.NATIONAL);
   }
 
-  /** Creates Easter Sunday (lunar-based). */
-  public static MoveableHoliday createEasterSunday(String country) {
-    return createLunarBased(
-        "Easter Sunday",
-        "Christian holiday celebrating the resurrection of Jesus Christ",
-        List.of(getCountryByName(country)),
-        HolidayType.RELIGIOUS,
-        false);
-  }
-
-  /** Creates Good Friday (relative to Easter). */
-  public static MoveableHoliday createGoodFriday(String country) {
-    var easter = createEasterSunday(country);
-    return createRelativeToHoliday(
-        "Good Friday",
-        "Christian holiday commemorating the crucifixion of Jesus Christ",
-        List.of(getCountryByName(country)),
-        HolidayType.RELIGIOUS,
-        easter,
-        -2, // 2 days before Easter
-        false);
-  }
-
-  /** Creates Easter Monday (relative to Easter). */
-  public static MoveableHoliday createEasterMonday(String country) {
-    var easter = createEasterSunday(country);
-    return createRelativeToHoliday(
-        "Easter Monday",
-        "Christian holiday celebrating the resurrection of Jesus Christ",
-        List.of(getCountryByName(country)),
-        HolidayType.RELIGIOUS,
-        easter,
-        1, // 1 day after Easter
-        false);
-  }
-
-  /** Creates Thanksgiving for the United States (4th Thursday of November). */
-  public static MoveableHoliday createUSThanksgiving() {
-    return createWeekdayBased(
-        "Thanksgiving Day",
-        "National day of giving thanks, traditionally celebrated with family gatherings",
-        4, // 4th occurrence (this would need special handling in operations)
-        Month.NOVEMBER,
-        List.of(Locality.unitedStates()),
-        HolidayType.NATIONAL,
-        false);
-  }
-
-  /** Creates Labor Day for the United States (1st Monday of September). */
-  public static MoveableHoliday createUSLaborDay() {
-    return createWeekdayBased(
-        "Labor Day",
-        "Federal holiday honoring the American labor movement",
-        1, // 1st occurrence (this would need special handling in operations)
-        Month.SEPTEMBER,
-        List.of(Locality.unitedStates()),
-        HolidayType.NATIONAL,
-        false);
-  }
-
-  /** Creates Memorial Day for the United States (last Monday of May). */
-  public static MoveableHoliday createUSMemorialDay() {
-    return createWeekdayBased(
-        "Memorial Day",
-        "Federal holiday honoring military personnel who died in service",
-        -1, // Last occurrence (this would need special handling in operations)
+  /** Creates International Workers' Day. */
+  public static FixedHoliday createLaborDay(String country) {
+    var countryObj = getCountryByName(country);
+    return createFixed(
+        "International Workers' Day",
+        "International celebration of workers",
+        1,
         Month.MAY,
-        List.of(Locality.unitedStates()),
+        List.of(countryObj),
+        HolidayType.NATIONAL);
+  }
+
+  /** Creates Christmas with mondayisation for a specific country. */
+  public static ObservedHoliday createChristmasWithMondayisation(String country) {
+    var countryObj = getCountryByName(country);
+    return createObserved(
+        "Christmas Day",
+        "Christian celebration with mondayisation",
+        25,
+        Month.DECEMBER,
+        List.of(countryObj),
+        HolidayType.RELIGIOUS,
+        true);
+  }
+
+  /** Creates New Year with mondayisation for a specific country. */
+  public static ObservedHoliday createNewYearWithMondayisation(String country) {
+    var countryObj = getCountryByName(country);
+    return createObserved(
+        "New Year's Day",
+        "First day of the year with mondayisation",
+        1,
+        Month.JANUARY,
+        List.of(countryObj),
         HolidayType.NATIONAL,
-        false);
-  }
-
-  /** Creates a state-level holiday - returns appropriate type based on mondayisation. */
-  public static Holiday createStateHoliday(
-      String name,
-      String description,
-      int day,
-      Month month,
-      String country,
-      String state,
-      boolean mondayisation) {
-
-    // If mondayisation is needed, create ObservedHoliday
-    if (mondayisation) {
-      return createObserved(
-          name,
-          description,
-          day,
-          month,
-          List.of(Locality.subdivision(getCountryByName(country), state, getStateFullName(state))),
-          HolidayType.STATE,
-          mondayisation);
-    }
-
-    // Otherwise create FixedHoliday
-    return createFixed(
-        name,
-        description,
-        day,
-        month,
-        List.of(Locality.subdivision(getCountryByName(country), state, getStateFullName(state))),
-        HolidayType.STATE);
-  }
-
-  /** Creates a city-level holiday - returns appropriate type based on mondayisation. */
-  public static Holiday createCityHoliday(
-      String name,
-      String description,
-      int day,
-      Month month,
-      String country,
-      String state,
-      String city,
-      boolean mondayisation) {
-
-    // If mondayisation is needed, create ObservedHoliday
-    if (mondayisation) {
-      return createObserved(
-          name,
-          description,
-          day,
-          month,
-          List.of(
-              Locality.city(
-                  city,
-                  Locality.subdivision(getCountryByName(country), state, getStateFullName(state)),
-                  getCountryByName(country))),
-          HolidayType.MUNICIPAL,
-          mondayisation);
-    }
-
-    // Otherwise create FixedHoliday
-    return createFixed(
-        name,
-        description,
-        day,
-        month,
-        List.of(
-            Locality.city(
-                city,
-                Locality.subdivision(getCountryByName(country), state, getStateFullName(state)),
-                getCountryByName(country))),
-        HolidayType.MUNICIPAL);
-  }
-
-  /** Applies mondayisation rules to a date. */
-  private static LocalDate applyMondayisationRules(LocalDate date) {
-    return switch (date.getDayOfWeek()) {
-      case SATURDAY -> date.minusDays(1); // Saturday -> Friday
-      case SUNDAY -> date.plusDays(1); // Sunday -> Monday
-      default -> date; // Weekdays remain unchanged
-    };
+        true);
   }
 
   // ===== NEW FACTORY METHODS USING KnownHoliday ENUM =====
@@ -544,5 +291,55 @@ public final class HolidayFactory {
         List.of(Locality.country(getCountryByName(country).name(), country)),
         HolidayType.RELIGIOUS,
         true);
+  }
+
+  // ===== HELPER METHODS =====
+
+  /** Applies mondayisation rules to a date. */
+  private static LocalDate applyMondayisationRules(LocalDate date) {
+    return switch (date.getDayOfWeek()) {
+      case SATURDAY -> date.minusDays(1); // Saturday -> Friday
+      case SUNDAY -> date.plusDays(1); // Sunday -> Monday
+      default -> date; // Weekdays remain unchanged
+    };
+  }
+
+  /** Helper method to get country by name. */
+  private static Locality.Country getCountryByName(String countryName) {
+    return switch (countryName.toLowerCase()) {
+      case "brazil", "br" -> new Locality.Country("BR", "Brazil");
+      case "united states", "us", "usa" -> new Locality.Country("US", "United States");
+      case "canada", "ca" -> new Locality.Country("CA", "Canada");
+      case "united kingdom", "uk", "gb" -> new Locality.Country("GB", "United Kingdom");
+      case "france", "fr" -> new Locality.Country("FR", "France");
+      case "germany", "de" -> new Locality.Country("DE", "Germany");
+      case "japan", "jp" -> new Locality.Country("JP", "Japan");
+      case "australia", "au" -> new Locality.Country("AU", "Australia");
+      default -> {
+        String code = countryName.length() == 2 ? countryName.toUpperCase() : "XX";
+        yield new Locality.Country(code, countryName);
+      }
+    };
+  }
+
+  /** Helper method to get state/subdivision full name. */
+  private static String getStateFullName(String stateCode) {
+    return switch (stateCode.toUpperCase()) {
+      case "SP" -> "São Paulo";
+      case "RJ" -> "Rio de Janeiro";
+      case "MG" -> "Minas Gerais";
+      case "RS" -> "Rio Grande do Sul";
+      case "PR" -> "Paraná";
+      case "SC" -> "Santa Catarina";
+      case "BA" -> "Bahia";
+      case "GO" -> "Goiás";
+      case "ES" -> "Espírito Santo";
+      case "DF" -> "Distrito Federal";
+      case "CA" -> "California";
+      case "NY" -> "New York";
+      case "TX" -> "Texas";
+      case "FL" -> "Florida";
+      default -> stateCode;
+    };
   }
 }
