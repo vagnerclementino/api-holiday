@@ -29,7 +29,8 @@ import me.clementino.holiday.domain.HolidayType;
  *   <li>Date calculations are handled by {@link HolidayOperations#calculateDate(Holiday, int)}
  * </ul>
  */
-public sealed interface Holiday permits FixedHoliday, ObservedHoliday, MoveableHoliday {
+public sealed interface Holiday
+    permits FixedHoliday, ObservedHoliday, MoveableHoliday, MoveableFromBaseHoliday {
 
   // Common data accessible to all holiday types
   String name();

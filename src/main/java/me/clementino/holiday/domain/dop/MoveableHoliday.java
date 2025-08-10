@@ -3,171 +3,91 @@ package me.clementino.holiday.domain.dop;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import me.clementino.holiday.domain.HolidayType;
 
 /**
- * Moveable holiday record - date changes based on calculation rules. Examples: Easter, Thanksgiving
- * (4th Thursday of November), Labor Day (1st Monday of September)
+ * Moveable holiday record - holidays with dates calculated based on complex rules. Examples: Easter
+ * (lunar-based), Thanksgiving (weekday-based).
  *
- * <p>Based on the OOP MoveableHoliday class but as an immutable record following DOP principles.
+ * <p>This represents holidays that have their dates calculated using algorithms, such as Easter
+ * (based on lunar calendar) or Thanksgiving (4th Thursday of November).
  *
- * <p>DOP Principles Applied: 1. Model Data Immutably and Transparently - Immutable record with
- * public fields 2. Model the Data, the Whole Data, and Nothing but the Data - Contains exactly what
- * a moveable holiday needs 3. Make Illegal States Unrepresentable - Validation prevents invalid
- * states 4. Separate Operations from Data - No behavior methods, only data
+ * <p>Based on the OOP MoveableHoliday class but simplified to focus on self-calculating holidays.
+ * For holidays derived from other holidays, use {@link MoveableFromBaseHoliday}.
+ *
+ * <p>DOP Principles Applied:
+ *
+ * <ol>
+ *   <li><strong>Model Data Immutably and Transparently</strong> - Immutable record with public
+ *       fields
+ *   <li><strong>Model the Data, the Whole Data, and Nothing but the Data</strong> - Contains
+ *       exactly what a moveable holiday needs
+ *   <li><strong>Make Illegal States Unrepresentable</strong> - Validation prevents invalid states,
+ *       enum ensures valid holiday types
+ *   <li><strong>Separate Operations from Data</strong> - No behavior methods, only data. Date
+ *       calculations handled by HolidayOperations
+ * </ol>
  */
 public record MoveableHoliday(
-    String name,
+    KnownHoliday knownHoliday, // Standardized holiday identifier
     String description,
-    LocalDate date,
+    LocalDate date, // Pre-calculated date for a specific year
     List<Locality> localities,
     HolidayType type,
-    boolean mondayisation,
-    MoveableHolidayType moveableType,
-    Optional<Holiday> baseHoliday,
-    int dayOffset)
+    boolean mondayisation)
     implements Holiday {
 
   // Compact constructor for validation
   public MoveableHoliday {
-    Objects.requireNonNull(name, "Holiday name cannot be null");
+    Objects.requireNonNull(knownHoliday, "Known holiday cannot be null");
     Objects.requireNonNull(date, "Holiday date cannot be null");
     Objects.requireNonNull(localities, "Localities cannot be null");
     Objects.requireNonNull(type, "Holiday type cannot be null");
-    Objects.requireNonNull(moveableType, "Moveable type cannot be null");
-    description = Objects.requireNonNullElse(description, "");
-    baseHoliday = Objects.requireNonNullElse(baseHoliday, Optional.empty());
+    description = Objects.requireNonNullElse(description, knownHoliday.getDescription());
 
-    if (name.isBlank()) {
-      throw new IllegalArgumentException("Holiday name cannot be blank");
+    if (!knownHoliday.isMoveable()) {
+      throw new IllegalArgumentException("Holiday " + knownHoliday + " is not a moveable holiday");
+    }
+
+    if (knownHoliday.isDerived()) {
+      throw new IllegalArgumentException(
+          "Holiday "
+              + knownHoliday
+              + " is derived from another holiday. Use MoveableFromBaseHoliday instead.");
     }
 
     if (localities.isEmpty()) {
       throw new IllegalArgumentException("At least one locality must be specified");
     }
+  }
 
-    // Validate that relative holidays have a base holiday
-    if (moveableType == MoveableHolidayType.RELATIVE_TO_HOLIDAY && baseHoliday.isEmpty()) {
-      throw new IllegalArgumentException("Base holiday is required for relative holidays");
-    }
+  // Convenience method to get the standardized name
+  public String name() {
+    return knownHoliday.getDisplayName();
   }
 
   // Transformation methods (instead of setters)
-  public MoveableHoliday withName(String newName) {
-    return new MoveableHoliday(
-        newName,
-        description,
-        date,
-        localities,
-        type,
-        mondayisation,
-        moveableType,
-        baseHoliday,
-        dayOffset);
+  public MoveableHoliday withKnownHoliday(KnownHoliday newKnownHoliday) {
+    return new MoveableHoliday(newKnownHoliday, description, date, localities, type, mondayisation);
   }
 
   public MoveableHoliday withDescription(String newDescription) {
-    return new MoveableHoliday(
-        name,
-        newDescription,
-        date,
-        localities,
-        type,
-        mondayisation,
-        moveableType,
-        baseHoliday,
-        dayOffset);
+    return new MoveableHoliday(knownHoliday, newDescription, date, localities, type, mondayisation);
   }
 
   public MoveableHoliday withDate(LocalDate newDate) {
-    return new MoveableHoliday(
-        name,
-        description,
-        newDate,
-        localities,
-        type,
-        mondayisation,
-        moveableType,
-        baseHoliday,
-        dayOffset);
+    return new MoveableHoliday(knownHoliday, description, newDate, localities, type, mondayisation);
   }
 
   public MoveableHoliday withLocalities(List<Locality> newLocalities) {
-    return new MoveableHoliday(
-        name,
-        description,
-        date,
-        newLocalities,
-        type,
-        mondayisation,
-        moveableType,
-        baseHoliday,
-        dayOffset);
+    return new MoveableHoliday(knownHoliday, description, date, newLocalities, type, mondayisation);
   }
 
   public MoveableHoliday withType(HolidayType newType) {
-    return new MoveableHoliday(
-        name,
-        description,
-        date,
-        localities,
-        newType,
-        mondayisation,
-        moveableType,
-        baseHoliday,
-        dayOffset);
+    return new MoveableHoliday(knownHoliday, description, date, localities, newType, mondayisation);
   }
 
   public MoveableHoliday withMondayisation(boolean newMondayisation) {
-    return new MoveableHoliday(
-        name,
-        description,
-        date,
-        localities,
-        type,
-        newMondayisation,
-        moveableType,
-        baseHoliday,
-        dayOffset);
-  }
-
-  public MoveableHoliday withMoveableType(MoveableHolidayType newMoveableType) {
-    return new MoveableHoliday(
-        name,
-        description,
-        date,
-        localities,
-        type,
-        mondayisation,
-        newMoveableType,
-        baseHoliday,
-        dayOffset);
-  }
-
-  public MoveableHoliday withBaseHoliday(Optional<Holiday> newBaseHoliday) {
-    return new MoveableHoliday(
-        name,
-        description,
-        date,
-        localities,
-        type,
-        mondayisation,
-        moveableType,
-        newBaseHoliday,
-        dayOffset);
-  }
-
-  public MoveableHoliday withDayOffset(int newDayOffset) {
-    return new MoveableHoliday(
-        name,
-        description,
-        date,
-        localities,
-        type,
-        mondayisation,
-        moveableType,
-        baseHoliday,
-        newDayOffset);
+    return new MoveableHoliday(knownHoliday, description, date, localities, type, newMondayisation);
   }
 }
