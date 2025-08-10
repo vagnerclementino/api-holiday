@@ -7,7 +7,7 @@ include MakefileDocumentation
 SERVICE_NAME := holiday-api
 APP_NAME := holiday-api
 DOCKER_COMPOSE := docker-compose
-MAVEN := JAVA_HOME=~/.asdf/installs/java/adoptopenjdk-24.0.1+9 ./mvnw
+MAVEN := ./mvnw
 JAVA_OPTS := -Xmx512m -Xms256m
 
 # Default target

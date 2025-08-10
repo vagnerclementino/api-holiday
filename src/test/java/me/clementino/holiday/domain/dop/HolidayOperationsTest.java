@@ -111,9 +111,9 @@ class HolidayOperationsTest {
               "Christmas Day",
               "Christian celebration",
               LocalDate.of(2023, Month.DECEMBER, 25), // Original date
-              LocalDate.of(2023, Month.DECEMBER, 25), // Observed date (same)
               BRAZIL_LOCALITIES,
               HolidayType.RELIGIOUS,
+              LocalDate.of(2023, Month.DECEMBER, 25), // Observed date (same)
               true // mondayisation enabled
               );
 
@@ -140,9 +140,9 @@ class HolidayOperationsTest {
               "Christmas Day",
               "Christian celebration",
               LocalDate.of(2023, Month.DECEMBER, 25),
-              LocalDate.of(2023, Month.DECEMBER, 25),
               BRAZIL_LOCALITIES,
               HolidayType.RELIGIOUS,
+              LocalDate.of(2023, Month.DECEMBER, 25),
               false // mondayisation disabled
               );
 
@@ -168,9 +168,9 @@ class HolidayOperationsTest {
               "New Year's Day",
               "First day of the year",
               LocalDate.of(2023, Month.JANUARY, 1), // Sunday
-              LocalDate.of(2023, Month.JANUARY, 2), // Monday (observed)
               BRAZIL_LOCALITIES,
               HolidayType.NATIONAL,
+              LocalDate.of(2023, Month.JANUARY, 2), // Monday (observed)
               true);
 
       // When: Calculate observed date for 2022 (New Year falls on Saturday)
@@ -193,9 +193,9 @@ class HolidayOperationsTest {
               "Christmas Day",
               "Christian celebration",
               LocalDate.of(2022, Month.DECEMBER, 25), // Sunday
-              LocalDate.of(2022, Month.DECEMBER, 26), // Monday (observed)
               BRAZIL_LOCALITIES,
               HolidayType.RELIGIOUS,
+              LocalDate.of(2022, Month.DECEMBER, 26), // Monday (observed)
               true);
 
       // When: Get observed date
@@ -216,11 +216,12 @@ class HolidayOperationsTest {
       // Given: Easter with placeholder date
       var originalEaster =
           new MoveableHoliday(
-              KnownHoliday.EASTER,
+              "Easter",
               "Christian celebration of resurrection",
               LocalDate.of(2023, Month.APRIL, 9), // Placeholder date
               BRAZIL_LOCALITIES,
               HolidayType.RELIGIOUS,
+              KnownHoliday.EASTER,
               false);
 
       // When: Calculate for 2025
@@ -243,11 +244,12 @@ class HolidayOperationsTest {
       // Given: Thanksgiving with placeholder date
       var originalThanksgiving =
           new MoveableHoliday(
-              KnownHoliday.THANKSGIVING_US,
+              "Thanksgiving",
               "US harvest celebration",
               LocalDate.of(2023, Month.NOVEMBER, 23), // Placeholder
               US_LOCALITIES,
               HolidayType.NATIONAL,
+              KnownHoliday.THANKSGIVING_US,
               false);
 
       // When: Calculate for 2024
@@ -269,11 +271,12 @@ class HolidayOperationsTest {
       // Given: Memorial Day with mondayisation enabled (Memorial Day is always Monday)
       var originalMemorialDay =
           new MoveableHoliday(
-              KnownHoliday.MEMORIAL_DAY_US,
+              "Memorial Day",
               "US day of remembrance",
               LocalDate.of(2023, Month.MAY, 29),
               US_LOCALITIES,
               HolidayType.NATIONAL,
+              KnownHoliday.MEMORIAL_DAY_US,
               true // mondayisation enabled
               );
 
@@ -293,11 +296,12 @@ class HolidayOperationsTest {
       // Given: Memorial Day
       var memorialDay =
           new MoveableHoliday(
-              KnownHoliday.MEMORIAL_DAY_US,
+              "Memorial Day",
               "US day of remembrance",
               LocalDate.of(2023, Month.MAY, 29), // Placeholder
               US_LOCALITIES,
               HolidayType.NATIONAL,
+              KnownHoliday.MEMORIAL_DAY_US,
               false);
 
       // When: Get date for 2025
@@ -318,21 +322,23 @@ class HolidayOperationsTest {
       // Given: Easter as base holiday
       var easter =
           new MoveableHoliday(
-              KnownHoliday.EASTER,
+              "Easter",
               "Christian celebration",
               LocalDate.of(2023, Month.APRIL, 9),
               BRAZIL_LOCALITIES,
               HolidayType.RELIGIOUS,
+              KnownHoliday.EASTER,
               false);
 
       // Given: Good Friday derived from Easter
       var originalGoodFriday =
           new MoveableFromBaseHoliday(
-              KnownHoliday.GOOD_FRIDAY,
+              "Good Friday",
               "Christian observance of crucifixion",
               LocalDate.of(2023, Month.APRIL, 7), // Placeholder
               BRAZIL_LOCALITIES,
               HolidayType.RELIGIOUS,
+              KnownHoliday.GOOD_FRIDAY,
               easter,
               -2, // 2 days before Easter
               false);
@@ -357,21 +363,23 @@ class HolidayOperationsTest {
       // Given: Easter as base holiday
       var easter =
           new MoveableHoliday(
-              KnownHoliday.EASTER,
+              "Easter",
               "Christian celebration",
               LocalDate.of(2023, Month.APRIL, 9),
               BRAZIL_LOCALITIES,
               HolidayType.RELIGIOUS,
+              KnownHoliday.EASTER,
               false);
 
       // Given: Easter Monday derived from Easter
       var originalEasterMonday =
           new MoveableFromBaseHoliday(
-              KnownHoliday.EASTER_MONDAY,
+              "Easter Monday",
               "Christian holiday following Easter",
               LocalDate.of(2023, Month.APRIL, 10), // Placeholder
               BRAZIL_LOCALITIES,
               HolidayType.RELIGIOUS,
+              KnownHoliday.EASTER_MONDAY,
               easter,
               1, // 1 day after Easter
               false);
@@ -395,21 +403,23 @@ class HolidayOperationsTest {
       // Given: Easter as base holiday
       var easter =
           new MoveableHoliday(
-              KnownHoliday.EASTER,
+              "Easter",
               "Christian celebration",
               LocalDate.of(2023, Month.APRIL, 9),
               BRAZIL_LOCALITIES,
               HolidayType.RELIGIOUS,
+              KnownHoliday.EASTER,
               false);
 
       // Given: Good Friday with mondayisation enabled (hypothetical scenario)
       var originalGoodFriday =
           new MoveableFromBaseHoliday(
-              KnownHoliday.GOOD_FRIDAY,
+              "Good Friday",
               "Christian observance",
               LocalDate.of(2023, Month.APRIL, 7),
               BRAZIL_LOCALITIES,
               HolidayType.RELIGIOUS,
+              KnownHoliday.GOOD_FRIDAY,
               easter,
               -2,
               true // mondayisation enabled
@@ -430,21 +440,23 @@ class HolidayOperationsTest {
       // Given: Easter as base holiday
       var easter =
           new MoveableHoliday(
-              KnownHoliday.EASTER,
+              "Easter",
               "Christian celebration",
               LocalDate.of(2023, Month.APRIL, 9),
               BRAZIL_LOCALITIES,
               HolidayType.RELIGIOUS,
+              KnownHoliday.EASTER,
               false);
 
       // Given: Palm Sunday (7 days before Easter)
       var palmSunday =
           new MoveableFromBaseHoliday(
-              KnownHoliday.PALM_SUNDAY,
+              "Palm Sunday",
               "Christian holiday commemorating Jesus' entry into Jerusalem",
               LocalDate.of(2023, Month.APRIL, 2), // Placeholder
               BRAZIL_LOCALITIES,
               HolidayType.RELIGIOUS,
+              KnownHoliday.PALM_SUNDAY,
               easter,
               -7, // 7 days before Easter
               false);
@@ -559,9 +571,9 @@ class HolidayOperationsTest {
               "New Year's Day",
               "First day of the year",
               LocalDate.of(2021, Month.JANUARY, 1), // Placeholder
-              LocalDate.of(2021, Month.JANUARY, 1), // Placeholder
               BRAZIL_LOCALITIES,
               HolidayType.NATIONAL,
+              LocalDate.of(2021, Month.JANUARY, 1), // Placeholder
               true);
 
       // When: Calculate observed date for 2022 (Saturday)
@@ -584,9 +596,9 @@ class HolidayOperationsTest {
               "New Year's Day",
               "First day of the year",
               LocalDate.of(2021, Month.JANUARY, 1), // Placeholder
-              LocalDate.of(2021, Month.JANUARY, 1), // Placeholder
               BRAZIL_LOCALITIES,
               HolidayType.NATIONAL,
+              LocalDate.of(2021, Month.JANUARY, 1), // Placeholder
               true);
 
       // When: Calculate observed date for 2023 (Sunday)
@@ -609,9 +621,9 @@ class HolidayOperationsTest {
               "New Year's Day",
               "First day of the year",
               LocalDate.of(2021, Month.JANUARY, 1), // Placeholder
-              LocalDate.of(2021, Month.JANUARY, 1), // Placeholder
               BRAZIL_LOCALITIES,
               HolidayType.NATIONAL,
+              LocalDate.of(2021, Month.JANUARY, 1), // Placeholder
               true);
 
       // When: Calculate observed date for 2024 (Monday)
