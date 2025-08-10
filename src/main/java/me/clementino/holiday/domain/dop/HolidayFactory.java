@@ -83,7 +83,7 @@ public final class HolidayFactory {
     }
 
     return new ObservedHoliday(
-        name, description, calculatedDate, observedDate, localities, type, mondayisation);
+        name, description, calculatedDate, localities, type, observedDate, mondayisation);
   }
 
   /** Creates an observed holiday with minimal required fields. */
@@ -117,7 +117,7 @@ public final class HolidayFactory {
     // If mondayisation is needed, create ObservedHoliday
     if (mondayisation) {
       return new ObservedHoliday(
-          name, description, date, observed, localities, type, mondayisation);
+          name, description, date, localities, type, observed, mondayisation);
     }
 
     // Otherwise create FixedHoliday
@@ -210,88 +210,9 @@ public final class HolidayFactory {
         true);
   }
 
-  // ===== NEW FACTORY METHODS USING KnownHoliday ENUM =====
-
-  /** Creates Easter Sunday for a specific country using the new KnownHoliday enum. */
-  public static MoveableHoliday createEasterWithEnum(String country) {
-    LocalDate easterDate = HolidayOperations.calculateEaster(LocalDate.now().getYear());
-    return new MoveableHoliday(
-        KnownHoliday.EASTER,
-        KnownHoliday.EASTER.getDescription(),
-        easterDate,
-        List.of(Locality.country(getCountryByName(country).name(), country)),
-        HolidayType.RELIGIOUS,
-        false);
-  }
-
-  /** Creates Good Friday (2 days before Easter) using the new MoveableFromBaseHoliday. */
-  public static MoveableFromBaseHoliday createGoodFridayWithEnum(String country) {
-    MoveableHoliday easter = createEasterWithEnum(country);
-    LocalDate goodFridayDate = easter.date().plusDays(-2); // 2 days before Easter
-
-    return new MoveableFromBaseHoliday(
-        KnownHoliday.GOOD_FRIDAY,
-        KnownHoliday.GOOD_FRIDAY.getDescription(),
-        goodFridayDate,
-        List.of(Locality.country(getCountryByName(country).name(), country)),
-        HolidayType.RELIGIOUS,
-        easter,
-        -2, // 2 days before Easter
-        false);
-  }
-
-  /** Creates Easter Monday (1 day after Easter) using the new MoveableFromBaseHoliday. */
-  public static MoveableFromBaseHoliday createEasterMondayWithEnum(String country) {
-    MoveableHoliday easter = createEasterWithEnum(country);
-    LocalDate easterMondayDate = easter.date().plusDays(1); // 1 day after Easter
-
-    return new MoveableFromBaseHoliday(
-        KnownHoliday.EASTER_MONDAY,
-        KnownHoliday.EASTER_MONDAY.getDescription(),
-        easterMondayDate,
-        List.of(Locality.country(getCountryByName(country).name(), country)),
-        HolidayType.RELIGIOUS,
-        easter,
-        1, // 1 day after Easter
-        false);
-  }
-
-  /** Creates Thanksgiving (US - 4th Thursday of November) using the new KnownHoliday enum. */
-  public static MoveableHoliday createThanksgivingWithEnum() {
-    LocalDate thanksgivingDate = HolidayOperations.calculateThanksgiving(LocalDate.now().getYear());
-    return new MoveableHoliday(
-        KnownHoliday.THANKSGIVING_US,
-        KnownHoliday.THANKSGIVING_US.getDescription(),
-        thanksgivingDate,
-        List.of(Locality.country("US", "United States")),
-        HolidayType.NATIONAL,
-        false);
-  }
-
-  /** Creates New Year's Day using the new KnownHoliday enum. */
-  public static FixedHoliday createNewYearWithEnum(String country) {
-    return new FixedHoliday(
-        KnownHoliday.NEW_YEAR.getDisplayName(),
-        KnownHoliday.NEW_YEAR.getDescription(),
-        LocalDate.of(LocalDate.now().getYear(), Month.JANUARY, 1),
-        List.of(Locality.country(getCountryByName(country).name(), country)),
-        HolidayType.NATIONAL);
-  }
-
-  /** Creates Christmas Day using the new KnownHoliday enum. */
-  public static ObservedHoliday createChristmasWithEnum(String country) {
-    LocalDate christmasDate = LocalDate.of(LocalDate.now().getYear(), Month.DECEMBER, 25);
-    LocalDate observedDate = applyMondayisationRules(christmasDate);
-
-    return new ObservedHoliday(
-        KnownHoliday.CHRISTMAS.getDisplayName(),
-        KnownHoliday.CHRISTMAS.getDescription(),
-        christmasDate,
-        observedDate,
-        List.of(Locality.country(getCountryByName(country).name(), country)),
-        HolidayType.RELIGIOUS,
-        true);
-  }
+  // ===== LEGACY METHODS REMOVED =====
+  // Old createXxxWithEnum methods have been removed due to constructor incompatibilities.
+  // Use HolidayFactorySimple for working factory methods.
 
   // ===== HELPER METHODS =====
 

@@ -90,9 +90,9 @@ public final class HolidayOperations {
               moveable.name(),
               moveable.description(),
               newDate,
-              observedDate,
               moveable.localities(),
               moveable.type(),
+              observedDate,
               true);
         } else {
           yield moveable.withDate(newDate);
@@ -109,9 +109,9 @@ public final class HolidayOperations {
               derived.name(),
               derived.description(),
               newDate,
-              observedDate,
               derived.localities(),
               derived.type(),
+              observedDate,
               true);
         } else {
           yield derived.withDate(newDate);
