@@ -1,111 +1,42 @@
 package me.clementino.holiday.dto;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Size;
-import java.time.LocalDate;
+import java.util.Optional;
 import me.clementino.holiday.domain.HolidayType;
 
-/** Request DTO for updating an existing holiday. All fields are optional for partial updates. */
-public class UpdateHolidayRequest {
+/**
+ * Request DTO for updating an existing holiday using Java 24 record. All fields are optional for
+ * partial updates.
+ *
+ * <p>This record demonstrates DOP principles:
+ *
+ * <ul>
+ *   <li>Model Data Immutably and Transparently - immutable record structure
+ *   <li>Model the Data, the Whole Data, and Nothing but the Data - contains exactly what's needed
+ *       for updates
+ * </ul>
+ */
+public record UpdateHolidayRequest(
+    @Size(max = 255, message = "Name must not exceed 255 characters") Optional<String> name,
+    @Size(max = 1000, message = "Description must not exceed 1000 characters")
+        Optional<String> description,
+    Optional<HolidayType> type,
+    @Valid Optional<CreateHolidayRequest.LocalityDto> locality,
+    @Valid Optional<CreateHolidayRequest.HolidayVariantDto> variant) {
 
-  @Size(max = 255, message = "Name must not exceed 255 characters")
-  private String name;
-
-  @JsonFormat(pattern = "yyyy-MM-dd")
-  private LocalDate date;
-
-  @JsonFormat(pattern = "yyyy-MM-dd")
-  private LocalDate observed;
-
-  @Size(max = 255, message = "Country must not exceed 255 characters")
-  private String country;
-
-  @Size(max = 255, message = "State must not exceed 255 characters")
-  private String state;
-
-  @Size(max = 255, message = "City must not exceed 255 characters")
-  private String city;
-
-  private HolidayType type;
-
-  private boolean recurring = false;
-
-  @Size(max = 1000, message = "Description must not exceed 1000 characters")
-  private String description;
-
-  // Default constructor
-  public UpdateHolidayRequest() {}
-
-  // Getters and setters
-  public String getName() {
-    return name;
+  /** Creates an empty update request with all fields set to Optional.empty(). */
+  public static UpdateHolidayRequest empty() {
+    return new UpdateHolidayRequest(
+        Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty());
   }
 
-  public void setName(String name) {
-    this.name = name;
-  }
-
-  public LocalDate getDate() {
-    return date;
-  }
-
-  public void setDate(LocalDate date) {
-    this.date = date;
-  }
-
-  public LocalDate getObserved() {
-    return observed;
-  }
-
-  public void setObserved(LocalDate observed) {
-    this.observed = observed;
-  }
-
-  public String getCountry() {
-    return country;
-  }
-
-  public void setCountry(String country) {
-    this.country = country;
-  }
-
-  public String getState() {
-    return state;
-  }
-
-  public void setState(String state) {
-    this.state = state;
-  }
-
-  public String getCity() {
-    return city;
-  }
-
-  public void setCity(String city) {
-    this.city = city;
-  }
-
-  public HolidayType getType() {
-    return type;
-  }
-
-  public void setType(HolidayType type) {
-    this.type = type;
-  }
-
-  public boolean isRecurring() {
-    return recurring;
-  }
-
-  public void setRecurring(boolean recurring) {
-    this.recurring = recurring;
-  }
-
-  public String getDescription() {
-    return description;
-  }
-
-  public void setDescription(String description) {
-    this.description = description;
+  /** Checks if this update request has any fields to update. */
+  public boolean hasUpdates() {
+    return name.isPresent()
+        || description.isPresent()
+        || type.isPresent()
+        || locality.isPresent()
+        || variant.isPresent();
   }
 }

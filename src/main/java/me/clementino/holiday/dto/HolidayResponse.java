@@ -2,141 +2,97 @@ package me.clementino.holiday.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.util.Optional;
 import me.clementino.holiday.domain.HolidayType;
+import me.clementino.holiday.domain.dop.KnownHoliday;
+import me.clementino.holiday.domain.dop.MoveableHolidayType;
 
-/** Response DTO for holiday data. Simple POJO for JSON serialization. */
-public class HolidayResponse {
+/**
+ * Response DTO for holiday data using Java 24 record.
+ *
+ * <p>This record demonstrates DOP principles:
+ *
+ * <ul>
+ *   <li>Model Data Immutably and Transparently - immutable record structure
+ *   <li>Model the Data, the Whole Data, and Nothing but the Data - contains exactly what's needed
+ *       for responses
+ * </ul>
+ */
+public record HolidayResponse(
+    String id,
+    String name,
+    String description,
+    HolidayType type,
+    LocalityResponse locality,
+    HolidayVariantResponse variant,
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ssXXX") OffsetDateTime createdAt,
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ssXXX") OffsetDateTime updatedAt,
+    Integer version) {
 
-  private String id; // Changed from UUID to String
-  private String name;
+  /** Sealed interface for different holiday variant types in responses. */
+  public sealed interface HolidayVariantResponse
+      permits HolidayVariantResponse.Fixed,
+          HolidayVariantResponse.Observed,
+          HolidayVariantResponse.Moveable,
+          HolidayVariantResponse.MoveableFromBase {
 
-  @JsonFormat(pattern = "yyyy-MM-dd")
-  private LocalDate date;
+    /** Fixed holiday variant response. */
+    record Fixed(@JsonFormat(pattern = "yyyy-MM-dd") LocalDate date)
+        implements HolidayVariantResponse {}
 
-  @JsonFormat(pattern = "yyyy-MM-dd")
-  private LocalDate observed;
+    /** Observed holiday variant response. */
+    record Observed(
+        @JsonFormat(pattern = "yyyy-MM-dd") LocalDate date,
+        @JsonFormat(pattern = "yyyy-MM-dd") Optional<LocalDate> observedDate,
+        boolean mondayisation,
+        boolean isWeekend)
+        implements HolidayVariantResponse {}
 
-  private String country;
-  private String state;
-  private String city;
-  private HolidayType type;
-  private boolean recurring;
-  private String description;
+    /** Moveable holiday variant response. */
+    record Moveable(
+        KnownHoliday knownHoliday,
+        MoveableHolidayType moveableType,
+        boolean mondayisation,
+        @JsonFormat(pattern = "yyyy-MM-dd") Optional<LocalDate> calculatedDate,
+        Optional<Integer> calculatedYear)
+        implements HolidayVariantResponse {}
 
-  @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
-  private LocalDateTime dateCreated; // Changed to LocalDateTime
-
-  @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
-  private LocalDateTime lastUpdated; // Changed to LocalDateTime
-
-  private Integer version;
-
-  // Default constructor
-  public HolidayResponse() {}
-
-  // Getters and setters
-  public String getId() {
-    return id;
+    /** Moveable from base holiday variant response. */
+    record MoveableFromBase(
+        String baseHolidayId,
+        String baseHolidayName,
+        int dayOffset,
+        boolean mondayisation,
+        @JsonFormat(pattern = "yyyy-MM-dd") Optional<LocalDate> calculatedDate,
+        Optional<Integer> calculatedYear)
+        implements HolidayVariantResponse {}
   }
 
-  public void setId(String id) {
-    this.id = id;
+  /** Creates a summary response with minimal information. */
+  public HolidaySummaryResponse toSummary() {
+    return new HolidaySummaryResponse(id, name, type, locality.displayName(), getEffectiveDate());
   }
 
-  public String getName() {
-    return name;
+  /** Gets the effective date for this holiday (calculated or fixed). */
+  public Optional<LocalDate> getEffectiveDate() {
+    return switch (variant) {
+      case HolidayVariantResponse.Fixed fixed -> Optional.of(fixed.date());
+      case HolidayVariantResponse.Observed observed ->
+          observed.observedDate().or(() -> Optional.of(observed.date()));
+      case HolidayVariantResponse.Moveable moveable -> moveable.calculatedDate();
+      case HolidayVariantResponse.MoveableFromBase moveableFromBase ->
+          moveableFromBase.calculatedDate();
+    };
   }
 
-  public void setName(String name) {
-    this.name = name;
+  /** Checks if this holiday is governmental. */
+  public boolean isGovernmental() {
+    return type.isGovernmental();
   }
 
-  public LocalDate getDate() {
-    return date;
-  }
-
-  public void setDate(LocalDate date) {
-    this.date = date;
-  }
-
-  public LocalDate getObserved() {
-    return observed;
-  }
-
-  public void setObserved(LocalDate observed) {
-    this.observed = observed;
-  }
-
-  public String getCountry() {
-    return country;
-  }
-
-  public void setCountry(String country) {
-    this.country = country;
-  }
-
-  public String getState() {
-    return state;
-  }
-
-  public void setState(String state) {
-    this.state = state;
-  }
-
-  public String getCity() {
-    return city;
-  }
-
-  public void setCity(String city) {
-    this.city = city;
-  }
-
-  public HolidayType getType() {
-    return type;
-  }
-
-  public void setType(HolidayType type) {
-    this.type = type;
-  }
-
-  public boolean isRecurring() {
-    return recurring;
-  }
-
-  public void setRecurring(boolean recurring) {
-    this.recurring = recurring;
-  }
-
-  public String getDescription() {
-    return description;
-  }
-
-  public void setDescription(String description) {
-    this.description = description;
-  }
-
-  public LocalDateTime getDateCreated() {
-    return dateCreated;
-  }
-
-  public void setDateCreated(LocalDateTime dateCreated) {
-    this.dateCreated = dateCreated;
-  }
-
-  public LocalDateTime getLastUpdated() {
-    return lastUpdated;
-  }
-
-  public void setLastUpdated(LocalDateTime lastUpdated) {
-    this.lastUpdated = lastUpdated;
-  }
-
-  public Integer getVersion() {
-    return version;
-  }
-
-  public void setVersion(Integer version) {
-    this.version = version;
+  /** Gets a display name including type information. */
+  public String getDisplayName() {
+    return name + " (" + type.name().toLowerCase() + ")";
   }
 }
