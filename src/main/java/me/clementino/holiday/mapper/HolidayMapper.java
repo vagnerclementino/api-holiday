@@ -2,9 +2,9 @@ package me.clementino.holiday.mapper;
 
 import java.util.List;
 import me.clementino.holiday.domain.*;
-import me.clementino.holiday.dto.CreateHolidayRequest;
-import me.clementino.holiday.dto.HolidayResponse;
-import me.clementino.holiday.dto.UpdateHolidayRequest;
+import me.clementino.holiday.dto.CreateHolidayRequestLegacy;
+import me.clementino.holiday.dto.HolidayResponseLegacy;
+import me.clementino.holiday.dto.UpdateHolidayRequestLegacy;
 import org.springframework.stereotype.Component;
 
 /**
@@ -14,9 +14,9 @@ import org.springframework.stereotype.Component;
 @Component
 public class HolidayMapper {
 
-  /** Convert HolidayData domain object to HolidayResponse DTO. */
-  public HolidayResponse toResponse(HolidayData holidayData) {
-    HolidayResponse response = new HolidayResponse();
+  /** Convert HolidayData domain object to HolidayResponseLegacy DTO. */
+  public HolidayResponseLegacy toResponse(HolidayData holidayData) {
+    HolidayResponseLegacy response = new HolidayResponseLegacy();
 
     response.setId(holidayData.id());
     response.setName(holidayData.name());
@@ -35,20 +35,20 @@ public class HolidayMapper {
     return response;
   }
 
-  /** Convert list of HolidayData domain objects to list of HolidayResponse DTOs. */
-  public List<HolidayResponse> toHolidayDataResponseList(List<HolidayData> holidayDataList) {
+  /** Convert list of HolidayData domain objects to list of HolidayResponseLegacy DTOs. */
+  public List<HolidayResponseLegacy> toHolidayDataResponseList(List<HolidayData> holidayDataList) {
     return holidayDataList.stream().map(this::toResponse).toList();
   }
 
   // Legacy methods for backward compatibility with persistence layer
 
   /**
-   * Convert CreateHolidayRequest to Holiday persistence entity.
+   * Convert CreateHolidayRequestLegacy to Holiday persistence entity.
    *
    * @deprecated Use DOP command pattern instead
    */
   @Deprecated
-  public Holiday toEntity(CreateHolidayRequest request) {
+  public Holiday toEntity(CreateHolidayRequestLegacy request) {
     Holiday holiday =
         new Holiday(request.getName(), request.getDate(), request.getCountry(), request.getType());
 
@@ -62,13 +62,13 @@ public class HolidayMapper {
   }
 
   /**
-   * Convert Holiday persistence entity to HolidayResponse DTO.
+   * Convert Holiday persistence entity to HolidayResponseLegacy DTO.
    *
    * @deprecated Use toResponse(HolidayData) instead for DOP approach
    */
   @Deprecated
-  public HolidayResponse toResponseFromEntity(Holiday holiday) {
-    HolidayResponse response = new HolidayResponse();
+  public HolidayResponseLegacy toResponseFromEntity(Holiday holiday) {
+    HolidayResponseLegacy response = new HolidayResponseLegacy();
 
     response.setId(holiday.getId());
     response.setName(holiday.getName());
@@ -88,22 +88,22 @@ public class HolidayMapper {
   }
 
   /**
-   * Convert list of Holiday persistence entities to list of HolidayResponse DTOs.
+   * Convert list of Holiday persistence entities to list of HolidayResponseLegacy DTOs.
    *
    * @deprecated Use toHolidayDataResponseList instead for DOP approach
    */
   @Deprecated
-  public List<HolidayResponse> toResponseList(List<Holiday> holidays) {
+  public List<HolidayResponseLegacy> toResponseList(List<Holiday> holidays) {
     return holidays.stream().map(this::toResponseFromEntity).toList();
   }
 
   /**
-   * Update existing Holiday persistence entity with data from UpdateHolidayRequest.
+   * Update existing Holiday persistence entity with data from UpdateHolidayRequestLegacy.
    *
    * @deprecated Use DOP command pattern instead
    */
   @Deprecated
-  public void updateEntity(Holiday holiday, UpdateHolidayRequest request) {
+  public void updateEntity(Holiday holiday, UpdateHolidayRequestLegacy request) {
     if (request.getName() != null) {
       holiday.setName(request.getName());
     }

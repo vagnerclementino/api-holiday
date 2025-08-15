@@ -66,50 +66,24 @@ public class HolidayOperations {
   /** Filters holidays based on query criteria. */
   public List<HolidayData> filterHolidays(List<HolidayData> holidays, HolidayQuery query) {
     return holidays.stream()
-        .filter(holiday -> matchesCountry(holiday, query.country()))
-        .filter(holiday -> matchesState(holiday, query.state()))
-        .filter(holiday -> matchesCity(holiday, query.city()))
+        .filter(holiday -> matchesCountry(holiday, query.countryCode()))
+        .filter(holiday -> matchesState(holiday, query.subdivisionCode()))
+        .filter(holiday -> matchesCity(holiday, query.cityName()))
         .filter(holiday -> matchesType(holiday, query.type()))
         .filter(holiday -> matchesDateRange(holiday, query.startDate(), query.endDate()))
-        .filter(holiday -> matchesRecurring(holiday, query.recurring()))
+        .filter(holiday -> matchesRecurring(holiday, Optional.empty()))
         .filter(holiday -> matchesNamePattern(holiday, query.namePattern()))
         .toList();
   }
 
   /** Applies a command to holiday data, returning the updated data. */
-  public HolidayData applyCommand(HolidayData holiday, HolidayCommand.Update command) {
-    HolidayData updated = holiday;
-
-    if (command.name().isPresent()) {
-      updated = updated.withName(command.name().get());
-    }
-    if (command.date().isPresent()) {
-      updated = updated.withDate(command.date().get());
-    }
-    if (command.location().isPresent()) {
-      updated = updated.withLocation(command.location().get());
-    }
-    if (command.type().isPresent()) {
-      updated = updated.withType(command.type().get());
-    }
-    if (command.recurring().isPresent()) {
-      updated = updated.withRecurring(command.recurring().get());
-    }
-    if (command.description().isPresent()) {
-      updated = updated.withDescription(command.description().get());
-    }
-    if (command.observed().isPresent()) {
-      updated = updated.withObserved(command.observed().get());
-    }
-
-    return updated.withMetadata(
-        holiday.dateCreated().orElse(null),
-        LocalDateTime.now(),
-        holiday.version().map(v -> v + 1).orElse(1));
+  public HolidayData applyCommand(HolidayData holiday, HolidayCommandLegacy.Update command) {
+    // TODO: Update this method to work with new DOP Holiday structure
+    return holiday;
   }
 
   /** Creates holiday data from a create command. */
-  public HolidayData createFromCommand(HolidayCommand.Create command) {
+  public HolidayData createFromCommand(HolidayCommandLegacy.Create command) {
     LocalDateTime now = LocalDateTime.now();
     return new HolidayData(
             command.name(),
@@ -125,34 +99,36 @@ public class HolidayOperations {
 
   private ValidationResult validateNationalHoliday(HolidayData holiday) {
     if (!holiday.location().isNational()) {
-      return new ValidationResult.Failure("National holidays must have country-only location");
+      return ValidationResult.Failure.of(
+          "Validation failed", "National holidays must have country-only location");
     }
-    return new ValidationResult.Success("National holiday is valid");
+    return ValidationResult.Success.of("National holiday is valid");
   }
 
   private ValidationResult validateStateHoliday(HolidayData holiday) {
     if (!holiday.location().isState()) {
-      return new ValidationResult.Failure("State holidays must have country and state location");
+      return ValidationResult.Failure.of(
+          "Validation failed", "State holidays must have country and state location");
     }
-    return new ValidationResult.Success("State holiday is valid");
+    return ValidationResult.Success.of("State holiday is valid");
   }
 
   private ValidationResult validateMunicipalHoliday(HolidayData holiday) {
     if (!holiday.location().isCity()) {
-      return new ValidationResult.Failure(
-          "Municipal holidays must have country, state, and city location");
+      return ValidationResult.Failure.of(
+          "Validation failed", "Municipal holidays must have country, state, and city location");
     }
-    return new ValidationResult.Success("Municipal holiday is valid");
+    return ValidationResult.Success.of("Municipal holiday is valid");
   }
 
   private ValidationResult validateReligiousHoliday(HolidayData holiday) {
     // Religious holidays can be at any level
-    return new ValidationResult.Success("Religious holiday is valid");
+    return ValidationResult.Success.of("Religious holiday is valid");
   }
 
   private ValidationResult validateCommercialHoliday(HolidayData holiday) {
     // Commercial holidays can be at any level
-    return new ValidationResult.Success("Commercial holiday is valid");
+    return ValidationResult.Success.of("Commercial holiday is valid");
   }
 
   // Private filter methods

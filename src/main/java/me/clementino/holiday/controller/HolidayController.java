@@ -9,9 +9,9 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import me.clementino.holiday.domain.*;
-import me.clementino.holiday.dto.CreateHolidayRequest;
-import me.clementino.holiday.dto.HolidayResponse;
-import me.clementino.holiday.dto.UpdateHolidayRequest;
+import me.clementino.holiday.dto.CreateHolidayRequestLegacy;
+import me.clementino.holiday.dto.HolidayResponseLegacy;
+import me.clementino.holiday.dto.UpdateHolidayRequestLegacy;
 import me.clementino.holiday.mapper.HolidayMapper;
 import me.clementino.holiday.service.HolidayService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,7 +41,7 @@ public class HolidayController {
       summary = "Get all holidays",
       description = "Retrieve all holidays with optional filtering using DOP query patterns")
   @ApiResponse(responseCode = "200", description = "Successfully retrieved holidays")
-  public ResponseEntity<List<HolidayResponse>> getAllHolidays(
+  public ResponseEntity<List<HolidayResponseLegacy>> getAllHolidays(
       @Parameter(description = "Filter by country") @RequestParam(required = false) String country,
       @Parameter(description = "Filter by state") @RequestParam(required = false) String state,
       @Parameter(description = "Filter by city") @RequestParam(required = false) String city,
@@ -65,7 +65,8 @@ public class HolidayController {
         holidayService.findAll(country, state, city, type, startDate, endDate);
 
     // Convert to response DTOs
-    List<HolidayResponse> response = holidays.stream().map(holidayMapper::toResponse).toList();
+    List<HolidayResponseLegacy> response =
+        holidays.stream().map(holidayMapper::toResponse).toList();
 
     return ResponseEntity.ok(response);
   }
@@ -74,11 +75,11 @@ public class HolidayController {
   @Operation(summary = "Get holiday by ID", description = "Retrieve a specific holiday by its ID")
   @ApiResponse(responseCode = "200", description = "Successfully retrieved holiday")
   @ApiResponse(responseCode = "404", description = "Holiday not found")
-  public ResponseEntity<HolidayResponse> getHolidayById(
+  public ResponseEntity<HolidayResponseLegacy> getHolidayById(
       @Parameter(description = "Holiday ID") @PathVariable String id) {
 
     HolidayData holiday = holidayService.findById(id);
-    HolidayResponse response = holidayMapper.toResponse(holiday);
+    HolidayResponseLegacy response = holidayMapper.toResponse(holiday);
 
     return ResponseEntity.ok(response);
   }
@@ -89,13 +90,13 @@ public class HolidayController {
       description = "Create a new holiday using DOP command pattern")
   @ApiResponse(responseCode = "201", description = "Holiday created successfully")
   @ApiResponse(responseCode = "400", description = "Invalid input data")
-  public ResponseEntity<HolidayResponse> createHoliday(
-      @Valid @RequestBody CreateHolidayRequest request) {
+  public ResponseEntity<HolidayResponseLegacy> createHoliday(
+      @Valid @RequestBody CreateHolidayRequestLegacy request) {
 
     // Create DOP command
     Location location = new Location(request.getCountry(), request.getState(), request.getCity());
-    HolidayCommand.Create command =
-        new HolidayCommand.Create(
+    HolidayCommandLegacy.Create command =
+        new HolidayCommandLegacy.Create(
             request.getName(),
             request.getDate(),
             location,
@@ -106,7 +107,7 @@ public class HolidayController {
 
     // Execute command
     HolidayData savedHoliday = holidayService.executeCommand(command);
-    HolidayResponse response = holidayMapper.toResponse(savedHoliday);
+    HolidayResponseLegacy response = holidayMapper.toResponse(savedHoliday);
 
     return ResponseEntity.status(HttpStatus.CREATED).body(response);
   }
@@ -118,9 +119,9 @@ public class HolidayController {
   @ApiResponse(responseCode = "200", description = "Holiday updated successfully")
   @ApiResponse(responseCode = "404", description = "Holiday not found")
   @ApiResponse(responseCode = "400", description = "Invalid input data")
-  public ResponseEntity<HolidayResponse> updateHoliday(
+  public ResponseEntity<HolidayResponseLegacy> updateHoliday(
       @Parameter(description = "Holiday ID") @PathVariable String id,
-      @Valid @RequestBody UpdateHolidayRequest request) {
+      @Valid @RequestBody UpdateHolidayRequestLegacy request) {
 
     // Create DOP update command
     Optional<Location> location = Optional.empty();
@@ -129,8 +130,8 @@ public class HolidayController {
           Optional.of(new Location(request.getCountry(), request.getState(), request.getCity()));
     }
 
-    HolidayCommand.Update command =
-        new HolidayCommand.Update(
+    HolidayCommandLegacy.Update command =
+        new HolidayCommandLegacy.Update(
             id,
             Optional.ofNullable(request.getName()),
             Optional.ofNullable(request.getDate()),
@@ -142,7 +143,7 @@ public class HolidayController {
 
     // Execute command
     HolidayData updatedHoliday = holidayService.executeCommand(command);
-    HolidayResponse response = holidayMapper.toResponse(updatedHoliday);
+    HolidayResponseLegacy response = holidayMapper.toResponse(updatedHoliday);
 
     return ResponseEntity.ok(response);
   }
@@ -157,7 +158,7 @@ public class HolidayController {
       @Parameter(description = "Holiday ID") @PathVariable String id) {
 
     // Create and execute DOP delete command
-    HolidayCommand.Delete command = new HolidayCommand.Delete(id);
+    HolidayCommandLegacy.Delete command = new HolidayCommandLegacy.Delete(id);
     holidayService.executeCommand(command);
 
     return ResponseEntity.noContent().build();

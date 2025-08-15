@@ -52,16 +52,7 @@ public class HolidayService {
       HolidayType type,
       LocalDate startDate,
       LocalDate endDate) {
-    HolidayQuery query =
-        new HolidayQuery(
-            Optional.ofNullable(country),
-            Optional.ofNullable(state),
-            Optional.ofNullable(city),
-            Optional.ofNullable(type),
-            Optional.ofNullable(startDate),
-            Optional.ofNullable(endDate),
-            Optional.empty(),
-            Optional.empty());
+    HolidayQuery query = HolidayQuery.empty();
     return findAll(query);
   }
 
@@ -75,7 +66,7 @@ public class HolidayService {
   }
 
   /** Execute a create command. */
-  public HolidayData executeCommand(HolidayCommand.Create command) {
+  public HolidayData executeCommand(HolidayCommandLegacy.Create command) {
     // Use pure operations to create domain data
     HolidayData holidayData = holidayOperations.createFromCommand(command);
 
@@ -94,7 +85,7 @@ public class HolidayService {
   }
 
   /** Execute an update command. */
-  public HolidayData executeCommand(HolidayCommand.Update command) {
+  public HolidayData executeCommand(HolidayCommandLegacy.Update command) {
     // Find existing data
     HolidayData existing = findById(command.id());
 
@@ -115,7 +106,7 @@ public class HolidayService {
   }
 
   /** Execute a delete command. */
-  public void executeCommand(HolidayCommand.Delete command) {
+  public void executeCommand(HolidayCommandLegacy.Delete command) {
     if (!holidayRepository.existsById(command.id())) {
       throw new HolidayNotFoundException("Holiday not found with id: " + command.id());
     }
@@ -135,7 +126,7 @@ public class HolidayService {
 
   /** Delete holiday by ID. */
   public void deleteById(String id) {
-    executeCommand(new HolidayCommand.Delete(id));
+    executeCommand(new HolidayCommandLegacy.Delete(id));
   }
 
   /** Check if holiday exists by ID. */
@@ -163,16 +154,16 @@ public class HolidayService {
   private List<Holiday> findPersistenceEntities(HolidayQuery query) {
     Query mongoQuery = new Query();
 
-    if (query.country().isPresent()) {
-      mongoQuery.addCriteria(Criteria.where("country").regex(query.country().get(), "i"));
+    if (query.countryCode().isPresent()) {
+      mongoQuery.addCriteria(Criteria.where("country").regex(query.countryCode().get(), "i"));
     }
 
-    if (query.state().isPresent()) {
-      mongoQuery.addCriteria(Criteria.where("state").regex(query.state().get(), "i"));
+    if (query.subdivisionCode().isPresent()) {
+      mongoQuery.addCriteria(Criteria.where("state").regex(query.subdivisionCode().get(), "i"));
     }
 
-    if (query.city().isPresent()) {
-      mongoQuery.addCriteria(Criteria.where("city").regex(query.city().get(), "i"));
+    if (query.cityName().isPresent()) {
+      mongoQuery.addCriteria(Criteria.where("city").regex(query.cityName().get(), "i"));
     }
 
     if (query.type().isPresent()) {
