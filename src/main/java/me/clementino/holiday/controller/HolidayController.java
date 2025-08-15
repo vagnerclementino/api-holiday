@@ -7,18 +7,26 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
-import me.clementino.holiday.domain.*;
-import me.clementino.holiday.dto.CreateHolidayRequestLegacy;
-import me.clementino.holiday.dto.HolidayResponseLegacy;
-import me.clementino.holiday.dto.UpdateHolidayRequestLegacy;
+import me.clementino.holiday.domain.HolidayCommand;
+import me.clementino.holiday.domain.HolidayData;
+import me.clementino.holiday.domain.HolidayType;
+import me.clementino.holiday.dto.CreateHolidayRequest;
+import me.clementino.holiday.dto.HolidayResponse;
+import me.clementino.holiday.dto.UpdateHolidayRequest;
 import me.clementino.holiday.mapper.HolidayMapper;
 import me.clementino.holiday.service.HolidayService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/holidays")
@@ -41,7 +49,7 @@ public class HolidayController {
       summary = "Get all holidays",
       description = "Retrieve all holidays with optional filtering using DOP query patterns")
   @ApiResponse(responseCode = "200", description = "Successfully retrieved holidays")
-  public ResponseEntity<List<HolidayResponseLegacy>> getAllHolidays(
+  public ResponseEntity<List<HolidayResponse>> getAllHolidays(
       @Parameter(description = "Filter by country") @RequestParam(required = false) String country,
       @Parameter(description = "Filter by state") @RequestParam(required = false) String state,
       @Parameter(description = "Filter by city") @RequestParam(required = false) String city,
@@ -65,8 +73,7 @@ public class HolidayController {
         holidayService.findAll(country, state, city, type, startDate, endDate);
 
     // Convert to response DTOs
-    List<HolidayResponseLegacy> response =
-        holidays.stream().map(holidayMapper::toResponse).toList();
+    List<HolidayResponse> response = holidays.stream().map(holidayMapper::toResponse).toList();
 
     return ResponseEntity.ok(response);
   }
@@ -75,11 +82,11 @@ public class HolidayController {
   @Operation(summary = "Get holiday by ID", description = "Retrieve a specific holiday by its ID")
   @ApiResponse(responseCode = "200", description = "Successfully retrieved holiday")
   @ApiResponse(responseCode = "404", description = "Holiday not found")
-  public ResponseEntity<HolidayResponseLegacy> getHolidayById(
+  public ResponseEntity<HolidayResponse> getHolidayById(
       @Parameter(description = "Holiday ID") @PathVariable String id) {
 
     HolidayData holiday = holidayService.findById(id);
-    HolidayResponseLegacy response = holidayMapper.toResponse(holiday);
+    HolidayResponse response = holidayMapper.toResponse(holiday);
 
     return ResponseEntity.ok(response);
   }
@@ -90,26 +97,14 @@ public class HolidayController {
       description = "Create a new holiday using DOP command pattern")
   @ApiResponse(responseCode = "201", description = "Holiday created successfully")
   @ApiResponse(responseCode = "400", description = "Invalid input data")
-  public ResponseEntity<HolidayResponseLegacy> createHoliday(
-      @Valid @RequestBody CreateHolidayRequestLegacy request) {
+  public ResponseEntity<HolidayResponse> createHoliday(
+      @Valid @RequestBody CreateHolidayRequest request) {
 
-    // Create DOP command
-    Location location = new Location(request.getCountry(), request.getState(), request.getCity());
-    HolidayCommandLegacy.Create command =
-        new HolidayCommandLegacy.Create(
-            request.getName(),
-            request.getDate(),
-            location,
-            request.getType(),
-            request.isRecurring(),
-            Optional.ofNullable(request.getDescription()),
-            Optional.ofNullable(request.getObserved()));
-
-    // Execute command
-    HolidayData savedHoliday = holidayService.executeCommand(command);
-    HolidayResponseLegacy response = holidayMapper.toResponse(savedHoliday);
-
-    return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    // TODO: Implement conversion from new DTO structure to domain objects
+    // This will need to be updated to work with the new DOP Holiday sealed
+    // interface
+    throw new UnsupportedOperationException(
+        "Implementation pending - needs DOP Holiday conversion");
   }
 
   @PutMapping("/{id}")
@@ -119,33 +114,15 @@ public class HolidayController {
   @ApiResponse(responseCode = "200", description = "Holiday updated successfully")
   @ApiResponse(responseCode = "404", description = "Holiday not found")
   @ApiResponse(responseCode = "400", description = "Invalid input data")
-  public ResponseEntity<HolidayResponseLegacy> updateHoliday(
+  public ResponseEntity<HolidayResponse> updateHoliday(
       @Parameter(description = "Holiday ID") @PathVariable String id,
-      @Valid @RequestBody UpdateHolidayRequestLegacy request) {
+      @Valid @RequestBody UpdateHolidayRequest request) {
 
-    // Create DOP update command
-    Optional<Location> location = Optional.empty();
-    if (request.getCountry() != null || request.getState() != null || request.getCity() != null) {
-      location =
-          Optional.of(new Location(request.getCountry(), request.getState(), request.getCity()));
-    }
-
-    HolidayCommandLegacy.Update command =
-        new HolidayCommandLegacy.Update(
-            id,
-            Optional.ofNullable(request.getName()),
-            Optional.ofNullable(request.getDate()),
-            location,
-            Optional.ofNullable(request.getType()),
-            Optional.ofNullable(request.isRecurring()),
-            Optional.ofNullable(request.getDescription()),
-            Optional.ofNullable(request.getObserved()));
-
-    // Execute command
-    HolidayData updatedHoliday = holidayService.executeCommand(command);
-    HolidayResponseLegacy response = holidayMapper.toResponse(updatedHoliday);
-
-    return ResponseEntity.ok(response);
+    // TODO: Implement conversion from new DTO structure to domain objects
+    // This will need to be updated to work with the new DOP Holiday sealed
+    // interface
+    throw new UnsupportedOperationException(
+        "Implementation pending - needs DOP Holiday conversion");
   }
 
   @DeleteMapping("/{id}")
@@ -158,7 +135,7 @@ public class HolidayController {
       @Parameter(description = "Holiday ID") @PathVariable String id) {
 
     // Create and execute DOP delete command
-    HolidayCommandLegacy.Delete command = new HolidayCommandLegacy.Delete(id);
+    HolidayCommand.Delete command = HolidayCommand.Delete.of(id);
     holidayService.executeCommand(command);
 
     return ResponseEntity.noContent().build();

@@ -66,47 +66,23 @@ public class HolidayService {
   }
 
   /** Execute a create command. */
-  public HolidayData executeCommand(HolidayCommandLegacy.Create command) {
-    // Use pure operations to create domain data
-    HolidayData holidayData = holidayOperations.createFromCommand(command);
-
-    // Validate using pure operations
-    ValidationResult validation = holidayOperations.validateHoliday(holidayData);
-    if (validation.isFailure()) {
-      throw new HolidayValidationException(((ValidationResult.Failure) validation).errors());
-    }
-
-    // Generate ID and convert to persistence entity
-    HolidayData dataWithId = holidayData.withId(UUID.randomUUID().toString());
-    Holiday persistenceEntity = toPersistenceEntity(dataWithId);
-    Holiday saved = holidayRepository.save(persistenceEntity);
-
-    return toDomainData(saved);
+  public HolidayData executeCommand(HolidayCommand.Create command) {
+    // TODO: Implement conversion from new DOP Holiday sealed interface to
+    // HolidayData
+    throw new UnsupportedOperationException(
+        "Implementation pending - needs DOP Holiday conversion");
   }
 
   /** Execute an update command. */
-  public HolidayData executeCommand(HolidayCommandLegacy.Update command) {
-    // Find existing data
-    HolidayData existing = findById(command.id());
-
-    // Apply command using pure operations
-    HolidayData updated = holidayOperations.applyCommand(existing, command);
-
-    // Validate using pure operations
-    ValidationResult validation = holidayOperations.validateHoliday(updated);
-    if (validation.isFailure()) {
-      throw new HolidayValidationException(((ValidationResult.Failure) validation).errors());
-    }
-
-    // Convert to persistence entity and save
-    Holiday persistenceEntity = toPersistenceEntity(updated);
-    Holiday saved = holidayRepository.save(persistenceEntity);
-
-    return toDomainData(saved);
+  public HolidayData executeCommand(HolidayCommand.Update command) {
+    // TODO: Implement conversion from new DOP Holiday sealed interface to
+    // HolidayData
+    throw new UnsupportedOperationException(
+        "Implementation pending - needs DOP Holiday conversion");
   }
 
   /** Execute a delete command. */
-  public void executeCommand(HolidayCommandLegacy.Delete command) {
+  public void executeCommand(HolidayCommand.Delete command) {
     if (!holidayRepository.existsById(command.id())) {
       throw new HolidayNotFoundException("Holiday not found with id: " + command.id());
     }
@@ -126,7 +102,7 @@ public class HolidayService {
 
   /** Delete holiday by ID. */
   public void deleteById(String id) {
-    executeCommand(new HolidayCommandLegacy.Delete(id));
+    executeCommand(HolidayCommand.Delete.of(id));
   }
 
   /** Check if holiday exists by ID. */

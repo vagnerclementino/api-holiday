@@ -1,7 +1,6 @@
 package me.clementino.holiday.operations;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import me.clementino.holiday.domain.*;
@@ -77,22 +76,17 @@ public class HolidayOperations {
   }
 
   /** Applies a command to holiday data, returning the updated data. */
-  public HolidayData applyCommand(HolidayData holiday, HolidayCommandLegacy.Update command) {
+  public HolidayData applyCommand(HolidayData holiday, HolidayCommand.Update command) {
     // TODO: Update this method to work with new DOP Holiday structure
-    return holiday;
+    throw new UnsupportedOperationException(
+        "Implementation pending - needs DOP Holiday conversion");
   }
 
   /** Creates holiday data from a create command. */
-  public HolidayData createFromCommand(HolidayCommandLegacy.Create command) {
-    LocalDateTime now = LocalDateTime.now();
-    return new HolidayData(
-            command.name(),
-            command.date(),
-            command.location(),
-            command.type(),
-            command.recurring(),
-            command.description().orElse(null))
-        .withMetadata(now, now, 0); // Start with version 0
+  public HolidayData createFromCommand(HolidayCommand.Create command) {
+    // TODO: Update this method to work with new DOP Holiday structure
+    throw new UnsupportedOperationException(
+        "Implementation pending - needs DOP Holiday conversion");
   }
 
   // Private validation methods

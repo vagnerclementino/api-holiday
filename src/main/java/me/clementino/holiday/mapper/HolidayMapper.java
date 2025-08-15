@@ -1,10 +1,11 @@
 package me.clementino.holiday.mapper;
 
+import java.time.OffsetDateTime;
 import java.util.List;
-import me.clementino.holiday.domain.*;
-import me.clementino.holiday.dto.CreateHolidayRequestLegacy;
-import me.clementino.holiday.dto.HolidayResponseLegacy;
-import me.clementino.holiday.dto.UpdateHolidayRequestLegacy;
+import me.clementino.holiday.domain.Holiday;
+import me.clementino.holiday.domain.HolidayData;
+import me.clementino.holiday.dto.HolidayResponse;
+import me.clementino.holiday.dto.LocalityResponse;
 import org.springframework.stereotype.Component;
 
 /**
@@ -14,120 +15,106 @@ import org.springframework.stereotype.Component;
 @Component
 public class HolidayMapper {
 
-  /** Convert HolidayData domain object to HolidayResponseLegacy DTO. */
-  public HolidayResponseLegacy toResponse(HolidayData holidayData) {
-    HolidayResponseLegacy response = new HolidayResponseLegacy();
+  /** Convert HolidayData domain object to HolidayResponse DTO. */
+  public HolidayResponse toResponse(HolidayData holidayData) {
+    // Create locality response
+    LocalityResponse locality = createLocalityResponse(holidayData);
 
-    response.setId(holidayData.id());
-    response.setName(holidayData.name());
-    response.setDate(holidayData.date());
-    response.setObserved(holidayData.observed().orElse(null));
-    response.setCountry(holidayData.location().country());
-    response.setState(holidayData.location().state().orElse(null));
-    response.setCity(holidayData.location().city().orElse(null));
-    response.setType(holidayData.type());
-    response.setRecurring(holidayData.recurring());
-    response.setDescription(holidayData.description().orElse(null));
-    response.setDateCreated(holidayData.dateCreated().orElse(null));
-    response.setLastUpdated(holidayData.lastUpdated().orElse(null));
-    response.setVersion(holidayData.version().orElse(null));
+    // Create variant response - for now, create a simple Fixed variant
+    // TODO: This needs to be enhanced to handle all DOP Holiday variants
+    HolidayResponse.HolidayVariantResponse variant =
+        new HolidayResponse.HolidayVariantResponse.Fixed(holidayData.date());
 
-    return response;
+    return new HolidayResponse(
+        holidayData.id(),
+        holidayData.name(),
+        holidayData.description().orElse(""),
+        holidayData.type(),
+        locality,
+        variant,
+        holidayData
+            .dateCreated()
+            .map(ldt -> ldt.atOffset(java.time.ZoneOffset.UTC))
+            .orElse(OffsetDateTime.now()),
+        holidayData
+            .lastUpdated()
+            .map(ldt -> ldt.atOffset(java.time.ZoneOffset.UTC))
+            .orElse(OffsetDateTime.now()),
+        holidayData.version().orElse(1));
   }
 
-  /** Convert list of HolidayData domain objects to list of HolidayResponseLegacy DTOs. */
-  public List<HolidayResponseLegacy> toHolidayDataResponseList(List<HolidayData> holidayDataList) {
+  /** Convert list of HolidayData domain objects to list of HolidayResponse DTOs. */
+  public List<HolidayResponse> toHolidayDataResponseList(List<HolidayData> holidayDataList) {
     return holidayDataList.stream().map(this::toResponse).toList();
+  }
+
+  private LocalityResponse createLocalityResponse(HolidayData holidayData) {
+    String country = holidayData.location().country();
+    String state = holidayData.location().state().orElse(null);
+    String city = holidayData.location().city().orElse(null);
+
+    if (city != null && state != null) {
+      return LocalityResponse.city(country, country, state, state, city);
+    } else if (state != null) {
+      return LocalityResponse.subdivision(country, country, state, state);
+    } else {
+      return LocalityResponse.country(country, country);
+    }
   }
 
   // Legacy methods for backward compatibility with persistence layer
 
   /**
-   * Convert CreateHolidayRequestLegacy to Holiday persistence entity.
-   *
-   * @deprecated Use DOP command pattern instead
-   */
-  @Deprecated
-  public Holiday toEntity(CreateHolidayRequestLegacy request) {
-    Holiday holiday =
-        new Holiday(request.getName(), request.getDate(), request.getCountry(), request.getType());
-
-    holiday.setObserved(request.getObserved());
-    holiday.setState(request.getState());
-    holiday.setCity(request.getCity());
-    holiday.setRecurring(request.isRecurring());
-    holiday.setDescription(request.getDescription());
-
-    return holiday;
-  }
-
-  /**
-   * Convert Holiday persistence entity to HolidayResponseLegacy DTO.
+   * Convert Holiday persistence entity to HolidayResponse DTO.
    *
    * @deprecated Use toResponse(HolidayData) instead for DOP approach
    */
   @Deprecated
-  public HolidayResponseLegacy toResponseFromEntity(Holiday holiday) {
-    HolidayResponseLegacy response = new HolidayResponseLegacy();
+  public HolidayResponse toResponseFromEntity(Holiday holiday) {
+    // Create locality response from entity
+    LocalityResponse locality = createLocalityResponseFromEntity(holiday);
 
-    response.setId(holiday.getId());
-    response.setName(holiday.getName());
-    response.setDate(holiday.getDate());
-    response.setObserved(holiday.getObserved());
-    response.setCountry(holiday.getCountry());
-    response.setState(holiday.getState());
-    response.setCity(holiday.getCity());
-    response.setType(holiday.getType());
-    response.setRecurring(holiday.isRecurring());
-    response.setDescription(holiday.getDescription());
-    response.setDateCreated(holiday.getDateCreated());
-    response.setLastUpdated(holiday.getLastUpdated());
-    response.setVersion(holiday.getVersion());
+    // Create variant response - for now, create a simple Fixed variant
+    HolidayResponse.HolidayVariantResponse variant =
+        new HolidayResponse.HolidayVariantResponse.Fixed(holiday.getDate());
 
-    return response;
+    return new HolidayResponse(
+        holiday.getId(),
+        holiday.getName(),
+        holiday.getDescription() != null ? holiday.getDescription() : "",
+        holiday.getType(),
+        locality,
+        variant,
+        holiday.getDateCreated() != null
+            ? holiday.getDateCreated().atOffset(java.time.ZoneOffset.UTC)
+            : OffsetDateTime.now(),
+        holiday.getLastUpdated() != null
+            ? holiday.getLastUpdated().atOffset(java.time.ZoneOffset.UTC)
+            : OffsetDateTime.now(),
+        holiday.getVersion() != null ? holiday.getVersion() : 1);
   }
 
   /**
-   * Convert list of Holiday persistence entities to list of HolidayResponseLegacy DTOs.
+   * Convert list of Holiday persistence entities to list of HolidayResponse DTOs.
    *
    * @deprecated Use toHolidayDataResponseList instead for DOP approach
    */
   @Deprecated
-  public List<HolidayResponseLegacy> toResponseList(List<Holiday> holidays) {
+  public List<HolidayResponse> toResponseList(List<Holiday> holidays) {
     return holidays.stream().map(this::toResponseFromEntity).toList();
   }
 
-  /**
-   * Update existing Holiday persistence entity with data from UpdateHolidayRequestLegacy.
-   *
-   * @deprecated Use DOP command pattern instead
-   */
-  @Deprecated
-  public void updateEntity(Holiday holiday, UpdateHolidayRequestLegacy request) {
-    if (request.getName() != null) {
-      holiday.setName(request.getName());
-    }
-    if (request.getDate() != null) {
-      holiday.setDate(request.getDate());
-    }
-    if (request.getObserved() != null) {
-      holiday.setObserved(request.getObserved());
-    }
-    if (request.getCountry() != null) {
-      holiday.setCountry(request.getCountry());
-    }
-    if (request.getState() != null) {
-      holiday.setState(request.getState());
-    }
-    if (request.getCity() != null) {
-      holiday.setCity(request.getCity());
-    }
-    if (request.getType() != null) {
-      holiday.setType(request.getType());
-    }
-    holiday.setRecurring(request.isRecurring());
-    if (request.getDescription() != null) {
-      holiday.setDescription(request.getDescription());
+  private LocalityResponse createLocalityResponseFromEntity(Holiday holiday) {
+    String country = holiday.getCountry();
+    String state = holiday.getState();
+    String city = holiday.getCity();
+
+    if (city != null && state != null) {
+      return LocalityResponse.city(country, country, state, state, city);
+    } else if (state != null) {
+      return LocalityResponse.subdivision(country, country, state, state);
+    } else {
+      return LocalityResponse.country(country, country);
     }
   }
 }
