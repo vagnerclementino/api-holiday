@@ -15,6 +15,8 @@ logging:
   level:
     me.clementino.holiday: DEBUG
     org.springframework.data.mongodb: DEBUG
+    org.mapstruct: DEBUG
+    org.instancio: DEBUG
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
 
@@ -40,6 +42,14 @@ springdoc:
   swagger-ui:
     path: /swagger-ui.html
     enabled: true
+    try-it-out-enabled: true
   api-docs:
     path: /api-docs
     enabled: true
+
+# Enhanced development configuration
+holiday-api:
+  holiday-calculation:
+    cache-enabled: false # Disable caching in development for testing
+  validation:
+    fail-fast: true # Fail fast in development for quicker feedback

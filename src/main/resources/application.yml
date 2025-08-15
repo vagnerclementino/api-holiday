@@ -4,14 +4,14 @@
 spring:
   application:
     name: holiday-api
-  
+
   # MongoDB Configuration
   data:
     mongodb:
       uri: ${MONGODB_DATABASE_URL:mongodb://localhost:27017/holiday-api}
       uuid-representation: standard
       auto-index-creation: true
-  
+
   # Docker Compose Integration
   docker:
     compose:
@@ -27,6 +27,22 @@ spring:
     default-property-inclusion: non_null
     mapper:
       accept-case-insensitive-enums: true
+    # Enhanced support for sealed interfaces and records
+    default-typing: none
+    visibility:
+      field: any
+      getter: none
+      setter: none
+      creator: any
+
+  # Caching Configuration for Holiday Calculations
+  cache:
+    type: simple
+    cache-names: holidays-by-year, calculated-holidays, locality-holidays
+
+  # Enhanced Validation Configuration
+  validation:
+    enabled: true
 
 # Server Configuration
 server:
@@ -104,3 +120,19 @@ holiday-api:
     sealed-interfaces: true
     immutable-data: true
     pure-functions: true
+  # MapStruct Configuration
+  mapstruct:
+    default-component-model: spring
+    unmapped-target-policy: error
+    suppress-timestamp-in-generated: true
+  # Holiday Calculation Configuration
+  holiday-calculation:
+    cache-enabled: true
+    auto-calculate-missing-years: true
+    max-years-ahead: 10
+    max-years-behind: 50
+  # Validation Configuration
+  validation:
+    fail-fast: false
+    detailed-errors: true
+    validate-nested: true
