@@ -96,8 +96,29 @@ public class HolidayService {
 
     query.with(Sort.by(Sort.Direction.ASC, "date"));
 
+    System.out.println("MongoDB Query: " + query.toString());
+
     List<HolidayEntity> entities = mongoTemplate.find(query, HolidayEntity.class);
-    return entities.stream().map(this::toDomainData).toList();
+
+    System.out.println("Found " + entities.size() + " entities in MongoDB");
+
+    if (!entities.isEmpty()) {
+      HolidayEntity first = entities.get(0);
+      System.out.println(
+          "First entity - ID: "
+              + first.getId()
+              + ", Name: '"
+              + first.getName()
+              + "', Description: '"
+              + first.getDescription()
+              + "'");
+    }
+
+    List<HolidayData> result = entities.stream().map(this::toDomainData).toList();
+    System.out.println("Returning " + result.size() + " HolidayData objects");
+    System.out.println("====================");
+
+    return result;
   }
 
   /** Create a new holiday. */
@@ -106,7 +127,6 @@ public class HolidayService {
     entity.setId(UUID.randomUUID().toString());
     entity.setDateCreated(LocalDateTime.now());
     entity.setLastUpdated(LocalDateTime.now());
-    entity.setVersion(1);
 
     HolidayEntity saved = holidayRepository.save(entity);
     return toDomainData(saved);
@@ -176,6 +196,23 @@ public class HolidayService {
 
   /** Convert HolidayEntity to HolidayData. */
   private HolidayData toDomainData(HolidayEntity entity) {
+    // Validate required fields before creating HolidayData
+    if (entity.getName() == null || entity.getName().isBlank()) {
+      throw new IllegalStateException(
+          "HolidayEntity name is null or blank for ID: "
+              + entity.getId()
+              + ". This indicates a data corruption issue in MongoDB.");
+    }
+    if (entity.getDate() == null) {
+      throw new IllegalStateException("HolidayEntity date is null for ID: " + entity.getId());
+    }
+    if (entity.getCountry() == null) {
+      throw new IllegalStateException("HolidayEntity country is null for ID: " + entity.getId());
+    }
+    if (entity.getType() == null) {
+      throw new IllegalStateException("HolidayEntity type is null for ID: " + entity.getId());
+    }
+
     return new HolidayData(
         entity.getId(),
         entity.getName(),
@@ -195,17 +232,33 @@ public class HolidayService {
 
   /** Convert HolidayData to HolidayEntity. */
   private HolidayEntity toEntity(HolidayData data) {
+    // Validate required fields before creating entity
+    if (data.name() == null || data.name().isBlank()) {
+      throw new IllegalArgumentException("HolidayData name cannot be null or blank");
+    }
+    if (data.date() == null) {
+      throw new IllegalArgumentException("HolidayData date cannot be null");
+    }
+    if (data.location() == null
+        || data.location().country() == null
+        || data.location().country().isBlank()) {
+      throw new IllegalArgumentException("HolidayData country cannot be null or blank");
+    }
+    if (data.type() == null) {
+      throw new IllegalArgumentException("HolidayData type cannot be null");
+    }
+
     HolidayEntity entity = new HolidayEntity();
     entity.setId(data.id());
-    entity.setName(data.name());
+    entity.setName(data.name().trim()); // Trim whitespace
     entity.setDate(data.date());
     entity.setObserved(data.observed().orElse(null));
-    entity.setCountry(data.location().country());
-    entity.setState(data.location().state().orElse(null));
-    entity.setCity(data.location().city().orElse(null));
+    entity.setCountry(data.location().country().trim()); // Trim whitespace
+    entity.setState(data.location().state().map(String::trim).orElse(null));
+    entity.setCity(data.location().city().map(String::trim).orElse(null));
     entity.setType(data.type());
     entity.setRecurring(data.recurring());
-    entity.setDescription(data.description().orElse(null));
+    entity.setDescription(data.description().map(String::trim).orElse(null));
     entity.setDateCreated(data.dateCreated().orElse(null));
     entity.setLastUpdated(data.lastUpdated().orElse(null));
     entity.setVersion(data.version().orElse(null));

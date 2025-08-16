@@ -143,7 +143,7 @@ public class HolidayEntity {
   public HolidayEntity(
       String name, String description, LocalDate date, String country, HolidayType type) {
     this.name = Objects.requireNonNull(name, "Name cannot be null");
-    this.description = Objects.requireNonNull(description, "Description cannot be null");
+    this.description = description;
     this.date = Objects.requireNonNull(date, "Date cannot be null");
     this.country = Objects.requireNonNull(country, "Country cannot be null");
     this.type = Objects.requireNonNull(type, "Type cannot be null");

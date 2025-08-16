@@ -2,8 +2,6 @@ package me.clementino.holiday.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Arrays;
-import me.clementino.holiday.entity.converter.HolidayVariantConverter;
-import me.clementino.holiday.entity.converter.LocalityVariantConverter;
 import org.bson.types.ObjectId;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -40,19 +38,8 @@ public class MongoConfig {
    */
   @Bean
   public MongoCustomConversions customConversions(ObjectMapper objectMapper) {
-    return new MongoCustomConversions(
-        Arrays.asList(
-            // DOP Holiday sealed interface converters
-            new HolidayVariantConverter.HolidayToStringConverter(objectMapper),
-            new HolidayVariantConverter.StringToHolidayConverter(objectMapper),
-
-            // DOP Locality sealed interface converters
-            new LocalityVariantConverter.LocalityToStringConverter(objectMapper),
-            new LocalityVariantConverter.StringToLocalityConverter(objectMapper),
-
-            // ObjectId converters for simplified ID handling
-            new ObjectIdToStringConverter(),
-            new StringToObjectIdConverter()));
+    // Disable ALL custom converters to debug the serialization issue
+    return new MongoCustomConversions(Arrays.asList());
   }
 
   /** Converter from ObjectId to String */
