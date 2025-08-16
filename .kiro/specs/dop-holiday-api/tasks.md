@@ -26,20 +26,20 @@
     - Implement ValidationResult sealed interface for validation outcomes
     - _Requirements: 1.3, 5.5, 7.4_
 
-- [ ] 3. Implement MapStruct mappers for type-safe transformations
-  - [ ] 3.1 Create holiday mapper interface
+- [x] 3. Implement MapStruct mappers for type-safe transformations
+  - [x] 3.1 Create holiday mapper interface
     - Implement HolidayMapper with MapStruct annotations
     - Add mapping methods between Holiday domain objects and DTOs
     - Configure custom mapping for sealed interface variants
     - _Requirements: 7.1, 7.4_
   
-  - [ ] 3.2 Create locality mapper interface
+  - [x] 3.2 Create locality mapper interface
     - Implement LocalityMapper for geographical data transformations
     - Add hierarchical mapping support for Country/Subdivision/City
     - Configure validation for locality consistency
     - _Requirements: 7.1, 7.2_
   
-  - [ ] 3.3 Create entity mapper interface
+  - [x] 3.3 Create entity mapper interface
     - Implement EntityMapper for JPA entity transformations
     - Add bidirectional mapping between domain objects and entities
     - Handle serialization of sealed interfaces for persistence
