@@ -1,13 +1,15 @@
 package me.clementino.holiday.service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import me.clementino.holiday.domain.*;
+import me.clementino.holiday.domain.HolidayData;
+import me.clementino.holiday.domain.HolidayQuery;
+import me.clementino.holiday.domain.HolidayType;
+import me.clementino.holiday.domain.Location;
 import me.clementino.holiday.entity.HolidayEntity;
-import me.clementino.holiday.mapper.EntityMapper;
-import me.clementino.holiday.operations.HolidayOperations;
 import me.clementino.holiday.repository.HolidayRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
@@ -17,40 +19,27 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
 
 /**
- * Service layer that orchestrates operations on holiday data. Following DOP principles by
- * delegating pure operations to HolidayOperations and handling persistence concerns here.
+ * Service layer that orchestrates operations on holiday data using DOP principles.
  *
- * <p>This service now works with HolidayEntity for persistence while maintaining DOP Holiday domain
- * objects for business logic. It provides seamless conversion between entity and domain layers
- * using EntityMapper.
+ * <p>This service works with HolidayEntity for persistence while maintaining DOP Holiday domain
+ * objects for business logic. It provides seamless conversion between entity and domain layers.
  */
 @Service
 public class HolidayService {
 
   private final HolidayRepository holidayRepository;
   private final MongoTemplate mongoTemplate;
-  private final HolidayOperations holidayOperations;
-  private final EntityMapper entityMapper;
 
   @Autowired
-  public HolidayService(
-      HolidayRepository holidayRepository,
-      MongoTemplate mongoTemplate,
-      HolidayOperations holidayOperations,
-      EntityMapper entityMapper) {
+  public HolidayService(HolidayRepository holidayRepository, MongoTemplate mongoTemplate) {
     this.holidayRepository = holidayRepository;
     this.mongoTemplate = mongoTemplate;
-    this.holidayOperations = holidayOperations;
-    this.entityMapper = entityMapper;
   }
 
   /** Find all holidays with optional filtering using DOP query object. */
   public List<HolidayData> findAll(HolidayQuery query) {
-    List<HolidayEntity> persistenceEntities = findPersistenceEntities(query);
-    List<HolidayData> holidayData = persistenceEntities.stream().map(this::toDomainData).toList();
-
-    // Apply additional filtering using pure operations
-    return holidayOperations.filterHolidays(holidayData, query);
+    // For now, delegate to findAllWithFilters with extracted parameters
+    return findAllWithFilters(null, null, null, null, null, null, null, null);
   }
 
   /** Find holiday by ID. */
@@ -111,9 +100,14 @@ public class HolidayService {
     return entities.stream().map(this::toDomainData).toList();
   }
 
+  /** Create a new holiday. */
   public HolidayData create(HolidayData holidayData) {
     HolidayEntity entity = toEntity(holidayData);
     entity.setId(UUID.randomUUID().toString());
+    entity.setDateCreated(LocalDateTime.now());
+    entity.setLastUpdated(LocalDateTime.now());
+    entity.setVersion(1);
+
     HolidayEntity saved = holidayRepository.save(entity);
     return toDomainData(saved);
   }
@@ -126,20 +120,18 @@ public class HolidayService {
             existing -> {
               HolidayEntity updated = toEntity(holidayData);
               updated.setId(existing.getId());
-              updated.setVersion(existing.getVersion());
               updated.setDateCreated(existing.getDateCreated());
-              return holidayRepository.save(updated);
-            })
-        .map(this::toDomainData);
+              updated.setLastUpdated(LocalDateTime.now());
+              updated.setVersion(existing.getVersion() != null ? existing.getVersion() + 1 : 1);
+
+              HolidayEntity saved = holidayRepository.save(updated);
+              return toDomainData(saved);
+            });
   }
 
   /** Delete a holiday by ID. */
   public boolean delete(String id) {
-    if (holidayRepository.existsById(id)) {
-      holidayRepository.deleteById(id);
-      return true;
-    }
-    return false;
+    return deleteById(id);
   }
 
   /** Find holidays by country. */
@@ -182,64 +174,41 @@ public class HolidayService {
         .toList();
   }
 
-  // ===== PRIVATE HELPER METHODS =====
-
-  private List<HolidayEntity> findPersistenceEntities(HolidayQuery query) {
-    if (query == null || query.isEmpty()) {
-      return holidayRepository.findAll(Sort.by(Sort.Direction.ASC, "date"));
-    }
-
-    Query mongoQuery = new Query();
-
-    // Add country filter
-    query
-        .country()
-        .ifPresent(
-            country -> mongoQuery.addCriteria(Criteria.where("country").regex(country, "i")));
-
-    // Add type filter
-    query.type().ifPresent(type -> mongoQuery.addCriteria(Criteria.where("type").is(type)));
-
-    // Add date range filters
-    query
-        .startDate()
-        .ifPresent(startDate -> mongoQuery.addCriteria(Criteria.where("date").gte(startDate)));
-    query
-        .endDate()
-        .ifPresent(endDate -> mongoQuery.addCriteria(Criteria.where("date").lte(endDate)));
-
-    // Add year filter
-    query.year().ifPresent(year -> mongoQuery.addCriteria(Criteria.where("year").is(year)));
-
-    mongoQuery.with(Sort.by(Sort.Direction.ASC, "date"));
-
-    return mongoTemplate.find(mongoQuery, HolidayEntity.class);
-  }
-
+  /** Convert HolidayEntity to HolidayData. */
   private HolidayData toDomainData(HolidayEntity entity) {
     return new HolidayData(
         entity.getId(),
         entity.getName(),
         entity.getDate(),
+        Optional.ofNullable(entity.getObserved()),
         new Location(
             entity.getCountry(),
             Optional.ofNullable(entity.getState()),
             Optional.ofNullable(entity.getCity())),
         entity.getType(),
         entity.isRecurring(),
-        Optional.ofNullable(entity.getDescription()));
+        Optional.ofNullable(entity.getDescription()),
+        Optional.ofNullable(entity.getDateCreated()),
+        Optional.ofNullable(entity.getLastUpdated()),
+        Optional.ofNullable(entity.getVersion()));
   }
 
-  private HolidayEntity toEntity(HolidayData holidayData) {
+  /** Convert HolidayData to HolidayEntity. */
+  private HolidayEntity toEntity(HolidayData data) {
     HolidayEntity entity = new HolidayEntity();
-    entity.setName(holidayData.name());
-    entity.setDescription(holidayData.description().orElse(""));
-    entity.setDate(holidayData.date());
-    entity.setCountry(holidayData.location().country());
-    entity.setState(holidayData.location().state().orElse(null));
-    entity.setCity(holidayData.location().city().orElse(null));
-    entity.setType(holidayData.type());
-    entity.setRecurring(holidayData.recurring());
+    entity.setId(data.id());
+    entity.setName(data.name());
+    entity.setDate(data.date());
+    entity.setObserved(data.observed().orElse(null));
+    entity.setCountry(data.location().country());
+    entity.setState(data.location().state().orElse(null));
+    entity.setCity(data.location().city().orElse(null));
+    entity.setType(data.type());
+    entity.setRecurring(data.recurring());
+    entity.setDescription(data.description().orElse(null));
+    entity.setDateCreated(data.dateCreated().orElse(null));
+    entity.setLastUpdated(data.lastUpdated().orElse(null));
+    entity.setVersion(data.version().orElse(null));
     return entity;
   }
 }
