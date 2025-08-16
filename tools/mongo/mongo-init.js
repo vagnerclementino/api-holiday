@@ -161,21 +161,6 @@ function initializeDatabase() {
         'Successfully created holiday_user',
         'Failed to create holiday_user'
     ) && success;
-
-    // Create indexes for better performance
-    success = checkOperation(
-        () => {
-            db.holidays.createIndex({ "country": 1 });
-            db.holidays.createIndex({ "type": 1 });
-            db.holidays.createIndex({ "date": 1 });
-            db.holidays.createIndex({ "country": 1, "state": 1 });
-            db.holidays.createIndex({ "country": 1, "state": 1, "city": 1 });
-            return true;
-        },
-        'Successfully created database indexes',
-        'Failed to create database indexes'
-    ) && success;
-
     if (success) {
         log('Holiday API initialization script completed successfully', 'SUCCESS');
         quit(0);
