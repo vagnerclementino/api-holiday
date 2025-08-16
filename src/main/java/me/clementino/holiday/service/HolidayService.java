@@ -121,7 +121,7 @@ public class HolidayService {
               updated.setId(existing.getId());
               updated.setDateCreated(existing.getDateCreated());
               updated.setLastUpdated(LocalDateTime.now());
-              updated.setVersion(existing.getVersion() != null ? existing.getVersion() + 1 : 1);
+              updated.setVersion(existing.getVersion()); // Let Spring Data handle version increment
 
               HolidayEntity saved = holidayRepository.save(updated);
               return toDomainData(saved);

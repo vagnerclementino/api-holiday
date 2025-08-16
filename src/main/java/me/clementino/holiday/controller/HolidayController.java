@@ -161,24 +161,28 @@ public class HolidayController {
         return ResponseEntity.notFound().build();
       }
 
-      // Create updated HolidayData with merged values
+      // Create updated HolidayData with merged values (null means keep current value)
       HolidayData current = existingHoliday.get();
       HolidayData updated =
           new HolidayData(
               id, // Keep same ID
-              request.name().orElse(current.name()),
-              request.date().orElse(current.date()),
-              request.observed().isPresent() ? request.observed() : current.observed(),
+              request.name() != null ? request.name() : current.name(),
+              request.date() != null ? request.date() : current.date(),
+              request.observed() != null ? Optional.of(request.observed()) : current.observed(),
               new Location(
-                  request.country().orElse(current.location().country()),
-                  request.state().isPresent() ? request.state() : current.location().state(),
-                  request.city().isPresent() ? request.city() : current.location().city()),
-              request.type().orElse(current.type()),
-              request.recurring().orElse(current.recurring()),
-              request.description().isPresent() ? request.description() : current.description(),
+                  request.country() != null ? request.country() : current.location().country(),
+                  request.state() != null
+                      ? Optional.of(request.state())
+                      : current.location().state(),
+                  request.city() != null ? Optional.of(request.city()) : current.location().city()),
+              request.type() != null ? request.type() : current.type(),
+              request.recurring() != null ? request.recurring() : current.recurring(),
+              request.description() != null
+                  ? Optional.of(request.description())
+                  : current.description(),
               current.dateCreated(), // Preserve creation date
               Optional.empty(), // lastUpdated will be set by service
-              current.version() // Preserve version
+              Optional.empty() // Let service manage version control
               );
 
       // Update using service

@@ -45,17 +45,17 @@
     - Handle serialization of sealed interfaces for persistence
     - _Requirements: 7.2, 7.3_
 
-- [x] 4. Enhance JPA entities for MongoDB persistence
-  - [x] 4.1 Update HolidayEntity for comprehensive data storage
-    - Add fields for year-based calculations and caching
-    - Implement custom converters for sealed interface serialization
-    - Add proper MongoDB indexing annotations
+- [x] 4. Enhance JPA entities for MongoDB persistence ✅ **DONE**
+  - [x] 4.1 Update HolidayEntity for comprehensive data storage ✅ **DONE**
+    - ✅ Add fields for year-based calculations and caching
+    - ✅ Implement custom converters for sealed interface serialization
+    - ✅ Add proper MongoDB indexing annotations
     - _Requirements: 10.3, 7.2_
   
-  - [x] 4.2 Create locality persistence support
-    - Implement LocalityEntity or embedded document structure
-    - Add converters for Locality sealed interface variants
-    - Configure proper MongoDB document structure
+  - [x] 4.2 Create locality persistence support ✅ **DONE**
+    - ✅ Implement LocalityEntity or embedded document structure
+    - ✅ Add converters for Locality sealed interface variants
+    - ✅ Configure proper MongoDB document structure
     - _Requirements: 7.2, 10.3_
 
 - [ ] 5. Implement year-based holiday calculation service
