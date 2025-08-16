@@ -42,6 +42,11 @@ public class HolidayService {
     return findAllWithFilters(null, null, null, null, null, null, null, null);
   }
 
+  /** Find all holidays without filters. */
+  public List<HolidayData> findAll() {
+    return findAllWithFilters(null, null, null, null, null, null, null, null);
+  }
+
   /** Find holiday by ID. */
   public Optional<HolidayData> findById(String id) {
     return holidayRepository.findById(id).map(this::toDomainData);
@@ -242,5 +247,115 @@ public class HolidayService {
     entity.setLastUpdated(data.lastUpdated().orElse(null));
     entity.setVersion(data.version().orElse(null));
     return entity;
+  }
+
+  // ========== Year-based Operations ==========
+
+  /**
+   * Find holidays for a specific year.
+   *
+   * @param year the target year
+   * @return list of holidays for the specified year
+   */
+  public List<HolidayData> findHolidaysForYear(int year) {
+    LocalDate startOfYear = LocalDate.of(year, 1, 1);
+    LocalDate endOfYear = LocalDate.of(year, 12, 31);
+
+    return findAllWithFilters(null, null, null, null, startOfYear, endOfYear, null, null);
+  }
+
+  /**
+   * Find holidays for a specific year and country.
+   *
+   * @param year the target year
+   * @param country the country code
+   * @return list of holidays for the specified year and country
+   */
+  public List<HolidayData> findHolidaysForYearAndCountry(int year, String country) {
+    LocalDate startOfYear = LocalDate.of(year, 1, 1);
+    LocalDate endOfYear = LocalDate.of(year, 12, 31);
+
+    return findAllWithFilters(country, null, null, null, startOfYear, endOfYear, null, null);
+  }
+
+  /**
+   * Find holidays for a specific year and type.
+   *
+   * @param year the target year
+   * @param type the holiday type
+   * @return list of holidays for the specified year and type
+   */
+  public List<HolidayData> findHolidaysForYearAndType(int year, HolidayType type) {
+    LocalDate startOfYear = LocalDate.of(year, 1, 1);
+    LocalDate endOfYear = LocalDate.of(year, 12, 31);
+
+    return findAllWithFilters(null, null, null, type, startOfYear, endOfYear, null, null);
+  }
+
+  /**
+   * Find holidays for a specific year, country, and type.
+   *
+   * @param year the target year
+   * @param country the country code
+   * @param type the holiday type
+   * @return list of holidays for the specified criteria
+   */
+  public List<HolidayData> findHolidaysForYearCountryAndType(
+      int year, String country, HolidayType type) {
+    LocalDate startOfYear = LocalDate.of(year, 1, 1);
+    LocalDate endOfYear = LocalDate.of(year, 12, 31);
+
+    return findAllWithFilters(country, null, null, type, startOfYear, endOfYear, null, null);
+  }
+
+  /**
+   * Check if any holidays exist for a specific year.
+   *
+   * @param year the target year
+   * @return true if holidays exist for the year
+   */
+  public boolean hasHolidaysForYear(int year) {
+    LocalDate startOfYear = LocalDate.of(year, 1, 1);
+    LocalDate endOfYear = LocalDate.of(year, 12, 31);
+
+    Query query = new Query();
+    query.addCriteria(Criteria.where("date").gte(startOfYear).lte(endOfYear));
+    query.limit(1); // We only need to know if at least one exists
+
+    return mongoTemplate.exists(query, HolidayEntity.class);
+  }
+
+  /**
+   * Count holidays for a specific year.
+   *
+   * @param year the target year
+   * @return number of holidays for the year
+   */
+  public long countHolidaysForYear(int year) {
+    LocalDate startOfYear = LocalDate.of(year, 1, 1);
+    LocalDate endOfYear = LocalDate.of(year, 12, 31);
+
+    Query query = new Query();
+    query.addCriteria(Criteria.where("date").gte(startOfYear).lte(endOfYear));
+
+    return mongoTemplate.count(query, HolidayEntity.class);
+  }
+
+  /**
+   * Find all base/template holidays (recurring holidays that can be calculated for any year).
+   *
+   * @return list of base holidays
+   */
+  public List<HolidayData> findBaseHolidays() {
+    return findAllWithFilters(null, null, null, null, null, null, true, null);
+  }
+
+  /**
+   * Find all calculated holidays (non-recurring holidays for specific years).
+   *
+   * @return list of calculated holidays
+   */
+  public List<HolidayData> findCalculatedHolidays() {
+    return findAllWithFilters(null, null, null, null, null, null, false, null);
   }
 }
