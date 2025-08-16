@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import me.clementino.holiday.domain.*;
+import me.clementino.holiday.entity.HolidayEntity;
+import me.clementino.holiday.mapper.EntityMapper;
 import me.clementino.holiday.operations.HolidayOperations;
 import me.clementino.holiday.repository.HolidayRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +19,10 @@ import org.springframework.stereotype.Service;
 /**
  * Service layer that orchestrates operations on holiday data. Following DOP principles by
  * delegating pure operations to HolidayOperations and handling persistence concerns here.
+ *
+ * <p>This service now works with HolidayEntity for persistence while maintaining DOP Holiday domain
+ * objects for business logic. It provides seamless conversion between entity and domain layers
+ * using EntityMapper.
  */
 @Service
 public class HolidayService {
@@ -24,178 +30,216 @@ public class HolidayService {
   private final HolidayRepository holidayRepository;
   private final MongoTemplate mongoTemplate;
   private final HolidayOperations holidayOperations;
+  private final EntityMapper entityMapper;
 
   @Autowired
   public HolidayService(
       HolidayRepository holidayRepository,
       MongoTemplate mongoTemplate,
-      HolidayOperations holidayOperations) {
+      HolidayOperations holidayOperations,
+      EntityMapper entityMapper) {
     this.holidayRepository = holidayRepository;
     this.mongoTemplate = mongoTemplate;
     this.holidayOperations = holidayOperations;
+    this.entityMapper = entityMapper;
   }
 
   /** Find all holidays with optional filtering using DOP query object. */
   public List<HolidayData> findAll(HolidayQuery query) {
-    List<Holiday> persistenceEntities = findPersistenceEntities(query);
+    List<HolidayEntity> persistenceEntities = findPersistenceEntities(query);
     List<HolidayData> holidayData = persistenceEntities.stream().map(this::toDomainData).toList();
 
     // Apply additional filtering using pure operations
     return holidayOperations.filterHolidays(holidayData, query);
   }
 
-  /** Legacy method for backward compatibility. */
-  public List<HolidayData> findAll(
+  /** Find holiday by ID. */
+  public Optional<HolidayData> findById(String id) {
+    return holidayRepository.findById(id).map(this::toDomainData);
+  }
+
+  /** Delete holiday by ID. */
+  public boolean deleteById(String id) {
+    if (holidayRepository.existsById(id)) {
+      holidayRepository.deleteById(id);
+      return true;
+    }
+    return false;
+  }
+
+  /** Find all holidays with filters. */
+  public List<HolidayData> findAllWithFilters(
       String country,
       String state,
       String city,
       HolidayType type,
       LocalDate startDate,
-      LocalDate endDate) {
-    HolidayQuery query = HolidayQuery.empty();
-    return findAll(query);
-  }
+      LocalDate endDate,
+      Boolean recurring,
+      String namePattern) {
 
-  /** Find holiday by ID, returning domain data. */
-  public HolidayData findById(String id) {
-    Holiday persistenceEntity =
-        holidayRepository
-            .findById(id)
-            .orElseThrow(() -> new HolidayNotFoundException("Holiday not found with id: " + id));
-    return toDomainData(persistenceEntity);
-  }
+    Query query = new Query();
 
-  /** Execute a create command. */
-  public HolidayData executeCommand(HolidayCommand.Create command) {
-    // TODO: Implement conversion from new DOP Holiday sealed interface to
-    // HolidayData
-    throw new UnsupportedOperationException(
-        "Implementation pending - needs DOP Holiday conversion");
-  }
-
-  /** Execute an update command. */
-  public HolidayData executeCommand(HolidayCommand.Update command) {
-    // TODO: Implement conversion from new DOP Holiday sealed interface to
-    // HolidayData
-    throw new UnsupportedOperationException(
-        "Implementation pending - needs DOP Holiday conversion");
-  }
-
-  /** Execute a delete command. */
-  public void executeCommand(HolidayCommand.Delete command) {
-    if (!holidayRepository.existsById(command.id())) {
-      throw new HolidayNotFoundException("Holiday not found with id: " + command.id());
+    if (country != null && !country.isBlank()) {
+      query.addCriteria(Criteria.where("country").regex(country, "i"));
     }
-    holidayRepository.deleteById(command.id());
+    if (state != null && !state.isBlank()) {
+      query.addCriteria(Criteria.where("state").regex(state, "i"));
+    }
+    if (city != null && !city.isBlank()) {
+      query.addCriteria(Criteria.where("city").regex(city, "i"));
+    }
+    if (type != null) {
+      query.addCriteria(Criteria.where("type").is(type));
+    }
+    if (startDate != null) {
+      query.addCriteria(Criteria.where("date").gte(startDate));
+    }
+    if (endDate != null) {
+      query.addCriteria(Criteria.where("date").lte(endDate));
+    }
+    if (recurring != null) {
+      query.addCriteria(Criteria.where("recurring").is(recurring));
+    }
+    if (namePattern != null && !namePattern.isBlank()) {
+      query.addCriteria(Criteria.where("name").regex(namePattern, "i"));
+    }
+
+    query.with(Sort.by(Sort.Direction.ASC, "date"));
+
+    List<HolidayEntity> entities = mongoTemplate.find(query, HolidayEntity.class);
+    return entities.stream().map(this::toDomainData).toList();
   }
 
-  /** Legacy save method for backward compatibility. */
-  public HolidayData save(HolidayData holidayData) {
-    // Generate ID if not present
-    HolidayData dataWithId =
-        holidayData.id() == null ? holidayData.withId(UUID.randomUUID().toString()) : holidayData;
-
-    Holiday persistenceEntity = toPersistenceEntity(dataWithId);
-    Holiday saved = holidayRepository.save(persistenceEntity);
+  public HolidayData create(HolidayData holidayData) {
+    HolidayEntity entity = toEntity(holidayData);
+    entity.setId(UUID.randomUUID().toString());
+    HolidayEntity saved = holidayRepository.save(entity);
     return toDomainData(saved);
   }
 
-  /** Delete holiday by ID. */
-  public void deleteById(String id) {
-    executeCommand(HolidayCommand.Delete.of(id));
+  /** Update an existing holiday. */
+  public Optional<HolidayData> update(String id, HolidayData holidayData) {
+    return holidayRepository
+        .findById(id)
+        .map(
+            existing -> {
+              HolidayEntity updated = toEntity(holidayData);
+              updated.setId(existing.getId());
+              updated.setVersion(existing.getVersion());
+              updated.setDateCreated(existing.getDateCreated());
+              return holidayRepository.save(updated);
+            })
+        .map(this::toDomainData);
   }
 
-  /** Check if holiday exists by ID. */
-  public boolean existsById(String id) {
-    return holidayRepository.existsById(id);
+  /** Delete a holiday by ID. */
+  public boolean delete(String id) {
+    if (holidayRepository.existsById(id)) {
+      holidayRepository.deleteById(id);
+      return true;
+    }
+    return false;
   }
 
-  /** Find holidays by country using DOP query. */
+  /** Find holidays by country. */
   public List<HolidayData> findByCountry(String country) {
-    return findAll(HolidayQuery.byCountry(country));
+    return holidayRepository.findByCountryIgnoreCase(country).stream()
+        .map(this::toDomainData)
+        .toList();
   }
 
-  /** Find holidays by type using DOP query. */
+  /** Find holidays by type. */
   public List<HolidayData> findByType(HolidayType type) {
-    return findAll(HolidayQuery.byType(type));
+    return holidayRepository.findByType(type).stream().map(this::toDomainData).toList();
   }
 
-  /** Find holidays by date range using DOP query. */
+  /** Find holidays by date range. */
   public List<HolidayData> findByDateRange(LocalDate startDate, LocalDate endDate) {
-    return findAll(HolidayQuery.byDateRange(startDate, endDate));
+    return holidayRepository.findByDateBetween(startDate, endDate).stream()
+        .map(this::toDomainData)
+        .toList();
   }
 
-  // Private helper methods for data conversion
+  /** Find holidays by year and country (for year-based calculations). */
+  public List<HolidayData> findByYearAndCountry(Integer year, String country) {
+    return holidayRepository.findByYearAndCountryIgnoreCase(year, country).stream()
+        .map(this::toDomainData)
+        .toList();
+  }
 
-  private List<Holiday> findPersistenceEntities(HolidayQuery query) {
+  /** Find calculated holidays for a specific year. */
+  public List<HolidayData> findCalculatedHolidays(Integer year) {
+    return holidayRepository.findByYearAndIsCalculatedTrue(year).stream()
+        .map(this::toDomainData)
+        .toList();
+  }
+
+  /** Find base holidays (not calculated) for a country. */
+  public List<HolidayData> findBaseHolidays(String country) {
+    return holidayRepository.findByCountryIgnoreCaseAndIsCalculatedFalse(country).stream()
+        .map(this::toDomainData)
+        .toList();
+  }
+
+  // ===== PRIVATE HELPER METHODS =====
+
+  private List<HolidayEntity> findPersistenceEntities(HolidayQuery query) {
+    if (query == null || query.isEmpty()) {
+      return holidayRepository.findAll(Sort.by(Sort.Direction.ASC, "date"));
+    }
+
     Query mongoQuery = new Query();
 
-    if (query.countryCode().isPresent()) {
-      mongoQuery.addCriteria(Criteria.where("country").regex(query.countryCode().get(), "i"));
-    }
+    // Add country filter
+    query
+        .country()
+        .ifPresent(
+            country -> mongoQuery.addCriteria(Criteria.where("country").regex(country, "i")));
 
-    if (query.subdivisionCode().isPresent()) {
-      mongoQuery.addCriteria(Criteria.where("state").regex(query.subdivisionCode().get(), "i"));
-    }
+    // Add type filter
+    query.type().ifPresent(type -> mongoQuery.addCriteria(Criteria.where("type").is(type)));
 
-    if (query.cityName().isPresent()) {
-      mongoQuery.addCriteria(Criteria.where("city").regex(query.cityName().get(), "i"));
-    }
+    // Add date range filters
+    query
+        .startDate()
+        .ifPresent(startDate -> mongoQuery.addCriteria(Criteria.where("date").gte(startDate)));
+    query
+        .endDate()
+        .ifPresent(endDate -> mongoQuery.addCriteria(Criteria.where("date").lte(endDate)));
 
-    if (query.type().isPresent()) {
-      mongoQuery.addCriteria(Criteria.where("type").is(query.type().get()));
-    }
+    // Add year filter
+    query.year().ifPresent(year -> mongoQuery.addCriteria(Criteria.where("year").is(year)));
 
-    if (query.startDate().isPresent() && query.endDate().isPresent()) {
-      mongoQuery.addCriteria(
-          Criteria.where("date").gte(query.startDate().get()).lte(query.endDate().get()));
-    } else if (query.startDate().isPresent()) {
-      mongoQuery.addCriteria(Criteria.where("date").gte(query.startDate().get()));
-    } else if (query.endDate().isPresent()) {
-      mongoQuery.addCriteria(Criteria.where("date").lte(query.endDate().get()));
-    }
+    mongoQuery.with(Sort.by(Sort.Direction.ASC, "date"));
 
-    mongoQuery.with(Sort.by(Sort.Direction.ASC, "date", "name"));
-
-    return mongoTemplate.find(mongoQuery, Holiday.class);
+    return mongoTemplate.find(mongoQuery, HolidayEntity.class);
   }
 
-  private HolidayData toDomainData(Holiday persistenceEntity) {
-    Location location =
-        new Location(
-            persistenceEntity.getCountry() != null ? persistenceEntity.getCountry() : "Unknown",
-            persistenceEntity.getState(),
-            persistenceEntity.getCity());
-
+  private HolidayData toDomainData(HolidayEntity entity) {
     return new HolidayData(
-        persistenceEntity.getId(),
-        persistenceEntity.getName(),
-        persistenceEntity.getDate(),
-        Optional.ofNullable(persistenceEntity.getObserved()),
-        location,
-        persistenceEntity.getType(),
-        persistenceEntity.isRecurring(),
-        Optional.ofNullable(persistenceEntity.getDescription()),
-        Optional.ofNullable(persistenceEntity.getDateCreated()),
-        Optional.ofNullable(persistenceEntity.getLastUpdated()),
-        Optional.ofNullable(persistenceEntity.getVersion()));
+        entity.getId(),
+        entity.getName(),
+        entity.getDate(),
+        new Location(
+            entity.getCountry(),
+            Optional.ofNullable(entity.getState()),
+            Optional.ofNullable(entity.getCity())),
+        entity.getType(),
+        entity.isRecurring(),
+        Optional.ofNullable(entity.getDescription()));
   }
 
-  private Holiday toPersistenceEntity(HolidayData domainData) {
-    Holiday entity = new Holiday();
-    entity.setId(domainData.id());
-    entity.setName(domainData.name());
-    entity.setDate(domainData.date());
-    entity.setObserved(domainData.observed().orElse(null));
-    entity.setCountry(domainData.location().country());
-    entity.setState(domainData.location().state().orElse(null));
-    entity.setCity(domainData.location().city().orElse(null));
-    entity.setType(domainData.type());
-    entity.setRecurring(domainData.recurring());
-    entity.setDescription(domainData.description().orElse(null));
-    entity.setDateCreated(domainData.dateCreated().orElse(null));
-    entity.setLastUpdated(domainData.lastUpdated().orElse(null));
-    entity.setVersion(null); // Set version to null to avoid conflicts
+  private HolidayEntity toEntity(HolidayData holidayData) {
+    HolidayEntity entity = new HolidayEntity();
+    entity.setName(holidayData.name());
+    entity.setDescription(holidayData.description().orElse(""));
+    entity.setDate(holidayData.date());
+    entity.setCountry(holidayData.location().country());
+    entity.setState(holidayData.location().state().orElse(null));
+    entity.setCity(holidayData.location().city().orElse(null));
+    entity.setType(holidayData.type());
+    entity.setRecurring(holidayData.recurring());
     return entity;
   }
 }

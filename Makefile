@@ -173,6 +173,11 @@ db-reset: docker-check ##@database Reset database with fresh data
 	@$(DOCKER_COMPOSE) restart mongodb
 	@echo "$(GREEN)Database reset completed!$(NC)"
 
+clean-db: docker-check ##@database Clean all holidays from database
+	@echo "$(YELLOW)Cleaning holidays collection...$(NC)"
+	@docker exec mongodb mongosh -u holiday_user -p holiday_pass_2024 --eval "db.holidays.deleteMany({})" mongodb://localhost:27017/holiday-api
+	@echo "$(GREEN)All holidays deleted from database!$(NC)"
+
 # Testing targets
 test: ##@tests Run API integration tests
 	@echo "$(GREEN)Running API integration tests...$(NC)"

@@ -2,23 +2,21 @@ package me.clementino.holiday.mapper;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.time.LocalDateTime;
-import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
 import java.util.List;
-import java.util.Map;
-import me.clementino.holiday.domain.Holiday;
+import java.util.stream.Collectors;
 import me.clementino.holiday.domain.dop.FixedHoliday;
+import me.clementino.holiday.domain.dop.Holiday;
 import me.clementino.holiday.domain.dop.Locality;
 import me.clementino.holiday.domain.dop.MoveableFromBaseHoliday;
 import me.clementino.holiday.domain.dop.MoveableHoliday;
 import me.clementino.holiday.domain.dop.ObservedHoliday;
-import org.mapstruct.Mapper;
-import org.mapstruct.Named;
+import me.clementino.holiday.entity.HolidayEntity;
+import me.clementino.holiday.entity.LocalityEntity;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 /**
- * MapStruct mapper for converting between DOP Holiday domain objects and JPA entities.
+ * Manual mapper for converting between DOP Holiday domain objects and MongoDB entities.
  *
  * <p>This mapper handles the complex task of serializing sealed interfaces for persistence while
  * maintaining the immutable nature of domain objects. It provides bidirectional mapping between
@@ -27,289 +25,194 @@ import org.springframework.beans.factory.annotation.Autowired;
  * <p><strong>Key Features:</strong>
  *
  * <ul>
- *   <li>Bidirectional mapping between domain objects and JPA entities
+ *   <li>Bidirectional mapping between DOP Holiday sealed interface and HolidayEntity
  *   <li>Serialization of sealed interfaces for persistence
  *   <li>Proper handling of hierarchical locality data
  *   <li>Metadata preservation (timestamps, version, etc.)
+ *   <li>Year-based calculation support
  * </ul>
  */
-@Mapper(
-    componentModel = "spring",
-    uses = {LocalityMapper.class})
-public abstract class EntityMapper {
+@Component
+public class EntityMapper {
 
-  @Autowired protected ObjectMapper objectMapper;
+  @Autowired private ObjectMapper objectMapper;
 
   // ===== DOMAIN TO ENTITY MAPPINGS =====
 
   /**
-   * Maps a DOP Holiday domain object to Holiday JPA entity.
+   * Maps a DOP Holiday domain object to HolidayEntity.
    *
    * @param domainHoliday the domain holiday object
-   * @return mapped JPA entity
+   * @return mapped HolidayEntity
    */
-  public Holiday toEntity(me.clementino.holiday.domain.dop.Holiday domainHoliday) {
+  public HolidayEntity toEntity(Holiday domainHoliday) {
     if (domainHoliday == null) {
       return null;
     }
 
-    Holiday entity = new Holiday();
+    HolidayEntity entity = new HolidayEntity();
+
+    // Map basic fields
     entity.setName(domainHoliday.name());
     entity.setDescription(domainHoliday.description());
     entity.setDate(domainHoliday.date());
-    entity.setObserved(extractObservedDate(domainHoliday));
-    entity.setCountry(extractCountry(domainHoliday));
-    entity.setState(extractState(domainHoliday));
-    entity.setCity(extractCity(domainHoliday));
     entity.setType(domainHoliday.type());
-    entity.setRecurring(determineRecurring(domainHoliday));
+
+    // Extract locality information
+    List<Locality> localities = domainHoliday.localities();
+    if (localities != null && !localities.isEmpty()) {
+      Locality firstLocality = localities.getFirst();
+
+      // Set flat locality fields for querying
+      entity.setCountry(extractCountry(firstLocality));
+      entity.setState(extractState(firstLocality));
+      entity.setCity(extractCity(firstLocality));
+
+      // Set embedded locality entities
+      entity.setLocalities(
+          localities.stream().map(LocalityEntity::fromDopLocality).collect(Collectors.toList()));
+    }
+
+    // Set holiday variant information
+    entity.setHolidayVariant(domainHoliday.getClass().getSimpleName());
+
+    // Serialize holiday data
+    try {
+      entity.setHolidayData(objectMapper.writeValueAsString(domainHoliday));
+      entity.setLocalityData(objectMapper.writeValueAsString(localities));
+    } catch (JsonProcessingException e) {
+      throw new RuntimeException("Failed to serialize holiday data", e);
+    }
 
     return entity;
   }
 
   /**
-   * Maps a list of DOP Holiday domain objects to Holiday JPA entities.
+   * Maps a DOP Holiday domain object to HolidayEntity with year information.
    *
-   * @param domainHolidays list of domain holiday objects
-   * @return list of mapped JPA entities
+   * @param domainHoliday the domain holiday object
+   * @param year the year for which this holiday is calculated
+   * @return mapped HolidayEntity with year information
    */
-  public List<Holiday> toEntityList(List<me.clementino.holiday.domain.dop.Holiday> domainHolidays) {
-    if (domainHolidays == null) {
-      return null;
+  public HolidayEntity toEntityWithYear(Holiday domainHoliday, Integer year) {
+    HolidayEntity entity = toEntity(domainHoliday);
+    entity.setYear(year);
+    entity.setCalculated(true);
+
+    // Set calculation rule based on holiday type
+    entity.setCalculationRule(getCalculationRule(domainHoliday));
+
+    // Set type-specific fields
+    switch (domainHoliday) {
+      case ObservedHoliday observedHoliday -> {
+        entity.setMondayisation(observedHoliday.mondayisation());
+        entity.setObserved(observedHoliday.observed());
+      }
+      case MoveableFromBaseHoliday moveableFromBase -> {
+        entity.setDayOffset(moveableFromBase.dayOffset());
+        // Note: baseHolidayId would need to be set separately based on business logic
+      }
+      default -> {
+        // No additional fields for FixedHoliday and MoveableHoliday
+      }
     }
-    return domainHolidays.stream().map(this::toEntity).toList();
+
+    return entity;
   }
 
   // ===== ENTITY TO DOMAIN MAPPINGS =====
 
   /**
-   * Maps a Holiday JPA entity to DOP Holiday domain object.
+   * Maps a HolidayEntity to DOP Holiday domain object.
    *
-   * @param entity the JPA entity
-   * @return mapped domain holiday object
+   * @param entity the holiday entity
+   * @return mapped DOP Holiday object
    */
-  public me.clementino.holiday.domain.dop.Holiday fromEntity(Holiday entity) {
-    return mapEntityToDomain(entity);
-  }
-
-  /**
-   * Maps a list of Holiday JPA entities to DOP Holiday domain objects.
-   *
-   * @param entities list of JPA entities
-   * @return list of mapped domain holiday objects
-   */
-  public List<me.clementino.holiday.domain.dop.Holiday> fromEntityList(List<Holiday> entities) {
-    if (entities == null) {
+  public Holiday toDomain(HolidayEntity entity) {
+    if (entity == null) {
       return null;
     }
-    return entities.stream().map(this::fromEntity).toList();
-  }
 
-  // ===== CUSTOM MAPPING METHODS =====
-
-  /** Extracts the observed date from holiday variants that support it. */
-  @Named("extractObservedDate")
-  protected java.time.LocalDate extractObservedDate(
-      me.clementino.holiday.domain.dop.Holiday holiday) {
-    return switch (holiday) {
-      case ObservedHoliday observed -> observed.observed();
-      default -> null;
-    };
-  }
-
-  /** Extracts the country from the primary locality. */
-  @Named("extractCountry")
-  protected String extractCountry(me.clementino.holiday.domain.dop.Holiday holiday) {
-    if (holiday.localities().isEmpty()) {
-      return null;
+    if (entity.getHolidayData() != null && !entity.getHolidayData().isBlank()) {
+      // Deserialize from stored holiday data
+      return deserializeHoliday(entity.getHolidayData(), entity.getHolidayVariant());
     }
-    var primaryLocality = holiday.localities().getFirst();
-    return switch (primaryLocality) {
+
+    // Fallback: construct from entity fields
+    return constructHolidayFromEntity(entity);
+  }
+
+  // ===== HELPER METHODS =====
+
+  private String extractCountry(Locality locality) {
+    return switch (locality) {
       case Locality.Country country -> country.code();
       case Locality.Subdivision subdivision -> subdivision.country().code();
       case Locality.City city -> city.country().code();
     };
   }
 
-  /** Extracts the state/subdivision from the primary locality. */
-  @Named("extractState")
-  protected String extractState(me.clementino.holiday.domain.dop.Holiday holiday) {
-    if (holiday.localities().isEmpty()) {
-      return null;
-    }
-    var primaryLocality = holiday.localities().getFirst();
-    return switch (primaryLocality) {
+  private String extractState(Locality locality) {
+    return switch (locality) {
       case Locality.Country country -> null;
       case Locality.Subdivision subdivision -> subdivision.code();
       case Locality.City city -> city.subdivision().code();
     };
   }
 
-  /** Extracts the city from the primary locality. */
-  @Named("extractCity")
-  protected String extractCity(me.clementino.holiday.domain.dop.Holiday holiday) {
-    if (holiday.localities().isEmpty()) {
-      return null;
-    }
-    var primaryLocality = holiday.localities().getFirst();
-    return switch (primaryLocality) {
+  private String extractCity(Locality locality) {
+    return switch (locality) {
       case Locality.Country country -> null;
       case Locality.Subdivision subdivision -> null;
       case Locality.City city -> city.name();
     };
   }
 
-  /** Determines if a holiday is recurring based on its type. */
-  @Named("determineRecurring")
-  protected boolean determineRecurring(me.clementino.holiday.domain.dop.Holiday holiday) {
+  private String getCalculationRule(Holiday holiday) {
     return switch (holiday) {
-      case FixedHoliday fixed -> true; // Fixed holidays recur annually
-      case MoveableHoliday moveable -> true; // Moveable holidays recur annually
-      case ObservedHoliday observed -> true; // Observed holidays recur annually
+      case FixedHoliday fixed -> "FIXED";
+      case ObservedHoliday observed -> "OBSERVED";
+      case MoveableHoliday moveable -> "MOVEABLE:" + moveable.knownHoliday().name();
       case MoveableFromBaseHoliday moveableFromBase ->
-          true; // Moveable from base holidays recur annually
+          "MOVEABLE_FROM_BASE:"
+              + moveableFromBase.knownHoliday().name()
+              + ":"
+              + moveableFromBase.dayOffset();
     };
   }
 
-  /**
-   * Maps a Holiday JPA entity back to the appropriate DOP Holiday domain object using stored
-   * metadata.
-   */
-  @Named("mapEntityToDomain")
-  protected me.clementino.holiday.domain.dop.Holiday mapEntityToDomain(Holiday entity) {
-    if (entity == null) {
-      return null;
-    }
-
-    // Reconstruct locality from entity fields
-    var locality = reconstructLocality(entity);
-    var localities = List.of(locality);
-
-    // For this simplified implementation, we'll create a FixedHoliday
-    // In a full implementation, we would store the holiday type metadata
-    // and reconstruct the appropriate sealed interface variant
-    if (entity.getObserved() != null) {
-      // This was likely an ObservedHoliday
-      return new ObservedHoliday(
-          entity.getName(),
-          entity.getDescription() != null ? entity.getDescription() : "",
-          entity.getDate(),
-          localities,
-          entity.getType(),
-          entity.getObserved(),
-          false // mondayisation flag would need to be stored separately
-          );
-    } else {
-      // Default to FixedHoliday
-      return new FixedHoliday(
-          entity.getName(),
-          entity.getDescription() != null ? entity.getDescription() : "",
-          entity.getDate(),
-          localities,
-          entity.getType());
-    }
-  }
-
-  /** Reconstructs a Locality from entity fields. */
-  private Locality reconstructLocality(Holiday entity) {
-    var country = new Locality.Country(entity.getCountry(), entity.getCountry()); // Name = code for
-    // simplicity
-
-    if (entity.getCity() != null && entity.getState() != null) {
-      var subdivision = new Locality.Subdivision(country, entity.getState(), entity.getState());
-      return new Locality.City(entity.getCity(), subdivision, country);
-    } else if (entity.getState() != null) {
-      return new Locality.Subdivision(country, entity.getState(), entity.getState());
-    } else {
-      return country;
-    }
-  }
-
-  // ===== SERIALIZATION HELPERS =====
-
-  /**
-   * Serializes a sealed interface to JSON string for storage.
-   *
-   * @param object the object to serialize
-   * @return JSON string representation
-   */
-  protected String serializeToJson(Object object) {
-    if (object == null) {
-      return null;
-    }
+  private Holiday deserializeHoliday(String holidayData, String holidayVariant) {
     try {
-      return objectMapper.writeValueAsString(object);
+      return switch (holidayVariant) {
+        case "FixedHoliday" -> objectMapper.readValue(holidayData, FixedHoliday.class);
+        case "ObservedHoliday" -> objectMapper.readValue(holidayData, ObservedHoliday.class);
+        case "MoveableHoliday" -> objectMapper.readValue(holidayData, MoveableHoliday.class);
+        case "MoveableFromBaseHoliday" ->
+            objectMapper.readValue(holidayData, MoveableFromBaseHoliday.class);
+        default -> throw new IllegalArgumentException("Unknown holiday variant: " + holidayVariant);
+      };
     } catch (JsonProcessingException e) {
-      throw new RuntimeException("Failed to serialize object to JSON", e);
+      throw new RuntimeException("Failed to deserialize holiday", e);
     }
   }
 
-  /**
-   * Deserializes a JSON string back to an object of the specified type.
-   *
-   * @param json the JSON string
-   * @param targetType the target class type
-   * @return deserialized object
-   */
-  protected <T> T deserializeFromJson(String json, Class<T> targetType) {
-    if (json == null || json.isBlank()) {
-      return null;
-    }
-    try {
-      return objectMapper.readValue(json, targetType);
-    } catch (JsonProcessingException e) {
-      throw new RuntimeException("Failed to deserialize JSON to object", e);
-    }
+  private Holiday constructHolidayFromEntity(HolidayEntity entity) {
+    // This is a fallback method to construct a basic FixedHoliday from entity fields
+    // In practice, you'd need more sophisticated logic based on the holiday variant
+
+    List<Locality> localities =
+        entity.getLocalities() != null
+            ? entity.getLocalities().stream()
+                .map(LocalityEntity::toDopLocality)
+                .collect(Collectors.toList())
+            : List.of(new Locality.Country(entity.getCountry(), entity.getCountry()));
+
+    return new FixedHoliday(
+        entity.getName(),
+        entity.getDescription(),
+        entity.getDate(),
+        localities,
+        entity.getType(),
+        entity.isMondayisation());
   }
-
-  // ===== UTILITY METHODS =====
-
-  /** Converts LocalDateTime to OffsetDateTime using UTC offset. */
-  protected OffsetDateTime localDateTimeToOffsetDateTime(LocalDateTime localDateTime) {
-    return localDateTime != null ? localDateTime.atOffset(ZoneOffset.UTC) : null;
-  }
-
-  /** Converts OffsetDateTime to LocalDateTime by extracting the local part. */
-  protected LocalDateTime offsetDateTimeToLocalDateTime(OffsetDateTime offsetDateTime) {
-    return offsetDateTime != null ? offsetDateTime.toLocalDateTime() : null;
-  }
-
-  /**
-   * Creates a metadata object containing information needed to reconstruct the original domain
-   * object.
-   */
-  protected HolidayMetadata createMetadata(me.clementino.holiday.domain.dop.Holiday holiday) {
-    return new HolidayMetadata(
-        holiday.getClass().getSimpleName(),
-        serializeToJson(holiday.localities()),
-        extractAdditionalMetadata(holiday));
-  }
-
-  /** Extracts additional metadata specific to each holiday type. */
-  private String extractAdditionalMetadata(me.clementino.holiday.domain.dop.Holiday holiday) {
-    return switch (holiday) {
-      case FixedHoliday fixed -> null; // No additional metadata needed
-      case ObservedHoliday observed ->
-          serializeToJson(Map.of("mondayisation", observed.mondayisation()));
-      case MoveableHoliday moveable ->
-          serializeToJson(
-              Map.of(
-                  "knownHoliday", moveable.knownHoliday(),
-                  "knownHoliday", moveable.knownHoliday(),
-                  "mondayisation", moveable.mondayisation()));
-      case MoveableFromBaseHoliday moveableFromBase ->
-          serializeToJson(
-              Map.of(
-                  "dayOffset",
-                  moveableFromBase.dayOffset(),
-                  "mondayisation",
-                  moveableFromBase.mondayisation(),
-                  "baseHolidayName",
-                  moveableFromBase.baseHoliday().name()));
-    };
-  }
-
-  /** Record for storing holiday metadata needed for reconstruction. */
-  public record HolidayMetadata(
-      String holidayType, String localitiesJson, String additionalMetadata) {}
 }
