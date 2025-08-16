@@ -96,29 +96,8 @@ public class HolidayService {
 
     query.with(Sort.by(Sort.Direction.ASC, "date"));
 
-    System.out.println("MongoDB Query: " + query.toString());
-
     List<HolidayEntity> entities = mongoTemplate.find(query, HolidayEntity.class);
-
-    System.out.println("Found " + entities.size() + " entities in MongoDB");
-
-    if (!entities.isEmpty()) {
-      HolidayEntity first = entities.get(0);
-      System.out.println(
-          "First entity - ID: "
-              + first.getId()
-              + ", Name: '"
-              + first.getName()
-              + "', Description: '"
-              + first.getDescription()
-              + "'");
-    }
-
-    List<HolidayData> result = entities.stream().map(this::toDomainData).toList();
-    System.out.println("Returning " + result.size() + " HolidayData objects");
-    System.out.println("====================");
-
-    return result;
+    return entities.stream().map(this::toDomainData).toList();
   }
 
   /** Create a new holiday. */
