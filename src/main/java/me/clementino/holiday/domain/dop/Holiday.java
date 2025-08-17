@@ -1,238 +1,213 @@
 package me.clementino.holiday.domain.dop;
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.List;
+import me.clementino.holiday.domain.HolidayType;
 
 /**
- * Holiday domain record following DOP principles.
+ * Sealed interface representing different types of holidays using Data-Oriented Programming
+ * principles.
  *
- * <p>This record represents the core business data for a holiday, following Data-Oriented
- * Programming principles: - Immutable data structure - Transparent data access - No behavior mixed
- * with data - Pure data representation
+ * <p>This implementation uses <strong>Solution 1: Interface Methods</strong> to eliminate
+ * repetition while maintaining all DOP principles:
+ *
+ * <ul>
+ *   <li><strong>Zero Repetition</strong>: Common attributes defined once as interface methods
+ *   <li><strong>Type Safety</strong>: Compiler ensures all methods are implemented
+ *   <li><strong>Performance</strong>: Direct field access in records
+ *   <li><strong>Common Functionality</strong>: Default methods for shared behavior
+ *   <li><strong>Pattern Matching</strong>: Works perfectly with sealed interfaces
+ * </ul>
+ *
+ * <p><strong>DOP Principles Applied:</strong>
+ *
+ * <ol>
+ *   <li><strong>Model Data Immutably and Transparently</strong> - All variants are immutable
+ *       records
+ *   <li><strong>Model the Data, the Whole Data, and Nothing but the Data</strong> - Each variant
+ *       contains exactly what it needs
+ *   <li><strong>Make Illegal States Unrepresentable</strong> - Sealed interface prevents invalid
+ *       holiday types
+ *   <li><strong>Separate Operations from Data</strong> - Operations in HolidayOperations, data in
+ *       records
+ * </ol>
+ *
+ * @see HolidayOperations for operations on holidays
+ * @see HolidayFactory for creating holiday instances
  */
-public record Holiday(
-    String id,
-    String name,
-    LocalDate date,
-    Optional<LocalDate> observedDate,
-    Location location,
-    HolidayType type,
-    boolean recurring,
-    Optional<String> description,
-    Optional<LocalDateTime> dateCreated,
-    Optional<LocalDateTime> lastUpdated) {
+public sealed interface Holiday
+    permits FixedHoliday, ObservedHoliday, MoveableHoliday, MoveableFromBaseHoliday {
 
-  /** Compact constructor for validation. */
-  public Holiday {
-    Objects.requireNonNull(name, "Holiday name cannot be null");
-    Objects.requireNonNull(date, "Holiday date cannot be null");
-    Objects.requireNonNull(location, "Holiday location cannot be null");
-    Objects.requireNonNull(type, "Holiday type cannot be null");
+  // ===== COMMON INTERFACE METHODS =====
+  // These eliminate repetition across all record implementations
 
-    if (name.isBlank()) {
-      throw new IllegalArgumentException("Holiday name cannot be blank");
+  /**
+   * The name of the holiday.
+   *
+   * @return holiday name, never null or blank
+   */
+  String name();
+
+  /**
+   * A description of the holiday.
+   *
+   * @return holiday description, never null
+   */
+  String description();
+
+  /**
+   * The date when this holiday occurs.
+   *
+   * @return holiday date, never null
+   */
+  LocalDate date();
+
+  /**
+   * The localities where this holiday is observed.
+   *
+   * @return list of localities, never null or empty
+   */
+  List<Locality> localities();
+
+  /**
+   * The type/category of this holiday.
+   *
+   * @return holiday type, never null
+   */
+  HolidayType type();
+
+  // ===== COMMON DEFAULT METHODS =====
+  // These provide shared functionality without repetition
+
+  /**
+   * Checks if this holiday falls on a weekend for its current date.
+   *
+   * @return true if the holiday falls on Saturday or Sunday
+   */
+  default boolean isWeekend() {
+    DayOfWeek dayOfWeek = date().getDayOfWeek();
+    return dayOfWeek == DayOfWeek.SATURDAY || dayOfWeek == DayOfWeek.SUNDAY;
+  }
+
+  /**
+   * Gets a formatted display name for this holiday including its type.
+   *
+   * @return formatted display name like "Christmas Day (religious)"
+   */
+  default String getDisplayName() {
+    return name() + " (" + type().name().toLowerCase() + ")";
+  }
+
+  /**
+   * Checks if this holiday applies to a specific locality using hierarchical matching. A national
+   * holiday applies to all subdivisions and cities in that country. A state holiday applies to all
+   * cities in that state. A city holiday only applies to that specific city.
+   *
+   * @param targetLocality the locality to check against
+   * @return true if this holiday applies to the target locality
+   */
+  default boolean appliesTo(Locality targetLocality) {
+    if (targetLocality == null) {
+      return false;
     }
+
+    return localities().stream()
+        .anyMatch(holidayLocality -> localityMatches(holidayLocality, targetLocality));
   }
 
   /**
-   * Create a new Holiday with updated name.
+   * Gets a summary of this holiday including name, type, and locality information.
    *
-   * @param newName the new name
-   * @return new Holiday instance with updated name
+   * @return formatted summary string
    */
-  public Holiday withName(String newName) {
-    return new Holiday(
-        id,
-        newName,
-        date,
-        observedDate,
-        location,
-        type,
-        recurring,
-        description,
-        dateCreated,
-        lastUpdated);
+  default String getSummary() {
+    String localityInfo =
+        localities().size() == 1
+            ? formatLocality(localities().getFirst())
+            : localities().size() + " localities";
+
+    return String.format(
+        "%s - %s holiday in %s", name(), type().name().toLowerCase(), localityInfo);
   }
 
   /**
-   * Create a new Holiday with updated date.
+   * Checks if this holiday is of a governmental type (national, state, or municipal).
    *
-   * @param newDate the new date
-   * @return new Holiday instance with updated date
+   * @return true if this is a governmental holiday
    */
-  public Holiday withDate(LocalDate newDate) {
-    return new Holiday(
-        id,
-        name,
-        newDate,
-        observedDate,
-        location,
-        type,
-        recurring,
-        description,
-        dateCreated,
-        lastUpdated);
+  default boolean isGovernmental() {
+    return type() == HolidayType.NATIONAL
+        || type() == HolidayType.STATE
+        || type() == HolidayType.MUNICIPAL;
   }
 
   /**
-   * Create a new Holiday with updated observed date.
+   * Checks if this holiday is observed in a specific country.
    *
-   * @param newObservedDate the new observed date
-   * @return new Holiday instance with updated observed date
+   * @param countryCode the ISO country code to check
+   * @return true if this holiday is observed in the specified country
    */
-  public Holiday withObservedDate(Optional<LocalDate> newObservedDate) {
-    return new Holiday(
-        id,
-        name,
-        date,
-        newObservedDate,
-        location,
-        type,
-        recurring,
-        description,
-        dateCreated,
-        lastUpdated);
+  default boolean isObservedInCountry(String countryCode) {
+    if (countryCode == null || countryCode.isBlank()) {
+      return false;
+    }
+
+    return localities().stream()
+        .anyMatch(
+            locality ->
+                switch (locality) {
+                  case Locality.Country country -> country.code().equalsIgnoreCase(countryCode);
+                  case Locality.Subdivision subdivision ->
+                      subdivision.country().code().equalsIgnoreCase(countryCode);
+                  case Locality.City city ->
+                      city.subdivision().country().code().equalsIgnoreCase(countryCode);
+                });
   }
 
-  /**
-   * Create a new Holiday with updated location.
-   *
-   * @param newLocation the new location
-   * @return new Holiday instance with updated location
-   */
-  public Holiday withLocation(Location newLocation) {
-    return new Holiday(
-        id,
-        name,
-        date,
-        observedDate,
-        newLocation,
-        type,
-        recurring,
-        description,
-        dateCreated,
-        lastUpdated);
+  // ===== PRIVATE HELPER METHODS =====
+
+  /** Checks if a holiday locality matches a target locality using hierarchical matching. */
+  private boolean localityMatches(Locality holidayLocality, Locality targetLocality) {
+    return switch (holidayLocality) {
+      case Locality.Country holidayCountry ->
+          switch (targetLocality) {
+            case Locality.Country targetCountry -> holidayCountry.equals(targetCountry);
+            case Locality.Subdivision targetSubdivision ->
+                holidayCountry.equals(targetSubdivision.country());
+            case Locality.City targetCity ->
+                holidayCountry.equals(targetCity.subdivision().country());
+          };
+      case Locality.Subdivision holidaySubdivision ->
+          switch (targetLocality) {
+            case Locality.Country targetCountry ->
+                false; // Subdivision doesn't match broader country
+            case Locality.Subdivision targetSubdivision ->
+                holidaySubdivision.equals(targetSubdivision);
+            case Locality.City targetCity -> holidaySubdivision.equals(targetCity.subdivision());
+          };
+      case Locality.City holidayCity ->
+          switch (targetLocality) {
+            case Locality.Country targetCountry -> false; // City doesn't match broader country
+            case Locality.Subdivision targetSubdivision ->
+                false; // City doesn't match broader subdivision
+            case Locality.City targetCity -> holidayCity.equals(targetCity);
+          };
+    };
   }
 
-  /**
-   * Create a new Holiday with updated type.
-   *
-   * @param newType the new type
-   * @return new Holiday instance with updated type
-   */
-  public Holiday withType(HolidayType newType) {
-    return new Holiday(
-        id,
-        name,
-        date,
-        observedDate,
-        location,
-        newType,
-        recurring,
-        description,
-        dateCreated,
-        lastUpdated);
-  }
-
-  /**
-   * Create a new Holiday with updated recurring flag.
-   *
-   * @param newRecurring the new recurring flag
-   * @return new Holiday instance with updated recurring flag
-   */
-  public Holiday withRecurring(boolean newRecurring) {
-    return new Holiday(
-        id,
-        name,
-        date,
-        observedDate,
-        location,
-        type,
-        newRecurring,
-        description,
-        dateCreated,
-        lastUpdated);
-  }
-
-  /**
-   * Create a new Holiday with updated description.
-   *
-   * @param newDescription the new description
-   * @return new Holiday instance with updated description
-   */
-  public Holiday withDescription(Optional<String> newDescription) {
-    return new Holiday(
-        id,
-        name,
-        date,
-        observedDate,
-        location,
-        type,
-        recurring,
-        newDescription,
-        dateCreated,
-        lastUpdated);
-  }
-
-  /**
-   * Create a new Holiday with updated ID.
-   *
-   * @param newId the new ID
-   * @return new Holiday instance with updated ID
-   */
-  public Holiday withId(String newId) {
-    return new Holiday(
-        newId,
-        name,
-        date,
-        observedDate,
-        location,
-        type,
-        recurring,
-        description,
-        dateCreated,
-        lastUpdated);
-  }
-
-  /**
-   * Create a new Holiday with updated creation timestamp.
-   *
-   * @param newDateCreated the new creation timestamp
-   * @return new Holiday instance with updated creation timestamp
-   */
-  public Holiday withDateCreated(Optional<LocalDateTime> newDateCreated) {
-    return new Holiday(
-        id,
-        name,
-        date,
-        observedDate,
-        location,
-        type,
-        recurring,
-        description,
-        newDateCreated,
-        lastUpdated);
-  }
-
-  /**
-   * Create a new Holiday with updated last update timestamp.
-   *
-   * @param newLastUpdated the new last update timestamp
-   * @return new Holiday instance with updated last update timestamp
-   */
-  public Holiday withLastUpdated(Optional<LocalDateTime> newLastUpdated) {
-    return new Holiday(
-        id,
-        name,
-        date,
-        observedDate,
-        location,
-        type,
-        recurring,
-        description,
-        dateCreated,
-        newLastUpdated);
+  /** Formats a single locality for display. */
+  private String formatLocality(Locality locality) {
+    return switch (locality) {
+      case Locality.Country country -> country.name();
+      case Locality.Subdivision subdivision ->
+          subdivision.name() + ", " + subdivision.country().name();
+      case Locality.City city ->
+          city.name()
+              + ", "
+              + city.subdivision().name()
+              + ", "
+              + city.subdivision().country().name();
+    };
   }
 }

@@ -1,4 +1,4 @@
-package me.clementino.holiday.domain.dop;
+package me.clementino.holiday.domain;
 
 import java.util.Objects;
 import java.util.Optional;
