@@ -1,9 +1,53 @@
 package me.clementino.holiday.domain.dop;
 
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.util.List;
 import me.clementino.holiday.domain.HolidayType;
+
+/**
+ * Sealed interface representing different types of holidays using Data-Oriented Programming
+ * principles.
+ *
+ * <p>This implementation uses <strong>Solution 1: Interface Methods</strong> to eliminate
+ * repetition while maintaining all DOP principles:
+ *
+ * <ul>
+ *   <li><strong>Zero Repetition</strong>: Common attributes defined once as interface methods
+ *   <li><strong>Type Safety</strong>: Compiler ensures all methods are implemented
+ *   <li><strong>Performance</strong>: Direct field access in records
+ *   <li><strong>Common Functionality</strong>: Default methods for shared behavior
+ *   <li><strong>Pattern Matching</strong>: Works perfectly with sealed interfaces
+ * </ul>
+ *
+ * <p><strong>DOP Principles Applied:</strong>
+ *
+ * <ol>
+ *   <li><strong>Model Data Immutably and Transparently</strong> - All variants are immutable
+ *       records
+ *   <li><strong>Model the Data, the Whole Data, and Nothing but the Data</strong> - Each variant
+ *       contains exactly what it needs
+ *   <li><strong>Make Illegal States Unrepresentable</strong> - Sealed interface prevents invalid
+ *       holiday types
+ *   <li><strong>Separate Operations from Data</strong> - No behavior methods, only data and derived
+ *       calculations
+ * </ol>
+ *
+ * <p><strong>Jackson Configuration:</strong> - Uses @JsonTypeInfo to determine which concrete type
+ * to deserialize - Property "holidayVariant" in JSON determines the implementation
+ */
+@JsonTypeInfo(
+    use = JsonTypeInfo.Id.NAME,
+    include = JsonTypeInfo.As.PROPERTY,
+    property = "holidayVariant")
+@JsonSubTypes({
+  @JsonSubTypes.Type(value = FixedHoliday.class, name = "FixedHoliday"),
+  @JsonSubTypes.Type(value = ObservedHoliday.class, name = "ObservedHoliday"),
+  @JsonSubTypes.Type(value = MoveableHoliday.class, name = "MoveableHoliday"),
+  @JsonSubTypes.Type(value = MoveableFromBaseHoliday.class, name = "MoveableFromBaseHoliday")
+})
 
 /**
  * Sealed interface representing different types of holidays using Data-Oriented Programming

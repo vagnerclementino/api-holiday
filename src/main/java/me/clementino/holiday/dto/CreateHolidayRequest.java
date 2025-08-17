@@ -27,7 +27,7 @@ import me.clementino.holiday.domain.dop.Locality;
  * <p>Jackson Configuration: - Uses @JsonTypeInfo to determine which concrete type to deserialize -
  * Property "type" in JSON determines the implementation (Fixed, Observed, etc.)
  */
-@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type")
 @JsonSubTypes({
   @JsonSubTypes.Type(value = CreateHolidayRequest.Fixed.class, name = "Fixed"),
   @JsonSubTypes.Type(value = CreateHolidayRequest.Observed.class, name = "Observed"),
