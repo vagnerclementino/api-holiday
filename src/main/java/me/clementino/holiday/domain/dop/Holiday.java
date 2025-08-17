@@ -77,7 +77,6 @@ import java.util.List;
  * </ol>
  *
  * @see HolidayOperations for operations on holidays
- * @see HolidayFactory for creating holiday instances
  */
 public sealed interface Holiday
     permits FixedHoliday, ObservedHoliday, MoveableHoliday, MoveableFromBaseHoliday {
