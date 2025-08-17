@@ -151,6 +151,16 @@ The project follows a clean, data-oriented architecture with Spring Boot 3:
 
 ## 🚀 Quick Start
 
+### 📮 **Testing with Postman (Recommended)**
+
+**Fastest way to explore the API!** No setup required.
+
+1. **Import Collections**: Use the ready-made Postman collections in [`postman/`](./postman/)
+2. **Start API**: Run `make run` to start the application
+3. **Test Everything**: 23 pre-configured requests covering all DOP patterns
+
+👉 **[Complete Postman Guide](./postman/README.md)**
+
 ### 📚 For Students (No Java Installation Required)
 
 **Perfect for learning and study purposes!** You don't need Java 24 installed locally.
@@ -288,6 +298,50 @@ This project is configured by default to run with **Java 24 (Amazon Corretto)** 
    java -jar target/holiday-api-*.jar
    ```
 
+## 📮 Postman Collections
+
+This project includes comprehensive **Postman Collections** for testing all API endpoints and DOP patterns. The collections are organized to demonstrate the complete functionality of the Holiday API with real-world test scenarios.
+
+### 🚀 **Quick Start with Postman**
+
+1. **Import the Collections:**
+   - Navigate to the [`postman/`](./postman/) directory
+   - Import `DOP-Holiday-API.postman_collection.json` into Postman
+   - Import `DOP-Holiday-API.postman_environment.json` for environment variables
+
+2. **Start Testing:**
+   - Select the **🎯 DOP Holiday API - Master Environment**
+   - Ensure the API is running at `http://localhost:8080`
+   - Run individual requests or the complete test suite
+
+### 📊 **Collection Structure**
+
+The Postman collection is organized into **5 main categories** with **23 comprehensive tests**:
+
+| Category | Tests | Description |
+|----------|-------|-------------|
+| **🟢 Basic CRUD Operations** | 13 | Create, Read, Update, Delete holidays |
+| **🔵 Advanced Filtering** | 1 | Complex queries and filtering |
+| **🟡 Validation & Errors** | 4 | Input validation and error handling |
+| **🟠 DOP-Specific Types** | 4 | Data-oriented holiday types |
+| **🔴 Performance Tests** | 1 | Response time and load testing |
+
+### 🏗️ **DOP Types Covered**
+
+The collection includes specific tests for all **Data-Oriented Programming** holiday types:
+
+- **📅 Fixed Holidays** - Christmas, New Year (fixed dates)
+- **👁️ Observed Holidays** - Holidays with mondayisation rules
+- **🔄 Moveable Holidays** - Easter, Thanksgiving (calculated dates)
+- **🔗 Moveable From Base** - Good Friday (calculated from other holidays)
+
+### 📚 **Complete Documentation**
+
+For detailed instructions, environment variables, and advanced usage, see:
+**[📖 Postman Collections Documentation](./postman/README.md)**
+
+---
+
 ## 📚 API Usage Examples
 
 ### Create a Holiday
@@ -344,6 +398,12 @@ curl -X DELETE "http://localhost:8080/api/holidays/{holiday-id}"
 
 ## 🧪 Testing
 
+### 📮 Postman Collections (Recommended)
+```bash
+# Import collections from postman/ directory
+# See detailed guide: ./postman/README.md
+```
+
 ### Run Unit Tests
 ```bash
 make unit-test
@@ -363,6 +423,8 @@ The integration tests demonstrate:
 - Validation at boundaries
 - Immutable data transformations
 - Error handling and edge cases
+
+**For comprehensive API testing with real scenarios, use the Postman collections in [`postman/`](./postman/) directory.**
 
 ## 🛠️ Development Commands
 
@@ -408,8 +470,12 @@ src/
 │   │   └── MongoHolidayRepository.java
 │   └── controller/      # REST Controllers
 │       └── HolidayController.java
-└── test/java/me/clementino/holiday/
-    └── HolidayApiIntegrationTest.java
+├── test/java/me/clementino/holiday/
+│   └── HolidayApiIntegrationTest.java
+└── postman/             # Postman Collections & Documentation
+    ├── DOP-Holiday-API.postman_collection.json
+    ├── DOP-Holiday-API.postman_environment.json
+    └── README.md        # Complete Postman documentation
 ```
 
 ## 🏛️ Infrastructure
@@ -432,6 +498,7 @@ By exploring this project, you'll understand:
 5. **How to build REST APIs** with Spring Boot 3 and modern Java
 6. **How to test data-oriented systems** effectively
 7. **How to use Docker Compose** for local development
+8. **How to create comprehensive API test suites** with Postman Collections
 
 ## 🤝 Contributing
 
