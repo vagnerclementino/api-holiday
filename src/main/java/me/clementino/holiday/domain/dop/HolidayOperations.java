@@ -6,6 +6,7 @@ import java.time.Month;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import org.springframework.stereotype.Component;
 
 /**
  * Operations for working with holidays. This class demonstrates the DOP principle of separating
@@ -21,18 +22,15 @@ import java.util.stream.Collectors;
  *       input
  * </ol>
  */
+@Component
 public final class HolidayOperations {
-
-  private HolidayOperations() {
-    // Utility class - prevent instantiation
-  }
 
   /**
    * Calculates the date for a holiday in a specific year and returns a new holiday instance with
    * the calculated date. This method follows DOP principles by returning new immutable instances
    * rather than modifying existing ones.
    */
-  public static Holiday calculateDate(Holiday holiday, int year) {
+  public Holiday calculateDate(Holiday holiday, int year) {
     Objects.requireNonNull(holiday, "Holiday cannot be null");
     validateYear(year);
 
@@ -63,7 +61,7 @@ public final class HolidayOperations {
    * with both the original date and observed date calculated. Applies mondayisation rules if the
    * holiday supports it.
    */
-  public static Holiday calculateObservedDate(Holiday holiday, int year) {
+  public Holiday calculateObservedDate(Holiday holiday, int year) {
     Objects.requireNonNull(holiday, "Holiday cannot be null");
     validateYear(year);
 
@@ -124,7 +122,7 @@ public final class HolidayOperations {
    * Helper method to get just the LocalDate for a holiday in a specific year. Useful for
    * calculations that only need the date value.
    */
-  public static LocalDate getDateOnly(Holiday holiday, int year) {
+  public LocalDate getDateOnly(Holiday holiday, int year) {
     Objects.requireNonNull(holiday, "Holiday cannot be null");
     validateYear(year);
 
@@ -140,7 +138,7 @@ public final class HolidayOperations {
    * Helper method to get just the observed LocalDate for a holiday in a specific year. Useful for
    * calculations that only need the observed date value.
    */
-  public static LocalDate getObservedDateOnly(Holiday holiday, int year) {
+  public LocalDate getObservedDateOnly(Holiday holiday, int year) {
     Objects.requireNonNull(holiday, "Holiday cannot be null");
     validateYear(year);
 
@@ -159,7 +157,7 @@ public final class HolidayOperations {
   }
 
   /** Checks if a holiday falls on a weekend for the specified year. */
-  public static boolean isWeekend(Holiday holiday, int year) {
+  public boolean isWeekend(Holiday holiday, int year) {
     LocalDate holidayDate = getDateOnly(holiday, year);
     DayOfWeek dayOfWeek = holidayDate.getDayOfWeek();
     return dayOfWeek == DayOfWeek.SATURDAY || dayOfWeek == DayOfWeek.SUNDAY;
@@ -254,7 +252,7 @@ public final class HolidayOperations {
   }
 
   /** Calculates the date for a holiday derived from another holiday. */
-  private static LocalDate calculateDerivedDate(MoveableFromBaseHoliday derived, int year) {
+  private LocalDate calculateDerivedDate(MoveableFromBaseHoliday derived, int year) {
     LocalDate baseDate = getDateOnly(derived.baseHoliday(), year);
     return baseDate.plusDays(derived.dayOffset());
   }

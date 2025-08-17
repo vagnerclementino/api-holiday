@@ -1,6 +1,48 @@
 package me.clementino.holiday.domain.dop;
 
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import java.util.Objects;
+
+/**
+ * Sealed interface representing a geographical locality where a holiday is observed.
+ *
+ * <p>This sealed interface models the hierarchical nature of geographical locations using
+ * Data-Oriented Programming principles. It makes illegal states unrepresentable by ensuring that a
+ * locality can only be one of three specific types: Country, Subdivision, or City.
+ *
+ * <p><strong>DOP Principles Applied:</strong>
+ *
+ * <ul>
+ *   <li><strong>Model Data Immutably and Transparently:</strong> All variants are immutable records
+ *   <li><strong>Model the Data, the Whole Data, and Nothing but the Data:</strong> Each variant
+ *       contains exactly what it needs
+ *   <li><strong>Make Illegal States Unrepresentable:</strong> Sealed interface prevents invalid
+ *       locality types
+ *   <li><strong>Separate Operations from Data:</strong> No behavior methods, only data
+ * </ul>
+ *
+ * <p><strong>Hierarchy Levels:</strong>
+ *
+ * <ul>
+ *   <li><strong>Country:</strong> National level with code and name
+ *   <li><strong>Subdivision:</strong> State/Province level with country, code, and name
+ *   <li><strong>City:</strong> Municipal level with name, subdivision, and country
+ * </ul>
+ *
+ * <p><strong>Jackson Configuration:</strong> - Uses @JsonTypeInfo to determine which concrete type
+ * to deserialize - Property "localityType" in JSON determines the implementation (Country,
+ * Subdivision, City)
+ */
+@JsonTypeInfo(
+    use = JsonTypeInfo.Id.NAME,
+    include = JsonTypeInfo.As.PROPERTY,
+    property = "localityType")
+@JsonSubTypes({
+  @JsonSubTypes.Type(value = Locality.Country.class, name = "Country"),
+  @JsonSubTypes.Type(value = Locality.Subdivision.class, name = "Subdivision"),
+  @JsonSubTypes.Type(value = Locality.City.class, name = "City")
+})
 
 /**
  * Sealed interface representing a geographical locality where a holiday is observed.

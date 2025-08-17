@@ -9,7 +9,10 @@ import me.clementino.holiday.domain.HolidayData;
 import me.clementino.holiday.domain.HolidayQuery;
 import me.clementino.holiday.domain.HolidayType;
 import me.clementino.holiday.domain.Location;
+import me.clementino.holiday.domain.dop.Holiday;
+import me.clementino.holiday.domain.dop.HolidayOperations;
 import me.clementino.holiday.entity.HolidayEntity;
+import me.clementino.holiday.mapper.SimpleHolidayMapper;
 import me.clementino.holiday.repository.HolidayRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
@@ -29,11 +32,19 @@ public class HolidayService {
 
   private final HolidayRepository holidayRepository;
   private final MongoTemplate mongoTemplate;
+  private final HolidayOperations holidayOperations;
+  private final SimpleHolidayMapper mapper;
 
   @Autowired
-  public HolidayService(HolidayRepository holidayRepository, MongoTemplate mongoTemplate) {
+  public HolidayService(
+      HolidayRepository holidayRepository,
+      MongoTemplate mongoTemplate,
+      HolidayOperations holidayOperations,
+      SimpleHolidayMapper mapper) {
     this.holidayRepository = holidayRepository;
     this.mongoTemplate = mongoTemplate;
+    this.holidayOperations = holidayOperations;
+    this.mapper = mapper;
   }
 
   /** Find all holidays with optional filtering using DOP query object. */
@@ -106,8 +117,10 @@ public class HolidayService {
   }
 
   /** Create a new holiday. */
-  public HolidayData create(HolidayData holidayData) {
-    HolidayEntity entity = toEntity(holidayData);
+  public HolidayData create(Holiday holiday) {
+
+    var holidayWithDate = holidayOperations.calculateDate(holiday, LocalDate.now().getYear());
+    var entity = mapper.toEntity(holidayWithDate);
     entity.setId(UUID.randomUUID().toString());
     entity.setDateCreated(LocalDateTime.now());
     entity.setLastUpdated(LocalDateTime.now());

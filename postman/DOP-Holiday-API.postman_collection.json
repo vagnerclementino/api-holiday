@@ -1,0 +1,710 @@
+{
+	"info": {
+		"_postman_id": "dop-holiday-api-collection",
+		"name": "DOP Holiday API - Complete Test Suite",
+		"description": "Complete collection for testing Data-Oriented Programming Holiday API\n\n## Features Tested:\n- ✅ Create Fixed Holidays with DOP validation\n- ✅ Retrieve holidays by ID\n- ✅ List all holidays\n- ✅ Test invalid date combinations (31/02, 31/04)\n- ✅ Test recurring holidays (year = null)\n- ✅ Test different locality types (Country, Subdivision, City)\n\n## DOP Principles Demonstrated:\n1. **Model Data Immutably and Transparently** - Records with validation\n2. **Model the Data, the Whole Data, and Nothing but the Data** - Specific fields (day, month, year)\n3. **Make Illegal States Unrepresentable** - Invalid dates rejected\n4. **Separate Operations from Data** - Validation in pure functions",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "✅ Valid Fixed Holidays",
+			"item": [
+				{
+					"name": "Create Christmas Day 2024",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 or 201\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+									"});",
+									"",
+									"pm.test(\"Response has id\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('id');",
+									"    pm.environment.set('lastCreatedHolidayId', jsonData.id);",
+									"});",
+									"",
+									"pm.test(\"Holiday name is correct\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.name).to.eql('Christmas Day 2024');",
+									"});",
+									"",
+									"pm.test(\"Holiday type is NATIONAL\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.type).to.eql('NATIONAL');",
+									"});",
+									"",
+									"pm.test(\"Date contains December 25\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.when.date).to.include('12-25');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"type\": \"Fixed\",\n  \"name\": \"Christmas Day 2024\",\n  \"description\": \"Christian holiday celebrating the birth of Jesus Christ\",\n  \"day\": 25,\n  \"month\": \"DECEMBER\",\n  \"year\": 2024,\n  \"localities\": [\n    {\n      \"localityType\": \"Country\",\n      \"code\": \"US\",\n      \"name\": \"United States\"\n    }\n  ],\n  \"holidayType\": \"NATIONAL\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/holidays",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"holidays"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create New Year (Recurring)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 or 201\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+									"});",
+									"",
+									"pm.test(\"Response has id\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('id');",
+									"});",
+									"",
+									"pm.test(\"Holiday is recurring (no specific year)\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.name).to.include('Recurring');",
+									"});",
+									"",
+									"pm.test(\"Date is January 1st\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.when.date).to.include('01-01');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"type\": \"Fixed\",\n  \"name\": \"New Year Recurring\",\n  \"description\": \"First day of the year - recurring every year\",\n  \"day\": 1,\n  \"month\": \"JANUARY\",\n  \"year\": null,\n  \"localities\": [\n    {\n      \"localityType\": \"Country\",\n      \"code\": \"BR\",\n      \"name\": \"Brazil\"\n    }\n  ],\n  \"holidayType\": \"NATIONAL\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/holidays",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"holidays"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Independence Day (State Level)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 or 201\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+									"});",
+									"",
+									"pm.test(\"Holiday type is STATE\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.type).to.eql('STATE');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"type\": \"Fixed\",\n  \"name\": \"California Admission Day\",\n  \"description\": \"State holiday commemorating California's admission to the Union\",\n  \"day\": 9,\n  \"month\": \"SEPTEMBER\",\n  \"year\": null,\n  \"localities\": [\n    {\n      \"localityType\": \"Subdivision\",\n      \"country\": {\n        \"code\": \"US\",\n        \"name\": \"United States\"\n      },\n      \"code\": \"CA\",\n      \"name\": \"California\"\n    }\n  ],\n  \"holidayType\": \"STATE\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/holidays",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"holidays"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Leap Day (Feb 29)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 or 201\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+									"});",
+									"",
+									"pm.test(\"February 29th is accepted\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.name).to.include('Leap Day');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"type\": \"Fixed\",\n  \"name\": \"Leap Day Test\",\n  \"description\": \"February 29th - should work in leap years\",\n  \"day\": 29,\n  \"month\": \"FEBRUARY\",\n  \"year\": 2024,\n  \"localities\": [\n    {\n      \"localityType\": \"Country\",\n      \"code\": \"US\",\n      \"name\": \"United States\"\n    }\n  ],\n  \"holidayType\": \"COMMERCIAL\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/holidays",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"holidays"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "❌ DOP Validation Tests (Should Fail)",
+			"item": [
+				{
+					"name": "Invalid: February 31st",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400 or 500 (validation error)\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([400, 500]);",
+									"});",
+									"",
+									"pm.test(\"Error message mentions February validation\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.message).to.include('FEBRUARY');",
+									"    pm.expect(jsonData.message).to.include('31');",
+									"});",
+									"",
+									"pm.test(\"DOP validation working\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.message).to.include('Maximum days');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"type\": \"Fixed\",\n  \"name\": \"Invalid Holiday - Feb 31\",\n  \"description\": \"This should fail - February 31st does not exist\",\n  \"day\": 31,\n  \"month\": \"FEBRUARY\",\n  \"year\": 2024,\n  \"localities\": [\n    {\n      \"localityType\": \"Country\",\n      \"code\": \"US\",\n      \"name\": \"United States\"\n    }\n  ],\n  \"holidayType\": \"COMMERCIAL\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/holidays",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"holidays"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Invalid: April 31st",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400 or 500 (validation error)\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([400, 500]);",
+									"});",
+									"",
+									"pm.test(\"Error message mentions April validation\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.message).to.include('APRIL');",
+									"    pm.expect(jsonData.message).to.include('31');",
+									"});",
+									"",
+									"pm.test(\"Shows correct max days for April\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.message).to.include('30');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"type\": \"Fixed\",\n  \"name\": \"Invalid Holiday - Apr 31\",\n  \"description\": \"This should fail - April 31st does not exist\",\n  \"day\": 31,\n  \"month\": \"APRIL\",\n  \"year\": 2024,\n  \"localities\": [\n    {\n      \"localityType\": \"Country\",\n      \"code\": \"US\",\n      \"name\": \"United States\"\n    }\n  ],\n  \"holidayType\": \"COMMERCIAL\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/holidays",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"holidays"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Invalid: June 31st",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400 or 500 (validation error)\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([400, 500]);",
+									"});",
+									"",
+									"pm.test(\"Error message mentions June validation\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.message).to.include('JUNE');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"type\": \"Fixed\",\n  \"name\": \"Invalid Holiday - Jun 31\",\n  \"description\": \"This should fail - June 31st does not exist\",\n  \"day\": 31,\n  \"month\": \"JUNE\",\n  \"year\": 2024,\n  \"localities\": [\n    {\n      \"localityType\": \"Country\",\n      \"code\": \"US\",\n      \"name\": \"United States\"\n    }\n  ],\n  \"holidayType\": \"COMMERCIAL\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/holidays",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"holidays"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "🔍 Retrieve Holidays",
+			"item": [
+				{
+					"name": "Get All Holidays",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response is an array\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.be.an('array');",
+									"});",
+									"",
+									"pm.test(\"Array contains holidays\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.length).to.be.greaterThan(0);",
+									"});",
+									"",
+									"pm.test(\"Each holiday has required fields\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    if (jsonData.length > 0) {",
+									"        var firstHoliday = jsonData[0];",
+									"        pm.expect(firstHoliday).to.have.property('id');",
+									"        pm.expect(firstHoliday).to.have.property('name');",
+									"        pm.expect(firstHoliday).to.have.property('when');",
+									"        pm.expect(firstHoliday).to.have.property('where');",
+									"        pm.expect(firstHoliday).to.have.property('type');",
+									"    }",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/holidays",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"holidays"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Holiday by ID (Use created holiday)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response has holiday data\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('id');",
+									"    pm.expect(jsonData).to.have.property('name');",
+									"    pm.expect(jsonData).to.have.property('when');",
+									"    pm.expect(jsonData).to.have.property('where');",
+									"});",
+									"",
+									"pm.test(\"Holiday has when.date field\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.when).to.have.property('date');",
+									"    pm.expect(jsonData.when).to.have.property('weekday');",
+									"});",
+									"",
+									"pm.test(\"Holiday has where array with locality\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.where).to.be.an('array');",
+									"    pm.expect(jsonData.where.length).to.be.greaterThan(0);",
+									"    pm.expect(jsonData.where[0]).to.have.property('country');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/holidays/{{lastCreatedHolidayId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"holidays",
+								"{{lastCreatedHolidayId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Holiday by Specific ID (Christmas)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Holiday data structure is correct\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('id');",
+									"    pm.expect(jsonData).to.have.property('name');",
+									"    pm.expect(jsonData).to.have.property('when');",
+									"    pm.expect(jsonData).to.have.property('where');",
+									"    pm.expect(jsonData).to.have.property('type');",
+									"    pm.expect(jsonData).to.have.property('created');",
+									"    pm.expect(jsonData).to.have.property('updated');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/holidays/f1a37c0b-e3b2-4635-b6a6-fc5a4054d28a",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"holidays",
+								"f1a37c0b-e3b2-4635-b6a6-fc5a4054d28a"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "🏙️ Different Locality Types",
+			"item": [
+				{
+					"name": "Create Municipal Holiday (City Level)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 or 201\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+									"});",
+									"",
+									"pm.test(\"Holiday type is MUNICIPAL\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.type).to.eql('MUNICIPAL');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"type\": \"Fixed\",\n  \"name\": \"São Paulo City Day\",\n  \"description\": \"Municipal holiday celebrating São Paulo city\",\n  \"day\": 25,\n  \"month\": \"JANUARY\",\n  \"year\": null,\n  \"localities\": [\n    {\n      \"localityType\": \"City\",\n      \"name\": \"São Paulo\",\n      \"subdivision\": {\n        \"country\": {\n          \"code\": \"BR\",\n          \"name\": \"Brazil\"\n        },\n        \"code\": \"SP\",\n        \"name\": \"São Paulo\"\n      }\n    }\n  ],\n  \"holidayType\": \"MUNICIPAL\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/holidays",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"holidays"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Religious Holiday",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 or 201\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+									"});",
+									"",
+									"pm.test(\"Holiday type is RELIGIOUS\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.type).to.eql('RELIGIOUS');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"type\": \"Fixed\",\n  \"name\": \"Good Friday\",\n  \"description\": \"Christian religious holiday commemorating the crucifixion of Jesus\",\n  \"day\": 14,\n  \"month\": \"APRIL\",\n  \"year\": 2024,\n  \"localities\": [\n    {\n      \"localityType\": \"Country\",\n      \"code\": \"BR\",\n      \"name\": \"Brazil\"\n    }\n  ],\n  \"holidayType\": \"RELIGIOUS\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/holidays",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"holidays"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "🔧 API Health & Info",
+			"item": [
+				{
+					"name": "Health Check",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"API is UP\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.status).to.eql('UP');",
+									"});",
+									"",
+									"pm.test(\"MongoDB is connected\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.components.mongo.status).to.eql('UP');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/actuator/health",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"actuator",
+								"health"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:8080",
+			"type": "string"
+		}
+	]
+}

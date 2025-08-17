@@ -22,6 +22,8 @@ class HolidayOperationsTest {
   private static final List<Locality> US_LOCALITIES =
       List.of(Locality.country("US", "United States"));
 
+  private final HolidayOperations holidayOperations = new HolidayOperations();
+
   @Nested
   @DisplayName("FixedHoliday Tests")
   class FixedHolidayTests {
@@ -35,11 +37,13 @@ class HolidayOperationsTest {
               "Christmas Day",
               "Christian celebration",
               LocalDate.of(2023, Month.DECEMBER, 25),
+              25,
+              Month.DECEMBER,
               BRAZIL_LOCALITIES,
               HolidayType.RELIGIOUS);
 
       // When: Calculate for 2025
-      Holiday result = HolidayOperations.calculateDate(originalChristmas, 2025);
+      Holiday result = holidayOperations.calculateDate(originalChristmas, 2025);
 
       // Then: Should return new FixedHoliday with 2025 date
       assertInstanceOf(FixedHoliday.class, result);
@@ -64,11 +68,13 @@ class HolidayOperationsTest {
               "New Year's Day",
               "First day of the year",
               LocalDate.of(2023, Month.JANUARY, 1),
+              1,
+              Month.JANUARY,
               BRAZIL_LOCALITIES,
               HolidayType.NATIONAL);
 
       // When: Calculate observed date for 2025
-      Holiday result = HolidayOperations.calculateObservedDate(originalNewYear, 2025);
+      Holiday result = holidayOperations.calculateObservedDate(originalNewYear, 2025);
 
       // Then: Should return FixedHoliday (no observed date concept)
       assertInstanceOf(FixedHoliday.class, result);
@@ -87,11 +93,13 @@ class HolidayOperationsTest {
               "Independence Day",
               "Brazil's independence",
               LocalDate.of(2023, Month.SEPTEMBER, 7),
+              7,
+              Month.SEPTEMBER,
               BRAZIL_LOCALITIES,
               HolidayType.NATIONAL);
 
       // When: Get date for 2026
-      LocalDate result = HolidayOperations.getDateOnly(independenceDay, 2026);
+      LocalDate result = holidayOperations.getDateOnly(independenceDay, 2026);
 
       // Then: Should return correct date
       assertEquals(LocalDate.of(2026, Month.SEPTEMBER, 7), result);
@@ -118,7 +126,7 @@ class HolidayOperationsTest {
               );
 
       // When: Calculate for 2022 (Christmas falls on Sunday)
-      Holiday result = HolidayOperations.calculateDate(originalChristmas, 2022);
+      Holiday result = holidayOperations.calculateDate(originalChristmas, 2022);
 
       // Then: Should return new ObservedHoliday with mondayisation applied
       assertInstanceOf(ObservedHoliday.class, result);
@@ -147,7 +155,7 @@ class HolidayOperationsTest {
               );
 
       // When: Calculate for 2022 (Christmas falls on Sunday)
-      Holiday result = HolidayOperations.calculateDate(originalChristmas, 2022);
+      Holiday result = holidayOperations.calculateDate(originalChristmas, 2022);
 
       // Then: Should return ObservedHoliday without mondayisation
       assertInstanceOf(ObservedHoliday.class, result);
@@ -174,7 +182,7 @@ class HolidayOperationsTest {
               true);
 
       // When: Calculate observed date for 2022 (New Year falls on Saturday)
-      Holiday result = HolidayOperations.calculateObservedDate(originalNewYear, 2022);
+      Holiday result = holidayOperations.calculateObservedDate(originalNewYear, 2022);
 
       // Then: Should apply Saturday -> Friday rule
       assertInstanceOf(ObservedHoliday.class, result);
@@ -199,7 +207,7 @@ class HolidayOperationsTest {
               true);
 
       // When: Get observed date
-      LocalDate result = HolidayOperations.getObservedDateOnly(christmas, 2022);
+      LocalDate result = holidayOperations.getObservedDateOnly(christmas, 2022);
 
       // Then: Should return the observed date
       assertEquals(LocalDate.of(2022, Month.DECEMBER, 26), result);
@@ -225,7 +233,7 @@ class HolidayOperationsTest {
               false);
 
       // When: Calculate for 2025
-      Holiday result = HolidayOperations.calculateDate(originalEaster, 2025);
+      Holiday result = holidayOperations.calculateDate(originalEaster, 2025);
 
       // Then: Should return new MoveableHoliday with calculated Easter date
       assertInstanceOf(MoveableHoliday.class, result);
@@ -253,7 +261,7 @@ class HolidayOperationsTest {
               false);
 
       // When: Calculate for 2024
-      Holiday result = HolidayOperations.calculateDate(originalThanksgiving, 2024);
+      Holiday result = holidayOperations.calculateDate(originalThanksgiving, 2024);
 
       // Then: Should return new MoveableHoliday with calculated Thanksgiving date
       assertInstanceOf(MoveableHoliday.class, result);
@@ -281,7 +289,7 @@ class HolidayOperationsTest {
               );
 
       // When: Calculate observed date for 2025
-      Holiday result = HolidayOperations.calculateObservedDate(originalMemorialDay, 2025);
+      Holiday result = holidayOperations.calculateObservedDate(originalMemorialDay, 2025);
 
       // Then: Memorial Day 2025 is May 26th (Monday), so no mondayisation adjustment needed
       // Should stay as MoveableHoliday since Memorial Day is always on Monday
@@ -305,7 +313,7 @@ class HolidayOperationsTest {
               false);
 
       // When: Get date for 2025
-      LocalDate result = HolidayOperations.getDateOnly(memorialDay, 2025);
+      LocalDate result = holidayOperations.getDateOnly(memorialDay, 2025);
 
       // Then: Should return calculated Memorial Day 2025 (last Monday of May)
       assertEquals(LocalDate.of(2025, Month.MAY, 26), result);
@@ -344,7 +352,7 @@ class HolidayOperationsTest {
               false);
 
       // When: Calculate for 2025
-      Holiday result = HolidayOperations.calculateDate(originalGoodFriday, 2025);
+      Holiday result = holidayOperations.calculateDate(originalGoodFriday, 2025);
 
       // Then: Should return new MoveableFromBaseHoliday with calculated date
       assertInstanceOf(MoveableFromBaseHoliday.class, result);
@@ -385,7 +393,7 @@ class HolidayOperationsTest {
               false);
 
       // When: Calculate for 2024
-      Holiday result = HolidayOperations.calculateDate(originalEasterMonday, 2024);
+      Holiday result = holidayOperations.calculateDate(originalEasterMonday, 2024);
 
       // Then: Should return new MoveableFromBaseHoliday with calculated date
       assertInstanceOf(MoveableFromBaseHoliday.class, result);
@@ -426,7 +434,7 @@ class HolidayOperationsTest {
               );
 
       // When: Calculate observed date for 2025
-      Holiday result = HolidayOperations.calculateObservedDate(originalGoodFriday, 2025);
+      Holiday result = holidayOperations.calculateObservedDate(originalGoodFriday, 2025);
 
       // Then: Good Friday 2025 is April 18th (Friday), so no mondayisation needed
       assertInstanceOf(MoveableFromBaseHoliday.class, result);
@@ -462,7 +470,7 @@ class HolidayOperationsTest {
               false);
 
       // When: Get date for 2026
-      LocalDate result = HolidayOperations.getDateOnly(palmSunday, 2026);
+      LocalDate result = holidayOperations.getDateOnly(palmSunday, 2026);
 
       // Then: Should return calculated Palm Sunday date
       // Easter 2026 is April 5th, so Palm Sunday is March 29th
@@ -477,7 +485,7 @@ class HolidayOperationsTest {
     @Test
     @DisplayName("calculateDate should throw exception for null holiday")
     void testCalculateDateNullHoliday() {
-      assertThrows(NullPointerException.class, () -> HolidayOperations.calculateDate(null, 2025));
+      assertThrows(NullPointerException.class, () -> holidayOperations.calculateDate(null, 2025));
     }
 
     @Test
@@ -488,20 +496,22 @@ class HolidayOperationsTest {
               "Test Holiday",
               "Test description",
               LocalDate.of(2023, Month.JANUARY, 1),
+              1,
+              Month.JANUARY,
               BRAZIL_LOCALITIES,
               HolidayType.NATIONAL);
 
       assertThrows(
-          IllegalArgumentException.class, () -> HolidayOperations.calculateDate(holiday, 0));
+          IllegalArgumentException.class, () -> holidayOperations.calculateDate(holiday, 0));
       assertThrows(
-          IllegalArgumentException.class, () -> HolidayOperations.calculateDate(holiday, -1));
+          IllegalArgumentException.class, () -> holidayOperations.calculateDate(holiday, -1));
     }
 
     @Test
     @DisplayName("calculateObservedDate should throw exception for null holiday")
     void testCalculateObservedDateNullHoliday() {
       assertThrows(
-          NullPointerException.class, () -> HolidayOperations.calculateObservedDate(null, 2025));
+          NullPointerException.class, () -> holidayOperations.calculateObservedDate(null, 2025));
     }
 
     @Test
@@ -513,13 +523,15 @@ class HolidayOperationsTest {
               "Christmas Day",
               "Christian celebration",
               LocalDate.of(2023, Month.DECEMBER, 25),
+              25,
+              Month.DECEMBER,
               BRAZIL_LOCALITIES,
               HolidayType.RELIGIOUS);
 
       // When/Then: Check different years
-      assertTrue(HolidayOperations.isWeekend(christmas, 2022)); // Sunday
-      assertFalse(HolidayOperations.isWeekend(christmas, 2023)); // Monday
-      assertTrue(HolidayOperations.isWeekend(christmas, 2021)); // Saturday
+      assertTrue(holidayOperations.isWeekend(christmas, 2022)); // Sunday
+      assertFalse(holidayOperations.isWeekend(christmas, 2023)); // Monday
+      assertTrue(holidayOperations.isWeekend(christmas, 2021)); // Saturday
     }
   }
 
@@ -531,9 +543,9 @@ class HolidayOperationsTest {
     @DisplayName("Easter calculation should be accurate for known years")
     void testEasterCalculation() {
       // Test known Easter dates
-      assertEquals(LocalDate.of(2024, Month.MARCH, 31), HolidayOperations.calculateEaster(2024));
-      assertEquals(LocalDate.of(2025, Month.APRIL, 20), HolidayOperations.calculateEaster(2025));
-      assertEquals(LocalDate.of(2026, Month.APRIL, 5), HolidayOperations.calculateEaster(2026));
+      assertEquals(LocalDate.of(2024, Month.MARCH, 31), holidayOperations.calculateEaster(2024));
+      assertEquals(LocalDate.of(2025, Month.APRIL, 20), holidayOperations.calculateEaster(2025));
+      assertEquals(LocalDate.of(2026, Month.APRIL, 5), holidayOperations.calculateEaster(2026));
     }
 
     @Test
@@ -541,20 +553,20 @@ class HolidayOperationsTest {
     void testThanksgivingCalculation() {
       // Test known Thanksgiving dates (4th Thursday of November)
       assertEquals(
-          LocalDate.of(2024, Month.NOVEMBER, 28), HolidayOperations.calculateThanksgiving(2024));
+          LocalDate.of(2024, Month.NOVEMBER, 28), holidayOperations.calculateThanksgiving(2024));
       assertEquals(
-          LocalDate.of(2025, Month.NOVEMBER, 27), HolidayOperations.calculateThanksgiving(2025));
+          LocalDate.of(2025, Month.NOVEMBER, 27), holidayOperations.calculateThanksgiving(2025));
       assertEquals(
-          LocalDate.of(2026, Month.NOVEMBER, 26), HolidayOperations.calculateThanksgiving(2026));
+          LocalDate.of(2026, Month.NOVEMBER, 26), holidayOperations.calculateThanksgiving(2026));
     }
 
     @Test
     @DisplayName("Memorial Day calculation should be accurate for known years")
     void testMemorialDayCalculation() {
       // Test known Memorial Day dates (last Monday of May)
-      assertEquals(LocalDate.of(2024, Month.MAY, 27), HolidayOperations.calculateMemorialDay(2024));
-      assertEquals(LocalDate.of(2025, Month.MAY, 26), HolidayOperations.calculateMemorialDay(2025));
-      assertEquals(LocalDate.of(2026, Month.MAY, 25), HolidayOperations.calculateMemorialDay(2026));
+      assertEquals(LocalDate.of(2024, Month.MAY, 27), holidayOperations.calculateMemorialDay(2024));
+      assertEquals(LocalDate.of(2025, Month.MAY, 26), holidayOperations.calculateMemorialDay(2025));
+      assertEquals(LocalDate.of(2026, Month.MAY, 25), holidayOperations.calculateMemorialDay(2026));
     }
   }
 
@@ -577,7 +589,7 @@ class HolidayOperationsTest {
               true);
 
       // When: Calculate observed date for 2022 (Saturday)
-      Holiday result = HolidayOperations.calculateObservedDate(newYear, 2022);
+      Holiday result = holidayOperations.calculateObservedDate(newYear, 2022);
 
       // Then: Should be observed on Friday
       assertInstanceOf(ObservedHoliday.class, result);
@@ -602,7 +614,7 @@ class HolidayOperationsTest {
               true);
 
       // When: Calculate observed date for 2023 (Sunday)
-      Holiday result = HolidayOperations.calculateObservedDate(newYear, 2023);
+      Holiday result = holidayOperations.calculateObservedDate(newYear, 2023);
 
       // Then: Should be observed on Monday
       assertInstanceOf(ObservedHoliday.class, result);
@@ -627,7 +639,7 @@ class HolidayOperationsTest {
               true);
 
       // When: Calculate observed date for 2024 (Monday)
-      Holiday result = HolidayOperations.calculateObservedDate(newYear, 2024);
+      Holiday result = holidayOperations.calculateObservedDate(newYear, 2024);
 
       // Then: Should remain on the same date
       assertInstanceOf(ObservedHoliday.class, result);

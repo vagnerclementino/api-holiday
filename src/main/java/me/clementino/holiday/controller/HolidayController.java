@@ -14,6 +14,7 @@ import me.clementino.holiday.domain.Location;
 import me.clementino.holiday.dto.CreateHolidayRequest;
 import me.clementino.holiday.dto.HolidayResponseDTO;
 import me.clementino.holiday.dto.UpdateHolidayRequest;
+import me.clementino.holiday.mapper.HolidayCreationMapper;
 import me.clementino.holiday.mapper.SimpleHolidayMapper;
 import me.clementino.holiday.service.HolidayService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,11 +50,16 @@ public class HolidayController {
 
   private final HolidayService holidayService;
   private final SimpleHolidayMapper holidayMapper;
+  private final HolidayCreationMapper creationMapper;
 
   @Autowired
-  public HolidayController(HolidayService holidayService, SimpleHolidayMapper holidayMapper) {
+  public HolidayController(
+      HolidayService holidayService,
+      SimpleHolidayMapper holidayMapper,
+      HolidayCreationMapper creationMapper) {
     this.holidayService = holidayService;
     this.holidayMapper = holidayMapper;
+    this.creationMapper = creationMapper;
   }
 
   @GetMapping
@@ -128,15 +134,9 @@ public class HolidayController {
       @Valid @RequestBody CreateHolidayRequest request) {
 
     try {
-      // Convert CreateHolidayRequest to HolidayData using mapper
-      HolidayData holidayData = holidayMapper.fromCreateRequest(request);
-
-      // Create the holiday using the service
-      HolidayData created = holidayService.create(holidayData);
-
-      // Convert to response DTO
-      HolidayResponseDTO response = holidayMapper.toResponse(created);
-
+      var holiday = creationMapper.toHoliday(request);
+      var createdHoliday = holidayService.create(holiday);
+      var response = holidayMapper.toResponse(createdHoliday);
       return ResponseEntity.status(201).body(response);
     } catch (Exception e) {
       return ResponseEntity.badRequest().build();

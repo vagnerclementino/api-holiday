@@ -47,7 +47,7 @@ public final class HolidayFactory {
           "Invalid day/month combination: day=" + day + ", month=" + month, e);
     }
 
-    return new FixedHoliday(name, description, calculatedDate, localities, type);
+    return new FixedHoliday(name, description, calculatedDate, day, month, localities, type);
   }
 
   /** Creates a fixed holiday with minimal required fields. */
@@ -121,7 +121,8 @@ public final class HolidayFactory {
     }
 
     // Otherwise create FixedHoliday
-    return new FixedHoliday(name, description, date, localities, type);
+    return new FixedHoliday(
+        name, description, date, date.getDayOfMonth(), date.getMonth(), localities, type);
   }
 
   // ===== SPECIFIC HOLIDAY FACTORY METHODS =====
