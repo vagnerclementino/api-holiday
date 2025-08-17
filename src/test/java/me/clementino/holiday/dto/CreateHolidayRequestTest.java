@@ -25,12 +25,14 @@ class CreateHolidayRequestTest {
             List.of(new Locality.Country("US", "United States")),
             HolidayType.NATIONAL);
 
-    // When: Get the date
-    LocalDate date = christmas2024.date();
+    // When: Calculate the date from day, month, year
+    int effectiveYear =
+        christmas2024.year() != null ? christmas2024.year() : LocalDate.now().getYear();
+    LocalDate date = LocalDate.of(effectiveYear, christmas2024.month(), christmas2024.day());
 
     // Then: Should be December 25, 2024
     assertEquals(LocalDate.of(2024, 12, 25), date);
-    assertFalse(christmas2024.isRecurring());
+    assertFalse(christmas2024.year() == null); // Not recurring (has specific year)
     assertEquals("Christmas Day", christmas2024.name());
     assertEquals(25, christmas2024.day());
     assertEquals(Month.DECEMBER, christmas2024.month());
@@ -50,14 +52,15 @@ class CreateHolidayRequestTest {
             List.of(new Locality.Country("BR", "Brazil")),
             HolidayType.NATIONAL);
 
-    // When: Get the date
-    LocalDate date = newYear.date();
+    // When: Calculate the date from day, month, year (using current year if null)
+    int effectiveYear = newYear.year() != null ? newYear.year() : LocalDate.now().getYear();
+    LocalDate date = LocalDate.of(effectiveYear, newYear.month(), newYear.day());
 
     // Then: Should use current year
     assertEquals(1, date.getDayOfMonth());
     assertEquals(Month.JANUARY, date.getMonth());
     assertEquals(LocalDate.now().getYear(), date.getYear());
-    assertTrue(newYear.isRecurring());
+    assertTrue(newYear.year() == null); // Is recurring (no specific year)
     assertNull(newYear.year());
   }
 
@@ -166,7 +169,7 @@ class CreateHolidayRequestTest {
     assertEquals("Independence Day", independenceDay.name());
     assertEquals(7, independenceDay.day());
     assertEquals(Month.SEPTEMBER, independenceDay.month());
-    assertTrue(independenceDay.isRecurring());
+    assertTrue(independenceDay.year() == null); // Is recurring (no specific year)
   }
 
   @Test
@@ -222,7 +225,11 @@ class CreateHolidayRequestTest {
     assertEquals(3, holiday.month().getValue());
     assertEquals("MARCH", holiday.month().name());
     assertEquals(31, holiday.month().length(false)); // March has 31 days
-    assertEquals(LocalDate.of(2024, 3, 15), holiday.date());
+
+    // Calculate date from day, month, year
+    int effectiveYear = holiday.year() != null ? holiday.year() : LocalDate.now().getYear();
+    LocalDate calculatedDate = LocalDate.of(effectiveYear, holiday.month(), holiday.day());
+    assertEquals(LocalDate.of(2024, 3, 15), calculatedDate);
   }
 
   /** Demonstrates pattern matching with sealed interfaces - a key DOP principle. */

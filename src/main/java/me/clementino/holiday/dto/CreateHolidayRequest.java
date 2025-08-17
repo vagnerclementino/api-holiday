@@ -78,18 +78,6 @@ public sealed interface CreateHolidayRequest
       }
     }
 
-    /** Get the LocalDate for this holiday. */
-    public LocalDate date() {
-      // If year is provided, create specific date; otherwise use current year as default
-      int effectiveYear = year != null ? year : LocalDate.now().getYear();
-      return LocalDate.of(effectiveYear, month, day);
-    }
-
-    /** Check if this is a recurring holiday (year not specified). */
-    public boolean isRecurring() {
-      return year == null;
-    }
-
     /**
      * Validates that the day/month combination is valid. Prevents illegal states like February
      * 31st.
