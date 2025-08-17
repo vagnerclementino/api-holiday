@@ -70,3 +70,8 @@ localstack_data/
 # Logs
 logs/
 *.log
+
+# Test scripts (local development only)
+test-endpoints.sh
+*-test.sh
+test-*.sh
