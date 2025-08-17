@@ -24,7 +24,7 @@ public class SwaggerConfig {
                     new Contact()
                         .name("Vagner Clementino")
                         .url("https://github.com/vagnerclementino")
-                        .email("vagner.clementino@example.com"))
+                        .email("vagner.clementinogmail.com"))
                 .license(
                     new License().name("MIT License").url("https://opensource.org/licenses/MIT")));
   }
