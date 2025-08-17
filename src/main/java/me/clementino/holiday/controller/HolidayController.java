@@ -12,7 +12,7 @@ import me.clementino.holiday.domain.HolidayData;
 import me.clementino.holiday.domain.HolidayType;
 import me.clementino.holiday.domain.Location;
 import me.clementino.holiday.dto.CreateHolidayRequest;
-import me.clementino.holiday.dto.SimpleHolidayResponse;
+import me.clementino.holiday.dto.HolidayResponseDTO;
 import me.clementino.holiday.dto.UpdateHolidayRequest;
 import me.clementino.holiday.mapper.SimpleHolidayMapper;
 import me.clementino.holiday.service.HolidayService;
@@ -61,7 +61,7 @@ public class HolidayController {
       summary = "Get all holidays",
       description = "Retrieve all holidays with optional filtering using DOP query patterns")
   @ApiResponse(responseCode = "200", description = "Successfully retrieved holidays")
-  public ResponseEntity<List<SimpleHolidayResponse>> getAllHolidays(
+  public ResponseEntity<List<HolidayResponseDTO>> getAllHolidays(
       @Parameter(description = "Filter by country") @RequestParam(required = false) String country,
       @Parameter(description = "Filter by state") @RequestParam(required = false) String state,
       @Parameter(description = "Filter by city") @RequestParam(required = false) String city,
@@ -87,7 +87,7 @@ public class HolidayController {
               country, state, city, type, startDate, endDate, recurring, namePattern);
 
       // Convert to response DTOs
-      List<SimpleHolidayResponse> responses =
+      List<HolidayResponseDTO> responses =
           holidays.stream().map(holidayMapper::toResponse).toList();
 
       return ResponseEntity.ok(responses);
@@ -101,7 +101,7 @@ public class HolidayController {
   @Operation(summary = "Get holiday by ID", description = "Retrieve a specific holiday by its ID")
   @ApiResponse(responseCode = "200", description = "Successfully retrieved holiday")
   @ApiResponse(responseCode = "404", description = "Holiday not found")
-  public ResponseEntity<SimpleHolidayResponse> getHolidayById(
+  public ResponseEntity<HolidayResponseDTO> getHolidayById(
       @Parameter(description = "Holiday ID") @PathVariable String id) {
 
     try {
@@ -111,7 +111,7 @@ public class HolidayController {
         return ResponseEntity.notFound().build();
       }
 
-      SimpleHolidayResponse response = holidayMapper.toResponse(holiday.get());
+      HolidayResponseDTO response = holidayMapper.toResponse(holiday.get());
       return ResponseEntity.ok(response);
     } catch (Exception e) {
       return ResponseEntity.notFound().build();
@@ -124,7 +124,7 @@ public class HolidayController {
       description = "Create a new holiday using DOP principles")
   @ApiResponse(responseCode = "201", description = "Holiday created successfully")
   @ApiResponse(responseCode = "400", description = "Invalid input data")
-  public ResponseEntity<SimpleHolidayResponse> createHoliday(
+  public ResponseEntity<HolidayResponseDTO> createHoliday(
       @Valid @RequestBody CreateHolidayRequest request) {
 
     try {
@@ -135,7 +135,7 @@ public class HolidayController {
       HolidayData created = holidayService.create(holidayData);
 
       // Convert to response DTO
-      SimpleHolidayResponse response = holidayMapper.toResponse(created);
+      HolidayResponseDTO response = holidayMapper.toResponse(created);
 
       return ResponseEntity.status(201).body(response);
     } catch (Exception e) {
@@ -150,7 +150,7 @@ public class HolidayController {
   @ApiResponse(responseCode = "200", description = "Holiday updated successfully")
   @ApiResponse(responseCode = "404", description = "Holiday not found")
   @ApiResponse(responseCode = "400", description = "Invalid input data")
-  public ResponseEntity<SimpleHolidayResponse> updateHoliday(
+  public ResponseEntity<HolidayResponseDTO> updateHoliday(
       @Parameter(description = "Holiday ID") @PathVariable String id,
       @Valid @RequestBody UpdateHolidayRequest request) {
 
@@ -192,7 +192,7 @@ public class HolidayController {
         return ResponseEntity.notFound().build();
       }
 
-      SimpleHolidayResponse response = holidayMapper.toResponse(result.get());
+      HolidayResponseDTO response = holidayMapper.toResponse(result.get());
       return ResponseEntity.ok(response);
     } catch (Exception e) {
       return ResponseEntity.badRequest().build();

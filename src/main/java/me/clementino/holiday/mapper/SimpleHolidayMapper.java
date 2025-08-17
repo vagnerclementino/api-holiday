@@ -1,33 +1,42 @@
 package me.clementino.holiday.mapper;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 import me.clementino.holiday.domain.HolidayData;
 import me.clementino.holiday.domain.Location;
 import me.clementino.holiday.dto.CreateHolidayRequest;
-import me.clementino.holiday.dto.SimpleHolidayResponse;
+import me.clementino.holiday.dto.HolidayResponseDTO;
+import me.clementino.holiday.dto.LocationInfo;
+import me.clementino.holiday.dto.WhenInfo;
 import org.springframework.stereotype.Component;
 
 /** Simple mapper for Holiday data using DOP principles. */
 @Component
 public class SimpleHolidayMapper {
 
-  /** Convert HolidayData to SimpleHolidayResponse. */
-  public SimpleHolidayResponse toResponse(HolidayData holidayData) {
-    return new SimpleHolidayResponse(
+  /** Convert HolidayData to HolidayResponseDTO. */
+  public HolidayResponseDTO toResponse(HolidayData holidayData) {
+    // Create when info (required)
+    WhenInfo when = WhenInfo.from(holidayData.date());
+
+    // Create observed info (optional)
+    WhenInfo observed = holidayData.observed().map(WhenInfo::from).orElse(null);
+
+    // Create location info (at least one required)
+    LocationInfo locationInfo = LocationInfo.from(holidayData.location());
+    List<LocationInfo> where = List.of(locationInfo);
+
+    return new HolidayResponseDTO(
         holidayData.id(),
         holidayData.name(),
-        holidayData.date(),
-        holidayData.observed().orElse(null),
-        holidayData.location().country(),
-        holidayData.location().state().orElse(null),
-        holidayData.location().city().orElse(null),
+        when,
+        observed,
+        where,
         holidayData.type(),
-        holidayData.recurring(),
         holidayData.description().orElse(null),
         holidayData.dateCreated().map(LocalDateTime::toString).orElse(null),
-        holidayData.lastUpdated().map(LocalDateTime::toString).orElse(null),
-        holidayData.version().orElse(null));
+        holidayData.lastUpdated().map(LocalDateTime::toString).orElse(null));
   }
 
   /** Convert CreateHolidayRequest to HolidayData. */
