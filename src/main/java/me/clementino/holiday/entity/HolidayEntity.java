@@ -6,7 +6,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
-import me.clementino.holiday.domain.HolidayType;
+import me.clementino.holiday.domain.dop.HolidayType;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.LastModifiedDate;
@@ -60,8 +60,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 })
 public class HolidayEntity {
 
-  @Id
-  private String id;
+  @Id private String id;
 
   @NotNull
   @Size(max = 255)
@@ -72,15 +71,11 @@ public class HolidayEntity {
   @Size(max = 1000)
   private String description;
 
-  @NotNull @Indexed
-  private LocalDate date;
+  @NotNull @Indexed private LocalDate date;
 
-  @NotNull
-  @Indexed
-  private HolidayType type;
+  @NotNull @Indexed private HolidayType type;
 
-  @NotNull
-  private List<LocalityEntity> localities;
+  @NotNull private List<LocalityEntity> localities;
 
   private LocalDate observed; // Observed date (different from actual date due to mondayisation)
 
@@ -133,7 +128,6 @@ public class HolidayEntity {
   public LocalDate getEffectiveDate() {
     return observed != null ? observed : date;
   }
-
 
   public String getId() {
     return id;

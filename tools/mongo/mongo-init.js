@@ -23,6 +23,28 @@ function checkOperation(operation, successMessage, errorMessage) {
     }
 }
 
+// Helper function to create LocalityEntity
+function createLocality(countryCode, countryName, subdivisionCode = null, subdivisionName = null, cityName = null) {
+    const locality = {
+        countryCode: countryCode,
+        countryName: countryName,
+        localityType: "COUNTRY"
+    };
+    
+    if (subdivisionCode && subdivisionName) {
+        locality.subdivisionCode = subdivisionCode;
+        locality.subdivisionName = subdivisionName;
+        locality.localityType = "SUBDIVISION";
+    }
+    
+    if (cityName) {
+        locality.cityName = cityName;
+        locality.localityType = "CITY";
+    }
+    
+    return locality;
+}
+
 // Main initialization function
 function initializeDatabase() {
     let success = true;
@@ -54,88 +76,92 @@ function initializeDatabase() {
             if (!existing) {
                 return db.holidays.insertMany([
                     {
-                        "_class": "me.clementino.holiday.domain.Holiday",
+                        "_class": "me.clementino.holiday.entity.HolidayEntity",
                         "name": "New Year",
-                        "date": new Date("2024-01-01"),
-                        "country": "Brazil",
-                        "type": "NATIONAL",
-                        "recurring": true,
                         "description": "New Year celebration",
+                        "date": new Date("2024-01-01"),
+                        "type": "NATIONAL",
+                        "localities": [
+                            createLocality("BR", "Brazil")
+                        ],
                         "dateCreated": new Date(),
                         "lastUpdated": new Date(),
                         "version": 0
                     },
                     {
-                        "_class": "me.clementino.holiday.domain.Holiday",
+                        "_class": "me.clementino.holiday.entity.HolidayEntity",
                         "name": "Independence Day",
-                        "date": new Date("2024-09-07"),
-                        "country": "Brazil",
-                        "type": "NATIONAL",
-                        "recurring": true,
                         "description": "Brazilian Independence Day",
+                        "date": new Date("2024-09-07"),
+                        "type": "NATIONAL",
+                        "localities": [
+                            createLocality("BR", "Brazil")
+                        ],
                         "dateCreated": new Date(),
                         "lastUpdated": new Date(),
                         "version": 0
                     },
                     {
-                        "_class": "me.clementino.holiday.domain.Holiday",
+                        "_class": "me.clementino.holiday.entity.HolidayEntity",
                         "name": "Christmas",
-                        "date": new Date("2024-12-25"),
-                        "country": "Brazil",
-                        "type": "NATIONAL",
-                        "recurring": true,
                         "description": "Christmas Day",
+                        "date": new Date("2024-12-25"),
+                        "type": "NATIONAL",
+                        "localities": [
+                            createLocality("BR", "Brazil")
+                        ],
                         "dateCreated": new Date(),
                         "lastUpdated": new Date(),
                         "version": 0
                     },
                     {
-                        "_class": "me.clementino.holiday.domain.Holiday",
+                        "_class": "me.clementino.holiday.entity.HolidayEntity",
                         "name": "Revolução Constitucionalista",
-                        "date": new Date("2024-07-09"),
-                        "country": "Brazil",
-                        "state": "SP",
-                        "type": "STATE",
-                        "recurring": true,
                         "description": "Constitutionalist Revolution Day",
+                        "date": new Date("2024-07-09"),
+                        "type": "STATE",
+                        "localities": [
+                            createLocality("BR", "Brazil", "SP", "São Paulo")
+                        ],
                         "dateCreated": new Date(),
                         "lastUpdated": new Date(),
                         "version": 0
                     },
                     {
-                        "_class": "me.clementino.holiday.domain.Holiday",
+                        "_class": "me.clementino.holiday.entity.HolidayEntity",
                         "name": "Aniversário de São Paulo",
-                        "date": new Date("2024-01-25"),
-                        "country": "Brazil",
-                        "state": "SP",
-                        "city": "São Paulo",
-                        "type": "MUNICIPAL",
-                        "recurring": true,
                         "description": "São Paulo City Anniversary",
+                        "date": new Date("2024-01-25"),
+                        "type": "MUNICIPAL",
+                        "localities": [
+                            createLocality("BR", "Brazil", "SP", "São Paulo", "São Paulo")
+                        ],
                         "dateCreated": new Date(),
                         "lastUpdated": new Date(),
                         "version": 0
                     },
                     {
-                        "_class": "me.clementino.holiday.domain.Holiday",
+                        "_class": "me.clementino.holiday.entity.HolidayEntity",
                         "name": "Independence Day",
-                        "date": new Date("2024-07-04"),
-                        "country": "USA",
-                        "type": "NATIONAL",
-                        "recurring": true,
                         "description": "American Independence Day",
+                        "date": new Date("2024-07-04"),
+                        "type": "NATIONAL",
+                        "localities": [
+                            createLocality("US", "United States")
+                        ],
                         "dateCreated": new Date(),
                         "lastUpdated": new Date(),
                         "version": 0
                     },
                     {
-                        "_class": "me.clementino.holiday.domain.Holiday",
+                        "_class": "me.clementino.holiday.entity.HolidayEntity",
                         "name": "Thanksgiving",
-                        "date": new Date("2024-11-28"),
-                        "country": "USA",
-                        "type": "NATIONAL",
-                        "recurring": true,
                         "description": "Thanksgiving Day",
+                        "date": new Date("2024-11-28"),
+                        "type": "NATIONAL",
+                        "localities": [
+                            createLocality("US", "United States")
+                        ],
                         "dateCreated": new Date(),
                         "lastUpdated": new Date(),
                         "version": 0
@@ -144,8 +170,30 @@ function initializeDatabase() {
             }
             return { insertedCount: 0 }; // Return dummy result if no insert happened
         },
-        'Successfully inserted sample holiday data',
+        'Successfully inserted sample holiday data with new HolidayEntity structure',
         'Failed to insert sample holiday data'
+    ) && success;
+
+    // Create indexes for better performance
+    success = checkOperation(
+        () => {
+            // Index for locality-based queries
+            db.holidays.createIndex({ "localities.countryCode": 1 });
+            db.holidays.createIndex({ "localities.countryCode": 1, "localities.subdivisionCode": 1 });
+            db.holidays.createIndex({ "localities.countryCode": 1, "localities.subdivisionCode": 1, "localities.cityName": 1 });
+            
+            // Index for date and type queries
+            db.holidays.createIndex({ "date": 1 });
+            db.holidays.createIndex({ "type": 1 });
+            db.holidays.createIndex({ "date": 1, "type": 1 });
+            
+            // Index for name searches
+            db.holidays.createIndex({ "name": "text", "description": "text" });
+            
+            return true;
+        },
+        'Successfully created database indexes',
+        'Failed to create database indexes'
     ) && success;
 
     // Create user
@@ -159,8 +207,9 @@ function initializeDatabase() {
             }]
         }),
         'Successfully created holiday_user',
-        'Failed to create holiday_user'
+        'Failed to create holiday_user (user may already exist)'
     ) && success;
+
     if (success) {
         log('Holiday API initialization script completed successfully', 'SUCCESS');
         quit(0);
@@ -178,6 +227,13 @@ try {
     quit(1);
 }
 
-// Show sample data
-log('Sample holidays in database:');
-db.holidays.find({}, { name: 1, date: 1, country: 1, type: 1 }).forEach(printjson);
+// Show sample data with new structure
+log('Sample holidays in database (new HolidayEntity structure):');
+db.holidays.find({}, { 
+    name: 1, 
+    date: 1, 
+    type: 1, 
+    "localities.countryCode": 1, 
+    "localities.subdivisionCode": 1, 
+    "localities.cityName": 1 
+}).forEach(printjson);

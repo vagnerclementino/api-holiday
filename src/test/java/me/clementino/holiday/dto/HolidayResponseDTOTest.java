@@ -5,7 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.time.LocalDate;
 import java.util.List;
-import me.clementino.holiday.domain.HolidayType;
+import me.clementino.holiday.domain.dop.HolidayType;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

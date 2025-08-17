@@ -1,27 +1,27 @@
 services:
-  holiday-api:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    environment:
-      SPRING_PROFILES_ACTIVE: local
-      JAVA_EXECUTION_MODE: "standard"
-      JAVA_OPTS: "-Xmx512m -Xms256m -XX:+UnlockExperimentalVMOptions -XshowSettings:vm"
-      APP_NAME: holiday-api
-      DEVOPS_DEBUG: true
-      MONGODB_DATABASE_URL: mongodb://holiday_user:holiday_pass_2024@mongodb:27017/holiday-api
-    container_name: holiday_api
-    expose:
-      - 8080
-      - 5005
-    ports:
-      - "8080:8080"
-      - "5005:5005"
-    depends_on:
-      - mongodb
-    restart: unless-stopped
-    networks:
-      - holiday-network
+#  holiday-api:
+#    build:
+#      context: .
+#      dockerfile: Dockerfile
+#    environment:
+#      SPRING_PROFILES_ACTIVE: local
+#      JAVA_EXECUTION_MODE: "standard"
+#      JAVA_OPTS: "-Xmx512m -Xms256m -XX:+UnlockExperimentalVMOptions -XshowSettings:vm"
+#      APP_NAME: holiday-api
+#      DEVOPS_DEBUG: true
+#      MONGODB_DATABASE_URL: mongodb://holiday_user:holiday_pass_2024@mongodb:27017/holiday-api
+#    container_name: holiday_api
+#    expose:
+#      - 8080
+#      - 5005
+#    ports:
+#      - "8080:8080"
+#      - "5005:5005"
+#    depends_on:
+#      - mongodb
+#    restart: unless-stopped
+#    networks:
+#      - holiday-network
 
   mongodb:
     image: mongo:8.0.12

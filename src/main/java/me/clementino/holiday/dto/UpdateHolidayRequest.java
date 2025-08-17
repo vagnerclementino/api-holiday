@@ -2,7 +2,7 @@ package me.clementino.holiday.dto;
 
 import jakarta.validation.constraints.Size;
 import java.time.LocalDate;
-import me.clementino.holiday.domain.HolidayType;
+import me.clementino.holiday.domain.dop.HolidayType;
 
 /**
  * Simple DTO for updating holidays using nullable fields for partial updates.

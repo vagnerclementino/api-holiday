@@ -6,7 +6,7 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Size;
 import java.time.LocalDate;
 import java.util.Optional;
-import me.clementino.holiday.domain.HolidayType;
+import me.clementino.holiday.domain.dop.HolidayType;
 
 /**
  * Request DTO for querying holidays with filtering options using Java 24 record.

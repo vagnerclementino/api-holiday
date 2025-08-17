@@ -4,7 +4,7 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.Month;
 import java.util.List;
-import me.clementino.holiday.domain.HolidayType;
+import me.clementino.holiday.domain.dop.HolidayType;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 /**

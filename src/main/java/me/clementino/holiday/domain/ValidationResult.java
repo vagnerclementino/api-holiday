@@ -18,7 +18,7 @@ public sealed interface ValidationResult
       if (message == null || message.isBlank()) {
         throw new IllegalArgumentException("Success message cannot be null or blank");
       }
-      validatedData = validatedData != null ? validatedData : Optional.empty();
+      validatedData = validatedData.isPresent() ? validatedData : Optional.empty();
     }
 
     /** Creates a success result with just a message. */

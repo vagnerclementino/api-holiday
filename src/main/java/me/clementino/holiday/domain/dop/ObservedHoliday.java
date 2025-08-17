@@ -4,7 +4,6 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
-import me.clementino.holiday.domain.HolidayType;
 
 /**
  * Observed holiday that may have a different observed date due to mondayisation rules.

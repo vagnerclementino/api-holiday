@@ -9,8 +9,8 @@ import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
 import java.time.Month;
 import java.util.List;
-import me.clementino.holiday.domain.HolidayType;
 import me.clementino.holiday.domain.dop.Holiday;
+import me.clementino.holiday.domain.dop.HolidayType;
 import me.clementino.holiday.domain.dop.KnownHoliday;
 import me.clementino.holiday.domain.dop.Locality;
 

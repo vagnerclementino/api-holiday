@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.util.List;
-import me.clementino.holiday.domain.HolidayType;
 
 /**
  * Sealed interface representing different types of holidays using Data-Oriented Programming

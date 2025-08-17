@@ -13,6 +13,7 @@ import me.clementino.holiday.dto.HolidayResponseDTO;
 import me.clementino.holiday.dto.LocationInfo;
 import me.clementino.holiday.dto.WhenInfo;
 import me.clementino.holiday.entity.HolidayEntity;
+import me.clementino.holiday.entity.LocalityEntity;
 import org.springframework.stereotype.Component;
 
 /** Simple mapper for Holiday data using DOP principles. */
@@ -67,16 +68,14 @@ public class SimpleHolidayMapper {
   /** Convert FixedHoliday to HolidayEntity. */
   private HolidayEntity toEntityFromFixed(FixedHoliday fixed) {
     // Get primary locality for basic fields
-    Locality primaryLocality = fixed.localities().get(0);
+    Locality primaryLocality = fixed.localities().getFirst();
     String country = getCountryCode(primaryLocality);
 
     HolidayEntity entity =
         new HolidayEntity(fixed.name(), fixed.description(), fixed.date(), country, fixed.type());
 
-    // Set additional fields
-    entity.setYear(fixed.date().getYear());
-    entity.setRecurring(fixed.isRecurring());
-    entity.setHolidayVariant("FIXED");
+    // Convert DOP localities to LocalityEntity list
+    entity.setLocalities(convertLocalitiesFromDOP(fixed.localities()));
 
     return entity;
   }
@@ -91,12 +90,8 @@ public class SimpleHolidayMapper {
         new HolidayEntity(
             observed.name(), observed.description(), observed.date(), country, observed.type());
 
-    // Set additional fields
-    entity.setYear(observed.date().getYear());
-    entity.setRecurring(false);
-    entity.setHolidayVariant("OBSERVED");
-    entity.setObserved(observed.observed());
-    entity.setMondayisation(observed.mondayisation());
+    // Convert DOP localities to LocalityEntity list
+    entity.setLocalities(convertLocalitiesFromDOP(observed.localities()));
 
     return entity;
   }
@@ -111,13 +106,8 @@ public class SimpleHolidayMapper {
         new HolidayEntity(
             moveable.name(), moveable.description(), moveable.date(), country, moveable.type());
 
-    // Set additional fields
-    entity.setYear(moveable.date().getYear());
-    entity.setRecurring(true);
-    entity.setHolidayVariant("MOVEABLE");
-    entity.setCalculationRule(moveable.knownHoliday().name());
-    entity.setMondayisation(moveable.mondayisation());
-    entity.setCalculated(true);
+    // Convert DOP localities to LocalityEntity list
+    entity.setLocalities(convertLocalitiesFromDOP(moveable.localities()));
 
     return entity;
   }
@@ -136,14 +126,8 @@ public class SimpleHolidayMapper {
             country,
             moveableFromBase.type());
 
-    // Set additional fields
-    entity.setYear(moveableFromBase.date().getYear());
-    entity.setRecurring(true);
-    entity.setHolidayVariant("MOVEABLE_FROM_BASE");
-    entity.setCalculationRule(moveableFromBase.knownHoliday().name());
-    entity.setDayOffset(moveableFromBase.dayOffset());
-    entity.setMondayisation(moveableFromBase.mondayisation());
-    entity.setCalculated(true);
+    // Convert DOP localities to LocalityEntity list
+    entity.setLocalities(convertLocalitiesFromDOP(moveableFromBase.localities()));
 
     return entity;
   }
@@ -154,6 +138,40 @@ public class SimpleHolidayMapper {
       case Locality.Country country -> country.code();
       case Locality.Subdivision subdivision -> subdivision.country().code();
       case Locality.City city -> city.subdivision().country().code();
+    };
+  }
+
+  /** Convert DOP Locality list to LocalityEntity list. */
+  private List<LocalityEntity> convertLocalitiesFromDOP(List<Locality> localities) {
+    return localities.stream().map(this::convertLocalityFromDOP).toList();
+  }
+
+  /** Convert single DOP Locality to LocalityEntity. */
+  private LocalityEntity convertLocalityFromDOP(Locality locality) {
+    return switch (locality) {
+      case Locality.Country country -> {
+        LocalityEntity entity = new LocalityEntity();
+        entity.setCountryCode(country.code());
+        entity.setCountryName(country.name());
+        yield entity;
+      }
+      case Locality.Subdivision subdivision -> {
+        LocalityEntity entity = new LocalityEntity();
+        entity.setCountryCode(subdivision.country().code());
+        entity.setCountryName(subdivision.country().name());
+        entity.setSubdivisionCode(subdivision.code());
+        entity.setSubdivisionName(subdivision.name());
+        yield entity;
+      }
+      case Locality.City city -> {
+        LocalityEntity entity = new LocalityEntity();
+        entity.setCountryCode(city.subdivision().country().code());
+        entity.setCountryName(city.subdivision().country().name());
+        entity.setSubdivisionCode(city.subdivision().code());
+        entity.setSubdivisionName(city.subdivision().name());
+        entity.setCityName(city.name());
+        yield entity;
+      }
     };
   }
 }

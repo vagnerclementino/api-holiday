@@ -5,7 +5,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import java.time.LocalDate;
 import java.time.Month;
 import java.util.List;
-import me.clementino.holiday.domain.HolidayType;
+import me.clementino.holiday.domain.dop.HolidayType;
 import me.clementino.holiday.domain.dop.Locality;
 import org.junit.jupiter.api.Test;
 

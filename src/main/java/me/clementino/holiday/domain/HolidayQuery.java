@@ -3,6 +3,7 @@ package me.clementino.holiday.domain;
 import java.time.LocalDate;
 import java.util.Objects;
 import java.util.Optional;
+import me.clementino.holiday.domain.dop.HolidayType;
 import me.clementino.holiday.domain.dop.Locality;
 
 /**

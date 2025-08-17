@@ -3,7 +3,7 @@ package me.clementino.holiday.dto;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.List;
-import me.clementino.holiday.domain.HolidayType;
+import me.clementino.holiday.domain.dop.HolidayType;
 
 /**
  * Comprehensive response DTO for holidays following DOP principles.

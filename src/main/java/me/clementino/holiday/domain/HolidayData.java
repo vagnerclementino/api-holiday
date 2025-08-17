@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.Optional;
+import me.clementino.holiday.domain.dop.HolidayType;
 
 /**
  * Immutable record representing holiday data. Following DOP v1.1 Principle 1: Model Data Immutably

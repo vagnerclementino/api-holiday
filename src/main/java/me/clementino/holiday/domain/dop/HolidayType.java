@@ -1,4 +1,4 @@
-package me.clementino.holiday.domain;
+package me.clementino.holiday.domain.dop;
 
 /**
  * Enum representing different types of holidays. Following DOP principle: Make illegal states

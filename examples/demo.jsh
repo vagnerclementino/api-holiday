@@ -3,7 +3,7 @@
 
 import java.time.*;
 import java.util.*;
-import me.clementino.holiday.domain.HolidayType;
+import me.clementino.holiday.domain.dop.HolidayType;
 import me.clementino.holiday.domain.oop.*;
 
 System.out.println("=== Demo Simples Holiday API ===\n");

@@ -67,7 +67,6 @@ public final class HolidayOperations {
 
     return switch (holiday) {
       case FixedHoliday fixed -> {
-        // Fixed holidays don't have observed dates, just return with calculated date
         LocalDate newDate = calculateFixedDate(fixed, year);
         yield fixed.withDate(newDate);
       }

@@ -2,7 +2,7 @@ package me.clementino.holiday.repository;
 
 import java.time.LocalDate;
 import java.util.List;
-import me.clementino.holiday.domain.HolidayType;
+import me.clementino.holiday.domain.dop.HolidayType;
 import me.clementino.holiday.entity.HolidayEntity;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.Query;
@@ -12,35 +12,22 @@ import org.springframework.stereotype.Repository;
  * MongoDB repository for HolidayEntity persistence operations.
  *
  * <p>This repository provides comprehensive querying capabilities for holiday data, including
- * year-based calculations, locality-based filtering, and complex search operations. It supports
- * both traditional field-based queries and advanced MongoDB aggregation operations.
+ * locality-based filtering using the new LocalityEntity structure, date range queries, and
+ * type-based filtering.
  *
  * <p><strong>Key Features:</strong>
  *
  * <ul>
- *   <li>Year-based holiday queries for calculation caching
- *   <li>Hierarchical locality filtering (country → state → city)
+ *   <li>Locality-based filtering using embedded LocalityEntity documents
  *   <li>Holiday type and date range filtering
- *   <li>Calculated vs base holiday differentiation
+ *   <li>Name-based search operations
  *   <li>Complex multi-criteria search operations
  * </ul>
  */
 @Repository
 public interface HolidayRepository extends MongoRepository<HolidayEntity, String> {
 
-  // ===== BASIC LOCALITY QUERIES =====
-
-  /** Find holidays by country (case insensitive). */
-  List<HolidayEntity> findByCountryIgnoreCase(String country);
-
-  /** Find holidays by country and state. */
-  List<HolidayEntity> findByCountryIgnoreCaseAndStateIgnoreCase(String country, String state);
-
-  /** Find holidays by country, state, and city. */
-  List<HolidayEntity> findByCountryIgnoreCaseAndStateIgnoreCaseAndCityIgnoreCase(
-      String country, String state, String city);
-
-  // ===== TYPE AND DATE QUERIES =====
+  // ===== BASIC QUERIES =====
 
   /** Find holidays by type. */
   List<HolidayEntity> findByType(HolidayType type);
@@ -48,91 +35,75 @@ public interface HolidayRepository extends MongoRepository<HolidayEntity, String
   /** Find holidays by date range. */
   List<HolidayEntity> findByDateBetween(LocalDate startDate, LocalDate endDate);
 
-  /** Find holidays by date and country. */
-  List<HolidayEntity> findByDateAndCountryIgnoreCase(LocalDate date, String country);
-
   /** Find holidays by name (case insensitive). */
   List<HolidayEntity> findByNameIgnoreCase(String name);
 
-  // ===== YEAR-BASED QUERIES FOR CALCULATIONS =====
+  /** Find holidays by date. */
+  List<HolidayEntity> findByDate(LocalDate date);
 
-  /** Find holidays by year and country. */
-  List<HolidayEntity> findByYearAndCountryIgnoreCase(Integer year, String country);
+  // ===== LOCALITY-BASED QUERIES =====
 
-  /** Find calculated holidays for a specific year. */
-  List<HolidayEntity> findByYearAndIsCalculatedTrue(Integer year);
+  /** Find holidays by country code in localities. */
+  @Query("{ 'localities.countryCode': { $regex: ?0, $options: 'i' } }")
+  List<HolidayEntity> findByCountryCode(String countryCode);
 
-  /** Find base holidays (not calculated) for a country. */
-  List<HolidayEntity> findByCountryIgnoreCaseAndIsCalculatedFalse(String country);
+  /** Find holidays by country code and subdivision code. */
+  @Query(
+      "{ $and: [ "
+          + "{ 'localities.countryCode': { $regex: ?0, $options: 'i' } }, "
+          + "{ 'localities.subdivisionCode': { $regex: ?1, $options: 'i' } } "
+          + "] }")
+  List<HolidayEntity> findByCountryCodeAndSubdivisionCode(
+      String countryCode, String subdivisionCode);
 
-  /** Find holidays by year, country, and type. */
-  List<HolidayEntity> findByYearAndCountryIgnoreCaseAndType(
-      Integer year, String country, HolidayType type);
+  /** Find holidays by country code, subdivision code, and city. */
+  @Query(
+      "{ $and: [ "
+          + "{ 'localities.countryCode': { $regex: ?0, $options: 'i' } }, "
+          + "{ 'localities.subdivisionCode': { $regex: ?1, $options: 'i' } }, "
+          + "{ 'localities.cityName': { $regex: ?2, $options: 'i' } } "
+          + "] }")
+  List<HolidayEntity> findByCountryCodeAndSubdivisionCodeAndCityName(
+      String countryCode, String subdivisionCode, String cityName);
 
-  // ===== DERIVED HOLIDAY QUERIES =====
-
-  /** Find derived holidays by base holiday ID. */
-  List<HolidayEntity> findByBaseHolidayId(String baseHolidayId);
-
-  /** Find derived holidays by base holiday ID and year. */
-  List<HolidayEntity> findByBaseHolidayIdAndYear(String baseHolidayId, Integer year);
-
-  // ===== RECURRING AND SPECIAL QUERIES =====
-
-  /** Find recurring holidays. */
-  List<HolidayEntity> findByRecurringTrue();
-
-  /** Find holidays with mondayisation enabled. */
-  List<HolidayEntity> findByMondayisationTrue();
-
-  /** Find holidays by holiday variant type. */
-  List<HolidayEntity> findByHolidayVariant(String holidayVariant);
+  /** Find holidays by date and country code. */
+  @Query(
+      "{ $and: [ "
+          + "{ 'date': ?0 }, "
+          + "{ 'localities.countryCode': { $regex: ?1, $options: 'i' } } "
+          + "] }")
+  List<HolidayEntity> findByDateAndCountryCode(LocalDate date, String countryCode);
 
   // ===== COMPLEX CUSTOM QUERIES =====
 
   /** Custom query to find holidays by multiple criteria. */
   @Query(
       "{ $and: [ "
-          + "{ $or: [ { 'country': { $regex: ?0, $options: 'i' } }, { ?0: null } ] }, "
+          + "{ $or: [ { 'localities.countryCode': { $regex: ?0, $options: 'i' } }, { ?0: null } ] }, "
           + "{ $or: [ { 'type': ?1 }, { ?1: null } ] }, "
           + "{ $or: [ { 'date': { $gte: ?2 } }, { ?2: null } ] }, "
           + "{ $or: [ { 'date': { $lte: ?3 } }, { ?3: null } ] } "
           + "] }")
   List<HolidayEntity> findWithFilters(
-      String country, HolidayType type, LocalDate startDate, LocalDate endDate);
-
-  /** Find holidays for a specific year with locality and type filters. */
-  @Query(
-      "{ $and: [ "
-          + "{ 'year': ?0 }, "
-          + "{ $or: [ { 'country': { $regex: ?1, $options: 'i' } }, { ?1: null } ] }, "
-          + "{ $or: [ { 'state': { $regex: ?2, $options: 'i' } }, { ?2: null } ] }, "
-          + "{ $or: [ { 'city': { $regex: ?3, $options: 'i' } }, { ?3: null } ] }, "
-          + "{ $or: [ { 'type': ?4 }, { ?4: null } ] } "
-          + "] }")
-  List<HolidayEntity> findByYearWithLocalityAndType(
-      Integer year, String country, String state, String city, HolidayType type);
-
-  /** Find holidays that need calculation for a specific year and country. */
-  @Query(
-      "{ $and: [ "
-          + "{ 'country': { $regex: ?1, $options: 'i' } }, "
-          + "{ 'recurring': true }, "
-          + "{ 'isCalculated': false }, "
-          + "{ $or: [ { 'year': null }, { 'year': { $ne: ?0 } } ] } "
-          + "] }")
-  List<HolidayEntity> findHolidaysNeedingCalculation(Integer year, String country);
-
-  /** Check if a holiday already exists for a specific year, country, and name. */
-  @Query(
-      "{ 'year': ?0, 'country': { $regex: ?1, $options: 'i' }, 'name': { $regex: ?2, $options: 'i' } }")
-  List<HolidayEntity> findExistingHolidayForYear(Integer year, String country, String name);
+      String countryCode, HolidayType type, LocalDate startDate, LocalDate endDate);
 
   /** Find holidays by effective date (considering observed date). */
   @Query(
       "{ $and: [ "
-          + "{ $or: [ { 'observed': ?0 }, { $and: [ { 'observed': null }, { 'date': ?0 } ] } ] }, "
-          + "{ 'country': { $regex: ?1, $options: 'i' } } "
+          + "{ $or: [ "
+          + "  { $and: [ { 'observed': { $ne: null } }, { 'observed': ?0 } ] }, "
+          + "  { $and: [ { 'observed': null }, { 'date': ?0 } ] } "
+          + "] }, "
+          + "{ 'localities.countryCode': { $regex: ?1, $options: 'i' } } "
           + "] }")
-  List<HolidayEntity> findByEffectiveDateAndCountry(LocalDate effectiveDate, String country);
+  List<HolidayEntity> findByEffectiveDateAndCountryCode(
+      LocalDate effectiveDate, String countryCode);
+
+  /** Find holidays by type and country code. */
+  @Query(
+      "{ $and: [ "
+          + "{ 'type': ?0 }, "
+          + "{ 'localities.countryCode': { $regex: ?1, $options: 'i' } } "
+          + "] }")
+  List<HolidayEntity> findByTypeAndCountryCode(HolidayType type, String countryCode);
 }

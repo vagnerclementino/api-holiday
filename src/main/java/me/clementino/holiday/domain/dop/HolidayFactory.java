@@ -5,7 +5,6 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.Month;
 import java.util.List;
-import me.clementino.holiday.domain.HolidayType;
 
 /**
  * Factory for creating Holiday instances following DOP principles. Based on the OOP Holiday classes

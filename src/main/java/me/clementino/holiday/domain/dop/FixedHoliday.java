@@ -4,7 +4,6 @@ import java.time.LocalDate;
 import java.time.Month;
 import java.util.List;
 import java.util.Objects;
-import me.clementino.holiday.domain.HolidayType;
 
 /**
  * Fixed holiday that occurs on the same date every year.

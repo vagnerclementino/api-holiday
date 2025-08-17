@@ -3,7 +3,7 @@ package me.clementino.holiday.dto;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import java.time.LocalDate;
 import java.util.Optional;
-import me.clementino.holiday.domain.HolidayType;
+import me.clementino.holiday.domain.dop.HolidayType;
 
 /**
  * Summary response DTO for holiday data using Java 24 record. Contains minimal information for list
