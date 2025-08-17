@@ -1,4 +1,4 @@
-package me.clementino.holiday.service;
+package me.clementino.holiday.exception;
 
 import java.util.List;
 
