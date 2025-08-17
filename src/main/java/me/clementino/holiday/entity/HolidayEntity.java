@@ -60,9 +60,8 @@ import org.springframework.data.mongodb.core.mapping.Document;
 })
 public class HolidayEntity {
 
-  @Id private String id;
-
-  // ===== CORE HOLIDAY FIELDS (from DOP Holiday interface) =====
+  @Id
+  private String id;
 
   @NotNull
   @Size(max = 255)
@@ -73,68 +72,23 @@ public class HolidayEntity {
   @Size(max = 1000)
   private String description;
 
-  @NotNull @Indexed private LocalDate date;
-
-  @NotNull @Indexed private HolidayType type;
-
-  // ===== LOCALITY FIELDS =====
+  @NotNull @Indexed
+  private LocalDate date;
 
   @NotNull
-  @Size(max = 255)
   @Indexed
-  private String country;
+  private HolidayType type;
 
-  @Size(max = 255)
-  @Indexed
-  private String state;
-
-  @Size(max = 255)
-  @Indexed
-  private String city;
-
-  // Embedded locality entities for complex queries
+  @NotNull
   private List<LocalityEntity> localities;
 
-  // ===== YEAR-BASED CALCULATION FIELDS =====
-
-  @Indexed private Integer year; // Year for which this holiday instance was calculated
-
-  @Indexed private boolean isCalculated; // Flag indicating if this is a calculated instance
-
-  @Size(max = 500)
-  private String calculationRule; // Rule used for calculation (for moveable holidays)
-
-  private Integer dayOffset; // Day offset from base holiday (for derived holidays)
-
-  private boolean mondayisation; // Whether mondayisation rules apply
-
-  @Indexed private String baseHolidayId; // Reference to base holiday for derived holidays
-
   private LocalDate observed; // Observed date (different from actual date due to mondayisation)
-
-  private boolean recurring; // Whether this holiday recurs annually
-
-  // ===== DOP SEALED INTERFACE SERIALIZATION SUPPORT =====
-
-  @Size(max = 50)
-  @Indexed
-  private String holidayVariant; // Type of holiday variant (FixedHoliday, MoveableHoliday, etc.)
-
-  @Size(max = 5000)
-  private String holidayData; // Serialized DOP Holiday sealed interface data
-
-  @Size(max = 2000)
-  private String localityData; // Serialized DOP Locality sealed interface data
-
-  // ===== METADATA FIELDS =====
 
   @CreatedDate private LocalDateTime dateCreated;
 
   @LastModifiedDate private LocalDateTime lastUpdated;
 
   @Version private Integer version; // Optimistic locking
-
-  // ===== CONSTRUCTORS =====
 
   // Default constructor for MongoDB
   public HolidayEntity() {}
@@ -145,11 +99,7 @@ public class HolidayEntity {
     this.name = Objects.requireNonNull(name, "Name cannot be null");
     this.description = description;
     this.date = Objects.requireNonNull(date, "Date cannot be null");
-    this.country = Objects.requireNonNull(country, "Country cannot be null");
     this.type = Objects.requireNonNull(type, "Type cannot be null");
-    this.recurring = false;
-    this.isCalculated = false;
-    this.mondayisation = false;
   }
 
   // Enhanced constructor for calculated holiday instances
@@ -162,8 +112,6 @@ public class HolidayEntity {
       Integer year,
       boolean isCalculated) {
     this(name, description, date, country, type);
-    this.year = year;
-    this.isCalculated = isCalculated;
   }
 
   // Constructor for derived holidays with base holiday reference
@@ -173,41 +121,8 @@ public class HolidayEntity {
       LocalDate date,
       String country,
       HolidayType type,
-      Integer year,
-      String baseHolidayId,
-      Integer dayOffset) {
+      Integer year) {
     this(name, description, date, country, type, year, true);
-    this.baseHolidayId = baseHolidayId;
-    this.dayOffset = dayOffset;
-  }
-
-  // ===== BUSINESS LOGIC HELPER METHODS =====
-
-  /**
-   * Checks if this holiday is a base holiday (not derived from another holiday).
-   *
-   * @return true if this is a base holiday, false if derived
-   */
-  public boolean isBaseHoliday() {
-    return baseHolidayId == null || baseHolidayId.isBlank();
-  }
-
-  /**
-   * Checks if this holiday is a derived holiday (calculated from a base holiday).
-   *
-   * @return true if this is a derived holiday, false if base
-   */
-  public boolean isDerivedHoliday() {
-    return !isBaseHoliday();
-  }
-
-  /**
-   * Checks if this holiday has mondayisation rules applied.
-   *
-   * @return true if mondayisation is enabled
-   */
-  public boolean hasMondayisation() {
-    return mondayisation;
   }
 
   /**
@@ -219,39 +134,6 @@ public class HolidayEntity {
     return observed != null ? observed : date;
   }
 
-  /**
-   * Checks if this holiday applies to a specific locality level.
-   *
-   * @param checkCountry the country to check
-   * @param checkState the state to check (optional)
-   * @param checkCity the city to check (optional)
-   * @return true if the holiday applies to the specified locality
-   */
-  public boolean appliesTo(String checkCountry, String checkState, String checkCity) {
-    if (!Objects.equals(this.country, checkCountry)) {
-      return false;
-    }
-
-    // If holiday is national level, it applies everywhere in the country
-    if (this.state == null || this.state.isBlank()) {
-      return true;
-    }
-
-    // If holiday is state level, check state match
-    if (!Objects.equals(this.state, checkState)) {
-      return false;
-    }
-
-    // If holiday is city level, check city match
-    if (this.city != null && !this.city.isBlank()) {
-      return Objects.equals(this.city, checkCity);
-    }
-
-    // State level holiday applies to all cities in the state
-    return true;
-  }
-
-  // ===== GETTERS AND SETTERS =====
 
   public String getId() {
     return id;
@@ -293,124 +175,12 @@ public class HolidayEntity {
     this.type = type;
   }
 
-  public String getCountry() {
-    return country;
-  }
-
-  public void setCountry(String country) {
-    this.country = country;
-  }
-
-  public String getState() {
-    return state;
-  }
-
-  public void setState(String state) {
-    this.state = state;
-  }
-
-  public String getCity() {
-    return city;
-  }
-
-  public void setCity(String city) {
-    this.city = city;
-  }
-
   public List<LocalityEntity> getLocalities() {
     return localities;
   }
 
   public void setLocalities(List<LocalityEntity> localities) {
     this.localities = localities;
-  }
-
-  public Integer getYear() {
-    return year;
-  }
-
-  public void setYear(Integer year) {
-    this.year = year;
-  }
-
-  public boolean isCalculated() {
-    return isCalculated;
-  }
-
-  public void setCalculated(boolean calculated) {
-    isCalculated = calculated;
-  }
-
-  public String getCalculationRule() {
-    return calculationRule;
-  }
-
-  public void setCalculationRule(String calculationRule) {
-    this.calculationRule = calculationRule;
-  }
-
-  public Integer getDayOffset() {
-    return dayOffset;
-  }
-
-  public void setDayOffset(Integer dayOffset) {
-    this.dayOffset = dayOffset;
-  }
-
-  public boolean isMondayisation() {
-    return mondayisation;
-  }
-
-  public void setMondayisation(boolean mondayisation) {
-    this.mondayisation = mondayisation;
-  }
-
-  public String getBaseHolidayId() {
-    return baseHolidayId;
-  }
-
-  public void setBaseHolidayId(String baseHolidayId) {
-    this.baseHolidayId = baseHolidayId;
-  }
-
-  public LocalDate getObserved() {
-    return observed;
-  }
-
-  public void setObserved(LocalDate observed) {
-    this.observed = observed;
-  }
-
-  public boolean isRecurring() {
-    return recurring;
-  }
-
-  public void setRecurring(boolean recurring) {
-    this.recurring = recurring;
-  }
-
-  public String getHolidayVariant() {
-    return holidayVariant;
-  }
-
-  public void setHolidayVariant(String holidayVariant) {
-    this.holidayVariant = holidayVariant;
-  }
-
-  public String getHolidayData() {
-    return holidayData;
-  }
-
-  public void setHolidayData(String holidayData) {
-    this.holidayData = holidayData;
-  }
-
-  public String getLocalityData() {
-    return localityData;
-  }
-
-  public void setLocalityData(String localityData) {
-    this.localityData = localityData;
   }
 
   public LocalDateTime getDateCreated() {
