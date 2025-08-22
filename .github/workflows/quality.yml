@@ -552,6 +552,7 @@ jobs:
                           <h3>🎨 Code Style Report</h3>
                           <p>Checkstyle analysis results and code formatting validation.</p>
                           <a href="style-reports/checkstyle.html" class="report-link">View Style Report</a>
+                          <a href="style-reports/checkstyle-result.xml" class="report-link" style="margin-left: 10px; background: #6c757d;">View XML</a>
                       </div>
                       
                       <div class="report-card">
@@ -579,19 +580,23 @@ jobs:
           </html>
           EOF
           
-          # Copy all reports to consolidated directory
+          # Copy all reports to consolidated directory with correct structure
           if [ -d "reports/style-reports" ]; then
-            cp -r reports/style-reports consolidated-reports/
+            mkdir -p consolidated-reports/style-reports
+            cp reports/style-reports/checkstyle.html consolidated-reports/style-reports/ 2>/dev/null || echo "checkstyle.html not found"
+            cp reports/style-reports/checkstyle-result.xml consolidated-reports/style-reports/ 2>/dev/null || echo "checkstyle-result.xml not found"
             echo "✅ Style reports copied"
           fi
           
           if [ -d "reports/unit-test-reports" ]; then
-            cp -r reports/unit-test-reports consolidated-reports/
+            mkdir -p consolidated-reports/unit-test-reports
+            cp reports/unit-test-reports/unit-tests.html consolidated-reports/unit-test-reports/ 2>/dev/null || echo "unit-tests.html not found"
             echo "✅ Unit test reports copied"
           fi
           
           if [ -d "reports/integration-test-reports" ]; then
-            cp -r reports/integration-test-reports consolidated-reports/
+            mkdir -p consolidated-reports/integration-test-reports
+            cp reports/integration-test-reports/integration-tests.html consolidated-reports/integration-test-reports/ 2>/dev/null || echo "integration-tests.html not found"
             echo "✅ Integration test reports copied"
           fi
           
