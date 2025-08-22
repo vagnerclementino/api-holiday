@@ -586,82 +586,48 @@ jobs:
           echo "🔍 Debugging: Listing downloaded artifacts..."
           find reports/ -type f -name "*.html" 2>/dev/null || echo "No HTML files found"
           
+          # Create directories
+          mkdir -p consolidated-reports/{style-reports,unit-test-reports,integration-test-reports}
+          
+          # Copy style reports
           if [ -d "reports/style-reports" ]; then
-            mkdir -p consolidated-reports/style-reports
-            # Try different possible locations for checkstyle.html
             if [ -f "reports/style-reports/checkstyle.html" ]; then
               cp reports/style-reports/checkstyle.html consolidated-reports/style-reports/
-              echo "✅ checkstyle.html copied from direct path"
             elif [ -f "reports/style-reports/reports-html/checkstyle.html" ]; then
               cp reports/style-reports/reports-html/checkstyle.html consolidated-reports/style-reports/
-              echo "✅ checkstyle.html copied from nested path"
             else
-              echo "⚠️ checkstyle.html not found, creating placeholder"
-              cat > consolidated-reports/style-reports/checkstyle.html << 'EOF'
-<!DOCTYPE html>
-<html><head><title>Checkstyle Report</title></head>
-<body><h1>Checkstyle Report</h1><p>Report generation in progress...</p></body></html>
-EOF
+              echo "<html><body><h1>Checkstyle Report</h1><p>Report not available</p></body></html>" > consolidated-reports/style-reports/checkstyle.html
             fi
-            
-            cp reports/style-reports/checkstyle-result.xml consolidated-reports/style-reports/ 2>/dev/null || echo "checkstyle-result.xml not found"
+            cp reports/style-reports/checkstyle-result.xml consolidated-reports/style-reports/ 2>/dev/null || echo "XML not found"
             echo "✅ Style reports processed"
           fi
           
+          # Copy unit test reports
           if [ -d "reports/unit-test-reports" ]; then
-            mkdir -p consolidated-reports/unit-test-reports
-            # Try different possible locations for unit-tests.html
             if [ -f "reports/unit-test-reports/unit-tests.html" ]; then
               cp reports/unit-test-reports/unit-tests.html consolidated-reports/unit-test-reports/
-              echo "✅ unit-tests.html copied from direct path"
             elif [ -f "reports/unit-test-reports/reports-html/unit-tests.html" ]; then
               cp reports/unit-test-reports/reports-html/unit-tests.html consolidated-reports/unit-test-reports/
-              echo "✅ unit-tests.html copied from nested path"
             else
-              echo "⚠️ unit-tests.html not found, creating placeholder"
-              cat > consolidated-reports/unit-test-reports/unit-tests.html << 'EOF'
-<!DOCTYPE html>
-<html><head><title>Unit Test Report</title></head>
-<body><h1>Unit Test Report</h1><p>Report generation in progress...</p></body></html>
-EOF
+              echo "<html><body><h1>Unit Test Report</h1><p>Report not available</p></body></html>" > consolidated-reports/unit-test-reports/unit-tests.html
             fi
             echo "✅ Unit test reports processed"
           else
-            echo "⚠️ unit-test-reports directory not found, creating placeholder"
-            mkdir -p consolidated-reports/unit-test-reports
-            cat > consolidated-reports/unit-test-reports/unit-tests.html << 'EOF'
-<!DOCTYPE html>
-<html><head><title>Unit Test Report</title></head>
-<body><h1>Unit Test Report</h1><p>Unit test reports will be available after test execution.</p></body></html>
-EOF
+            echo "<html><body><h1>Unit Test Report</h1><p>Report not available</p></body></html>" > consolidated-reports/unit-test-reports/unit-tests.html
           fi
           
+          # Copy integration test reports
           if [ -d "reports/integration-test-reports" ]; then
-            mkdir -p consolidated-reports/integration-test-reports
-            # Try different possible locations for integration-tests.html
             if [ -f "reports/integration-test-reports/integration-tests.html" ]; then
               cp reports/integration-test-reports/integration-tests.html consolidated-reports/integration-test-reports/
-              echo "✅ integration-tests.html copied from direct path"
             elif [ -f "reports/integration-test-reports/reports-html/integration-tests.html" ]; then
               cp reports/integration-test-reports/reports-html/integration-tests.html consolidated-reports/integration-test-reports/
-              echo "✅ integration-tests.html copied from nested path"
             else
-              echo "⚠️ integration-tests.html not found, creating placeholder"
-              cat > consolidated-reports/integration-test-reports/integration-tests.html << 'EOF'
-<!DOCTYPE html>
-<html><head><title>Integration Test Report</title></head>
-<body><h1>Integration Test Report</h1><p>Report generation in progress...</p></body></html>
-EOF
+              echo "<html><body><h1>Integration Test Report</h1><p>Report not available</p></body></html>" > consolidated-reports/integration-test-reports/integration-tests.html
             fi
             echo "✅ Integration test reports processed"
           else
-            echo "⚠️ integration-test-reports directory not found, creating placeholder"
-            mkdir -p consolidated-reports/integration-test-reports
-            cat > consolidated-reports/integration-test-reports/integration-tests.html << 'EOF'
-<!DOCTYPE html>
-<html><head><title>Integration Test Report</title></head>
-<body><h1>Integration Test Report</h1><p>Integration test reports will be available after test execution.</p></body></html>
-EOF
+            echo "<html><body><h1>Integration Test Report</h1><p>Report not available</p></body></html>" > consolidated-reports/integration-test-reports/integration-tests.html
           fi
           
           echo "📊 Consolidated HTML report created successfully!"
