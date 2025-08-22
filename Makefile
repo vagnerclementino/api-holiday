@@ -205,6 +205,106 @@ quality: ##@quality Run complete quality workflow (build + style + tests)
 	@echo "$(GREEN)🎯 Running complete quality workflow...$(NC)"
 	@./scripts/test-quality-workflow.sh
 
+# HTML Reports targets
+reports: ##@reports Generate all HTML reports and open dashboard
+	@echo "$(GREEN)📊 Generating all HTML reports...$(NC)"
+	@$(MAKE) reports-generate
+	@$(MAKE) reports-open
+
+reports-generate: ##@reports Generate all HTML reports (style + unit tests + integration tests)
+	@echo "$(GREEN)📊 Generating HTML reports...$(NC)"
+	@echo "$(BLUE)🎨 Generating style report...$(NC)"
+	@$(MAKE) report-style-generate
+	@echo "$(BLUE)🧪 Generating unit test report...$(NC)"
+	@$(MAKE) report-unit-generate
+	@echo "$(BLUE)🔗 Generating integration test report...$(NC)"
+	@$(MAKE) report-integration-generate
+	@echo "$(BLUE)📋 Generating consolidated dashboard...$(NC)"
+	@$(MAKE) report-dashboard-generate
+	@echo "$(GREEN)✅ All HTML reports generated successfully!$(NC)"
+
+reports-open: ##@reports Open HTML reports dashboard in browser
+	@echo "$(GREEN)🌐 Opening HTML reports dashboard...$(NC)"
+	@if [ -f "target/reports-html/index.html" ]; then \
+		open target/reports-html/index.html; \
+		echo "$(GREEN)✅ Dashboard opened in browser!$(NC)"; \
+	else \
+		echo "$(RED)❌ Dashboard not found. Run 'make reports-generate' first.$(NC)"; \
+		exit 1; \
+	fi
+
+report-style: ##@reports Generate style report and open in browser
+	@echo "$(GREEN)🎨 Generating style report...$(NC)"
+	@$(MAKE) report-style-generate
+	@$(MAKE) report-style-open
+
+report-style-generate: ##@reports Generate Checkstyle HTML report
+	@echo "$(BLUE)🎨 Generating Checkstyle HTML report...$(NC)"
+	@$(MAVEN) checkstyle:checkstyle -B
+	@mkdir -p target/reports-html
+	@./scripts/generate-style-report.sh
+	@echo "$(GREEN)✅ Checkstyle HTML report generated!$(NC)"
+
+report-style-open: ##@reports Open style report in browser
+	@echo "$(GREEN)🌐 Opening style report...$(NC)"
+	@if [ -f "target/reports-html/checkstyle.html" ]; then \
+		open target/reports-html/checkstyle.html; \
+		echo "$(GREEN)✅ Style report opened in browser!$(NC)"; \
+	else \
+		echo "$(RED)❌ Style report not found. Run 'make report-style-generate' first.$(NC)"; \
+		exit 1; \
+	fi
+
+report-unit: ##@reports Generate unit test report and open in browser
+	@echo "$(GREEN)🧪 Generating unit test report...$(NC)"
+	@$(MAKE) report-unit-generate
+	@$(MAKE) report-unit-open
+
+report-unit-generate: ##@reports Generate unit test HTML report
+	@echo "$(BLUE)🧪 Generating unit test HTML report...$(NC)"
+	@$(MAVEN) test -Punit-tests -B
+	@mkdir -p target/reports-html
+	@./scripts/generate-unit-report.sh
+	@echo "$(GREEN)✅ Unit test HTML report generated!$(NC)"
+
+report-unit-open: ##@reports Open unit test report in browser
+	@echo "$(GREEN)🌐 Opening unit test report...$(NC)"
+	@if [ -f "target/reports-html/unit-tests.html" ]; then \
+		open target/reports-html/unit-tests.html; \
+		echo "$(GREEN)✅ Unit test report opened in browser!$(NC)"; \
+	else \
+		echo "$(RED)❌ Unit test report not found. Run 'make report-unit-generate' first.$(NC)"; \
+		exit 1; \
+	fi
+
+report-integration: ##@reports Generate integration test report and open in browser
+	@echo "$(GREEN)🔗 Generating integration test report...$(NC)"
+	@$(MAKE) report-integration-generate
+	@$(MAKE) report-integration-open
+
+report-integration-generate: ##@reports Generate integration test HTML report
+	@echo "$(BLUE)🔗 Generating integration test HTML report...$(NC)"
+	@$(MAVEN) test -Pintegration-tests -B
+	@mkdir -p target/reports-html
+	@./scripts/generate-integration-report.sh
+	@echo "$(GREEN)✅ Integration test HTML report generated!$(NC)"
+
+report-integration-open: ##@reports Open integration test report in browser
+	@echo "$(GREEN)🌐 Opening integration test report...$(NC)"
+	@if [ -f "target/reports-html/integration-tests.html" ]; then \
+		open target/reports-html/integration-tests.html; \
+		echo "$(GREEN)✅ Integration test report opened in browser!$(NC)"; \
+	else \
+		echo "$(RED)❌ Integration test report not found. Run 'make report-integration-generate' first.$(NC)"; \
+		exit 1; \
+	fi
+
+report-dashboard-generate: ##@reports Generate consolidated HTML dashboard
+	@echo "$(BLUE)📋 Generating consolidated HTML dashboard...$(NC)"
+	@mkdir -p target/reports-html
+	@./scripts/generate-dashboard.sh
+	@echo "$(GREEN)✅ Consolidated HTML dashboard generated!$(NC)"
+
 checkstyle: ##@quality Run Checkstyle code analysis
 	@echo "$(GREEN)🎨 Running Checkstyle analysis...$(NC)"
 	@$(MAVEN) checkstyle:check -B
@@ -345,4 +445,4 @@ setup: java-check ##@setup Complete environment setup with Java version check
 	@echo "  3. Load sample data: make sample-data"
 	@echo "$(GREEN)🎉 Holiday API is ready for development!$(NC)"
 
-.PHONY: docker-check build-artifact build-image run run-local run-docker run-only run-detached infra db dev dev-local dev-debug mongosh mongo-admin db-reset test unit-test test-all stop restart clean clean-dev status status-local logs url health sample-data quick-test package info java-check setup help
+.PHONY: docker-check build-artifact build-image run run-local run-docker run-only run-detached infra db dev dev-local dev-debug mongosh mongo-admin db-reset test unit-test test-all stop restart clean clean-dev status status-local logs url health sample-data quick-test package info java-check setup help reports reports-generate reports-open report-style report-style-generate report-style-open report-unit report-unit-generate report-unit-open report-integration report-integration-generate report-integration-open report-dashboard-generate
