@@ -170,7 +170,7 @@ jobs:
           path: |
             target/reports-html/checkstyle.html
             target/checkstyle-result.xml
-          retention-days: 7
+          retention-days: 2
 
   # ============================================================================
   # JOB 3: UNIT TESTS (Tagged with @Tag("unit"))
@@ -327,7 +327,7 @@ jobs:
           path: |
             target/reports-html/unit-tests.html
             target/surefire-reports/
-          retention-days: 7
+          retention-days: 2
 
       - name: 📋 Publish Unit Test Results
         if: always()
@@ -482,7 +482,7 @@ jobs:
           path: |
             target/reports-html/integration-tests.html
             target/surefire-reports/
-          retention-days: 7
+          retention-days: 2
 
       - name: 📋 Publish Integration Test Results
         if: always()
@@ -637,7 +637,7 @@ jobs:
         with:
           name: quality-reports-html
           path: consolidated-reports/
-          retention-days: 30
+          retention-days: 7
 
   # ============================================================================
   # JOB 6: QUALITY GATE
