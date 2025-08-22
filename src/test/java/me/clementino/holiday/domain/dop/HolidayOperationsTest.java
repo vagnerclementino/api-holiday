@@ -7,6 +7,7 @@ import java.time.Month;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -15,6 +16,7 @@ import org.junit.jupiter.api.Test;
  * dates.
  */
 @DisplayName("HolidayOperations Tests")
+@Tag("unit")
 class HolidayOperationsTest {
 
   private static final List<Locality> BRAZIL_LOCALITIES = List.of(Locality.country("BR", "Brazil"));

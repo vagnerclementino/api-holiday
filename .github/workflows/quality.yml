@@ -142,7 +142,7 @@ jobs:
           retention-days: 2
 
   # ============================================================================
-  # JOB 3: UNIT TESTS
+  # JOB 3: UNIT TESTS (Tagged with @Tag("unit"))
   # ============================================================================
   unit-tests:
     name: 🧪 Unit Tests
@@ -173,8 +173,8 @@ jobs:
 
       - name: 🧪 Run Unit Tests
         run: |
-          echo "🧪 Running unit tests..."
-          ./mvnw test -Dtest="!**/*IntegrationTest" -B -V
+          echo "🧪 Running unit tests only (tagged with @Tag('unit'))..."
+          ./mvnw test -Punit-tests -B -V
 
       - name: 📊 Generate Test Report
         if: always()
@@ -212,7 +212,7 @@ jobs:
           fail-on-empty: false
 
   # ============================================================================
-  # JOB 4: INTEGRATION TESTS
+  # JOB 4: INTEGRATION TESTS (Tagged with @Tag("integration"))
   # ============================================================================
   integration-tests:
     name: 🔗 Integration Tests
@@ -243,14 +243,8 @@ jobs:
 
       - name: 🔗 Run Integration Tests
         run: |
-          echo "🔗 Running integration tests with TestContainers..."
-          # Check if integration tests exist
-          if find src/test -name "*IntegrationTest.java" -o -name "*IT.java" | grep -q .; then
-            ./mvnw test -Dtest="**/*IntegrationTest,**/*IT" -B -V
-          else
-            echo "⚠️ No integration tests found, running all tests as integration tests"
-            ./mvnw test -B -V
-          fi
+          echo "🔗 Running integration tests only (tagged with @Tag('integration'))..."
+          ./mvnw test -Pintegration-tests -B -V
 
       - name: 📊 Generate Integration Test Report
         if: always()

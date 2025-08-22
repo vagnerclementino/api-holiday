@@ -7,9 +7,11 @@ import java.time.Month;
 import java.util.List;
 import me.clementino.holiday.domain.dop.HolidayType;
 import me.clementino.holiday.domain.dop.Locality;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 /** Test class demonstrating DOP principles with CreateHolidayRequest. */
+@Tag("unit")
 class CreateHolidayRequestTest {
 
   @Test

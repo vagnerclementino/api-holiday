@@ -35,6 +35,10 @@
         <springdoc.version>2.7.0</springdoc.version>
         <mapstruct.version>1.6.3</mapstruct.version>
         <instancio.version>5.1.0</instancio.version>
+        
+        <!-- Test execution properties -->
+        <test.groups></test.groups>
+        <test.excludedGroups></test.excludedGroups>
     </properties>
 
     <dependencies>
@@ -174,6 +178,9 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
                     <argLine>--enable-preview</argLine>
+                    <!-- Default: run all tests -->
+                    <groups>${test.groups}</groups>
+                    <excludedGroups>${test.excludedGroups}</excludedGroups>
                 </configuration>
             </plugin>
             
@@ -266,5 +273,38 @@
             </plugin>
         </plugins>
     </build>
+
+    <!-- Test execution profiles -->
+    <profiles>
+        <!-- Profile for running only unit tests -->
+        <profile>
+            <id>unit-tests</id>
+            <properties>
+                <test.groups>unit</test.groups>
+                <test.excludedGroups>integration</test.excludedGroups>
+            </properties>
+        </profile>
+        
+        <!-- Profile for running only integration tests -->
+        <profile>
+            <id>integration-tests</id>
+            <properties>
+                <test.groups>integration</test.groups>
+                <test.excludedGroups>unit</test.excludedGroups>
+            </properties>
+        </profile>
+        
+        <!-- Profile for running all tests (default behavior) -->
+        <profile>
+            <id>all-tests</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <properties>
+                <test.groups></test.groups>
+                <test.excludedGroups></test.excludedGroups>
+            </properties>
+        </profile>
+    </profiles>
 
 </project>

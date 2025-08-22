@@ -5,9 +5,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.util.Optional;
 import me.clementino.holiday.domain.Location;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 @DisplayName("LocationInfo Tests")
+@Tag("unit")
 class LocationInfoTest {
 
   @Test

@@ -7,9 +7,11 @@ import java.time.LocalDate;
 import java.util.List;
 import me.clementino.holiday.domain.dop.HolidayType;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 @DisplayName("HolidayResponseDTO Tests")
+@Tag("unit")
 class HolidayResponseDTOTest {
 
   @Test

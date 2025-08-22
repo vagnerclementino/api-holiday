@@ -13,9 +13,11 @@ import me.clementino.holiday.dto.HolidayResponseDTO;
 import me.clementino.holiday.dto.LocationInfo;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 @DisplayName("SimpleHolidayMapper Tests")
+@Tag("unit")
 class SimpleHolidayMapperTest {
 
   private SimpleHolidayMapper mapper;

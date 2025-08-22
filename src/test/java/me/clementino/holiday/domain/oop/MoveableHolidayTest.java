@@ -8,9 +8,11 @@ import me.clementino.holiday.domain.dop.HolidayType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 @DisplayName("MoveableHoliday Tests")
+@Tag("unit")
 class MoveableHolidayTest {
 
   private List<Locality> localities;
