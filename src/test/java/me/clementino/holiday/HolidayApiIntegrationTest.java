@@ -30,9 +30,9 @@ class HolidayApiIntegrationTest {
   /**
    * Test that the application context loads successfully with MongoDB. This is a basic smoke test
    * to ensure the application starts correctly and can connect to the database.
-   * 
-   * Note: This test requires Docker to be available. If Docker is not available,
-   * the test will be skipped automatically by TestContainers.
+   *
+   * <p>Note: This test requires Docker to be available. If Docker is not available, the test will
+   * be skipped automatically by TestContainers.
    */
   @Test
   void contextLoads() {
