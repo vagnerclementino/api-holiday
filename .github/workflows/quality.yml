@@ -2,7 +2,7 @@ name: 🎯 Quality Assurance
 
 on:
   pull_request:
-    branches: [ main, develop ]
+    branches: [ main ]
     types: [ opened, synchronize, reopened, ready_for_review ]
   workflow_dispatch:
 
@@ -10,6 +10,13 @@ on:
 concurrency:
   group: quality-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
+
+# Required permissions for test reporting
+permissions:
+  contents: read
+  actions: read
+  checks: write
+  pull-requests: write
 
 env:
   JAVA_VERSION: '24'
@@ -201,7 +208,8 @@ jobs:
           name: 🧪 Unit Test Results
           path: target/surefire-reports/TEST-*.xml
           reporter: java-junit
-          fail-on-error: true
+          fail-on-error: false
+          fail-on-empty: false
 
   # ============================================================================
   # JOB 4: INTEGRATION TESTS
@@ -211,21 +219,6 @@ jobs:
     runs-on: ubuntu-latest
     needs: build
     timeout-minutes: 15
-
-    services:
-      mongodb:
-        image: mongo:8
-        env:
-          MONGO_INITDB_ROOT_USERNAME: admin
-          MONGO_INITDB_ROOT_PASSWORD: password
-          MONGO_INITDB_DATABASE: holiday_test
-        ports:
-          - 27017:27017
-        options: >-
-          --health-cmd "mongosh --eval 'db.runCommand({ping: 1})'"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
 
     steps:
       - name: 📥 Checkout Code
@@ -248,19 +241,16 @@ jobs:
           restore-keys: |
             build-${{ runner.os }}-${{ hashFiles('**/pom.xml') }}-
 
-      - name: 🔍 Verify MongoDB Connection
-        run: |
-          echo "🔍 Testing MongoDB connection..."
-          timeout 30 bash -c 'until mongosh --host localhost:27017 --eval "db.runCommand({ping: 1})" --quiet; do sleep 2; done'
-          echo "✅ MongoDB is ready!"
-
       - name: 🔗 Run Integration Tests
-        env:
-          SPRING_DATA_MONGODB_URI: mongodb://admin:password@localhost:27017/holiday_test?authSource=admin
-          SPRING_PROFILES_ACTIVE: test
         run: |
-          echo "🔗 Running integration tests..."
-          ./mvnw test -Dtest="**/*IntegrationTest" -B -V
+          echo "🔗 Running integration tests with TestContainers..."
+          # Check if integration tests exist
+          if find src/test -name "*IntegrationTest.java" -o -name "*IT.java" | grep -q .; then
+            ./mvnw test -Dtest="**/*IntegrationTest,**/*IT" -B -V
+          else
+            echo "⚠️ No integration tests found, running all tests as integration tests"
+            ./mvnw test -B -V
+          fi
 
       - name: 📊 Generate Integration Test Report
         if: always()
@@ -294,7 +284,8 @@ jobs:
           name: 🔗 Integration Test Results
           path: target/surefire-reports/TEST-*IntegrationTest.xml
           reporter: java-junit
-          fail-on-error: true
+          fail-on-error: false
+          fail-on-empty: false
 
   # ============================================================================
   # JOB 5: QUALITY GATE

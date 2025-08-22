@@ -1,0 +1,9 @@
+spring:
+  data:
+    mongodb:
+      uri: mongodb://admin:password@localhost:27017/holiday_test?authSource=admin
+
+logging:
+  level:
+    me.clementino.holiday: DEBUG
+    org.springframework.data.mongodb: DEBUG
