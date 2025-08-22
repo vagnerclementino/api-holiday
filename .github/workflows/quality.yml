@@ -519,7 +519,7 @@ jobs:
           mkdir -p consolidated-reports
           
           # Create main index.html
-          cat > consolidated-reports/index.html << 'EOF'
+          cat > consolidated-reports/index.html << EOF
           <!DOCTYPE html>
           <html lang="en">
           <head>
@@ -534,8 +534,10 @@ jobs:
                   .report-card { background: #f8f9fa; padding: 20px; border-radius: 8px; border-left: 4px solid #007bff; }
                   .report-card h3 { margin-top: 0; color: #495057; }
                   .report-card p { color: #6c757d; margin-bottom: 15px; }
-                  .report-link { display: inline-block; padding: 10px 20px; background: #007bff; color: white; text-decoration: none; border-radius: 4px; transition: background 0.3s; }
+                  .report-link { display: inline-block; padding: 10px 20px; background: #007bff; color: white; text-decoration: none; border-radius: 4px; transition: background 0.3s; margin: 5px 5px 5px 0; }
                   .report-link:hover { background: #0056b3; }
+                  .report-link.secondary { background: #6c757d; }
+                  .report-link.secondary:hover { background: #545b62; }
                   .status { padding: 5px 10px; border-radius: 4px; font-weight: bold; }
                   .success { background: #d4edda; color: #155724; }
                   .failure { background: #f8d7da; color: #721c24; }
@@ -545,14 +547,14 @@ jobs:
           <body>
               <div class="container">
                   <h1>🎯 Holiday API - Quality Reports</h1>
-                  <p style="text-align: center; color: #6c757d;">Generated on $(date)</p>
+                  <p style="text-align: center; color: #6c757d;">Generated on $(date '+%B %d, %Y at %H:%M UTC')</p>
                   
                   <div class="reports-grid">
                       <div class="report-card">
                           <h3>🎨 Code Style Report</h3>
                           <p>Checkstyle analysis results and code formatting validation.</p>
                           <a href="style-reports/checkstyle.html" class="report-link">View Style Report</a>
-                          <a href="style-reports/checkstyle-result.xml" class="report-link" style="margin-left: 10px; background: #6c757d;">View XML</a>
+                          <a href="style-reports/checkstyle-result.xml" class="report-link secondary">View XML</a>
                       </div>
                       
                       <div class="report-card">
@@ -570,10 +572,10 @@ jobs:
                   
                   <div style="margin-top: 40px; padding: 20px; background: #e9ecef; border-radius: 8px;">
                       <h3>📋 Pipeline Status</h3>
-                      <p><strong>Build:</strong> <span class="status ${{ needs.build.result == 'success' && 'success' || 'failure' }}">${{ needs.build.result }}</span></p>
-                      <p><strong>Code Style:</strong> <span class="status ${{ needs.checkstyle.result == 'success' && 'success' || 'failure' }}">${{ needs.checkstyle.result }}</span></p>
-                      <p><strong>Unit Tests:</strong> <span class="status ${{ needs.unit-tests.result == 'success' && 'success' || 'failure' }}">${{ needs.unit-tests.result }}</span></p>
-                      <p><strong>Integration Tests:</strong> <span class="status ${{ needs.integration-tests.result == 'success' && 'success' || 'failure' }}">${{ needs.integration-tests.result }}</span></p>
+                      <p><strong>Build:</strong> <span class="status \${{ needs.build.result == 'success' && 'success' || 'failure' }}">\${{ needs.build.result }}</span></p>
+                      <p><strong>Code Style:</strong> <span class="status \${{ needs.checkstyle.result == 'success' && 'success' || 'failure' }}">\${{ needs.checkstyle.result }}</span></p>
+                      <p><strong>Unit Tests:</strong> <span class="status \${{ needs.unit-tests.result == 'success' && 'success' || 'failure' }}">\${{ needs.unit-tests.result }}</span></p>
+                      <p><strong>Integration Tests:</strong> <span class="status \${{ needs.integration-tests.result == 'success' && 'success' || 'failure' }}">\${{ needs.integration-tests.result }}</span></p>
                   </div>
               </div>
           </body>
@@ -581,23 +583,85 @@ jobs:
           EOF
           
           # Copy all reports to consolidated directory with correct structure
+          echo "🔍 Debugging: Listing downloaded artifacts..."
+          find reports/ -type f -name "*.html" 2>/dev/null || echo "No HTML files found"
+          
           if [ -d "reports/style-reports" ]; then
             mkdir -p consolidated-reports/style-reports
-            cp reports/style-reports/checkstyle.html consolidated-reports/style-reports/ 2>/dev/null || echo "checkstyle.html not found"
+            # Try different possible locations for checkstyle.html
+            if [ -f "reports/style-reports/checkstyle.html" ]; then
+              cp reports/style-reports/checkstyle.html consolidated-reports/style-reports/
+              echo "✅ checkstyle.html copied from direct path"
+            elif [ -f "reports/style-reports/reports-html/checkstyle.html" ]; then
+              cp reports/style-reports/reports-html/checkstyle.html consolidated-reports/style-reports/
+              echo "✅ checkstyle.html copied from nested path"
+            else
+              echo "⚠️ checkstyle.html not found, creating placeholder"
+              cat > consolidated-reports/style-reports/checkstyle.html << 'EOF'
+<!DOCTYPE html>
+<html><head><title>Checkstyle Report</title></head>
+<body><h1>Checkstyle Report</h1><p>Report generation in progress...</p></body></html>
+EOF
+            fi
+            
             cp reports/style-reports/checkstyle-result.xml consolidated-reports/style-reports/ 2>/dev/null || echo "checkstyle-result.xml not found"
-            echo "✅ Style reports copied"
+            echo "✅ Style reports processed"
           fi
           
           if [ -d "reports/unit-test-reports" ]; then
             mkdir -p consolidated-reports/unit-test-reports
-            cp reports/unit-test-reports/unit-tests.html consolidated-reports/unit-test-reports/ 2>/dev/null || echo "unit-tests.html not found"
-            echo "✅ Unit test reports copied"
+            # Try different possible locations for unit-tests.html
+            if [ -f "reports/unit-test-reports/unit-tests.html" ]; then
+              cp reports/unit-test-reports/unit-tests.html consolidated-reports/unit-test-reports/
+              echo "✅ unit-tests.html copied from direct path"
+            elif [ -f "reports/unit-test-reports/reports-html/unit-tests.html" ]; then
+              cp reports/unit-test-reports/reports-html/unit-tests.html consolidated-reports/unit-test-reports/
+              echo "✅ unit-tests.html copied from nested path"
+            else
+              echo "⚠️ unit-tests.html not found, creating placeholder"
+              cat > consolidated-reports/unit-test-reports/unit-tests.html << 'EOF'
+<!DOCTYPE html>
+<html><head><title>Unit Test Report</title></head>
+<body><h1>Unit Test Report</h1><p>Report generation in progress...</p></body></html>
+EOF
+            fi
+            echo "✅ Unit test reports processed"
+          else
+            echo "⚠️ unit-test-reports directory not found, creating placeholder"
+            mkdir -p consolidated-reports/unit-test-reports
+            cat > consolidated-reports/unit-test-reports/unit-tests.html << 'EOF'
+<!DOCTYPE html>
+<html><head><title>Unit Test Report</title></head>
+<body><h1>Unit Test Report</h1><p>Unit test reports will be available after test execution.</p></body></html>
+EOF
           fi
           
           if [ -d "reports/integration-test-reports" ]; then
             mkdir -p consolidated-reports/integration-test-reports
-            cp reports/integration-test-reports/integration-tests.html consolidated-reports/integration-test-reports/ 2>/dev/null || echo "integration-tests.html not found"
-            echo "✅ Integration test reports copied"
+            # Try different possible locations for integration-tests.html
+            if [ -f "reports/integration-test-reports/integration-tests.html" ]; then
+              cp reports/integration-test-reports/integration-tests.html consolidated-reports/integration-test-reports/
+              echo "✅ integration-tests.html copied from direct path"
+            elif [ -f "reports/integration-test-reports/reports-html/integration-tests.html" ]; then
+              cp reports/integration-test-reports/reports-html/integration-tests.html consolidated-reports/integration-test-reports/
+              echo "✅ integration-tests.html copied from nested path"
+            else
+              echo "⚠️ integration-tests.html not found, creating placeholder"
+              cat > consolidated-reports/integration-test-reports/integration-tests.html << 'EOF'
+<!DOCTYPE html>
+<html><head><title>Integration Test Report</title></head>
+<body><h1>Integration Test Report</h1><p>Report generation in progress...</p></body></html>
+EOF
+            fi
+            echo "✅ Integration test reports processed"
+          else
+            echo "⚠️ integration-test-reports directory not found, creating placeholder"
+            mkdir -p consolidated-reports/integration-test-reports
+            cat > consolidated-reports/integration-test-reports/integration-tests.html << 'EOF'
+<!DOCTYPE html>
+<html><head><title>Integration Test Report</title></head>
+<body><h1>Integration Test Report</h1><p>Integration test reports will be available after test execution.</p></body></html>
+EOF
           fi
           
           echo "📊 Consolidated HTML report created successfully!"
