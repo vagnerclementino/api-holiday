@@ -200,6 +200,39 @@ test-all: ##@tests Run all tests (unit + integration)
 	@$(MAKE) test
 	@echo "$(GREEN)All tests completed!$(NC)"
 
+# Quality Assurance targets
+quality: ##@quality Run complete quality workflow (build + style + tests)
+	@echo "$(GREEN)🎯 Running complete quality workflow...$(NC)"
+	@./scripts/test-quality-workflow.sh
+
+checkstyle: ##@quality Run Checkstyle code analysis
+	@echo "$(GREEN)🎨 Running Checkstyle analysis...$(NC)"
+	@$(MAVEN) checkstyle:check -B
+	@echo "$(GREEN)Checkstyle analysis completed!$(NC)"
+
+format-check: ##@quality Check code formatting (Spotless)
+	@echo "$(GREEN)📋 Checking code formatting...$(NC)"
+	@$(MAVEN) spotless:check -B
+	@echo "$(GREEN)Code formatting check completed!$(NC)"
+
+format-fix: ##@quality Auto-fix code formatting (Spotless)
+	@echo "$(GREEN)🔧 Auto-fixing code formatting...$(NC)"
+	@$(MAVEN) spotless:apply -B
+	@echo "$(GREEN)Code formatting applied!$(NC)"
+
+style-check: ##@quality Run all style checks (Checkstyle + Spotless)
+	@echo "$(GREEN)🎨 Running all style checks...$(NC)"
+	@$(MAKE) checkstyle
+	@$(MAKE) format-check
+	@echo "$(GREEN)All style checks completed!$(NC)"
+
+pre-commit: ##@quality Run pre-commit quality checks
+	@echo "$(GREEN)🚀 Running pre-commit quality checks...$(NC)"
+	@$(MAVEN) clean compile test-compile -DskipTests -B
+	@$(MAKE) style-check
+	@$(MAKE) unit-test
+	@echo "$(GREEN)Pre-commit checks completed! Ready to commit.$(NC)"
+
 # Control targets
 stop: ##@control Stop all containers and processes
 	@echo "$(YELLOW)Stopping all services...$(NC)"

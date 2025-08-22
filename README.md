@@ -1,5 +1,12 @@
 # Data-Oriented Programming Holiday API
 
+[![Quality Assurance](https://github.com/vagnerclementino/odp-api-holiday/actions/workflows/quality.yml/badge.svg)](https://github.com/vagnerclementino/odp-api-holiday/actions/workflows/quality.yml)
+[![Quality Assurance - Main](https://github.com/vagnerclementino/odp-api-holiday/actions/workflows/quality.yml/badge.svg?branch=main)](https://github.com/vagnerclementino/odp-api-holiday/actions/workflows/quality.yml)
+[![Java](https://img.shields.io/badge/Java-24-orange.svg)](https://openjdk.org/projects/jdk/24/)
+[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.5.4-brightgreen.svg)](https://spring.io/projects/spring-boot)
+[![MongoDB](https://img.shields.io/badge/MongoDB-8-green.svg)](https://www.mongodb.com/)
+[![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+
 A comprehensive example demonstrating **Data-Oriented Programming (DOP) v1.1** principles in Java, built as a REST API for managing public holidays across different countries, states, and cities using **Spring Boot 3** and **MongoDB 8**.
 
 This project follows the architectural patterns from [Bootify.io](https://bootify.io/) and implements a data model inspired by the [Holiday API](https://holidayapi.com/docs).
@@ -414,8 +421,6 @@ mvn test
 ### Run Integration Tests
 ```bash
 make test
-# or
-./scripts/test-api.sh
 ```
 
 The integration tests demonstrate:
@@ -425,6 +430,66 @@ The integration tests demonstrate:
 - Error handling and edge cases
 
 **For comprehensive API testing with real scenarios, use the Postman collections in [`postman/`](./postman/) directory.**
+
+## 🎯 Quality Assurance
+
+This project includes a comprehensive **GitHub Actions workflow** for automated quality assurance that runs on every pull request.
+
+### 🏷️ **Build Status**
+
+The badges at the top of this README show the current status of our quality checks:
+- **Quality Assurance**: Status of the latest workflow run
+- **Quality Assurance - Main**: Status specifically for the main branch
+- **Java 24**: Version compatibility
+- **Spring Boot 3.5.4**: Framework version
+- **MongoDB 8**: Database version
+
+### 🚀 **Quality Workflow**
+
+The `quality.yml` workflow ensures code quality through:
+
+| Stage | Description | Tools |
+|-------|-------------|-------|
+| **🏗️ Build** | Compile source and test code, create JAR | Maven, Java 24 |
+| **🎨 Style Check** | Code style and formatting validation | Checkstyle, Spotless |
+| **🧪 Unit Tests** | Execute unit tests with coverage | JUnit, Surefire |
+| **🔗 Integration Tests** | Run integration tests with MongoDB | TestContainers, MongoDB 8 |
+| **🚪 Quality Gate** | Aggregate results and block merge if failed | GitHub Actions |
+
+### 📋 **Local Quality Commands**
+
+```bash
+# Run complete quality workflow locally
+make quality
+
+# Individual quality checks
+make checkstyle          # Run Checkstyle analysis
+make format-check        # Check code formatting
+make format-fix          # Auto-fix formatting issues
+make style-check         # Run all style checks
+make pre-commit          # Pre-commit quality checks
+
+# Test commands
+make unit-test           # Run unit tests only
+make test               # Run integration tests
+make test-all           # Run all tests
+```
+
+### 🛡️ **Branch Protection**
+
+Pull requests to `main` branch require:
+- ✅ All quality checks must pass
+- ✅ Code review approval
+- ✅ Branch must be up to date
+
+**No code can be merged without passing the complete quality workflow.**
+
+### 📚 **Quality Documentation**
+
+For detailed information about the quality workflow:
+- **[Branch Protection Setup](./.github/BRANCH_PROTECTION.md)**
+
+---
 
 ## 🛠️ Development Commands
 

@@ -1,0 +1,361 @@
+name: 🎯 Quality Assurance
+
+on:
+  pull_request:
+    branches: [ main, develop ]
+    types: [ opened, synchronize, reopened, ready_for_review ]
+  workflow_dispatch:
+
+# Prevent concurrent runs on the same PR
+concurrency:
+  group: quality-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+env:
+  JAVA_VERSION: '24'
+  JAVA_DISTRIBUTION: 'corretto'
+  MAVEN_OPTS: '-Xmx2048m -XX:MaxMetaspaceSize=512m'
+
+jobs:
+  # ============================================================================
+  # JOB 1: BUILD & COMPILE
+  # ============================================================================
+  build:
+    name: 🏗️ Build Application
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: 📥 Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: ☕ Setup Java ${{ env.JAVA_VERSION }}
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: ${{ env.JAVA_DISTRIBUTION }}
+          cache: maven
+
+      - name: 📋 Validate Maven Configuration
+        run: |
+          echo "🔍 Validating Maven setup..."
+          ./mvnw --version
+          ./mvnw help:effective-pom -q
+
+      - name: 🏗️ Compile Application
+        run: |
+          echo "🔨 Compiling source code..."
+          ./mvnw clean compile -DskipTests -B -V
+
+      - name: 🧪 Compile Tests
+        run: |
+          echo "🔨 Compiling test code..."
+          ./mvnw test-compile -DskipTests -B -V
+
+      - name: 📦 Package Application
+        run: |
+          echo "📦 Creating JAR package..."
+          ./mvnw package -DskipTests -B -V
+
+      - name: 💾 Cache Build Artifacts
+        uses: actions/cache@v4
+        with:
+          path: |
+            target/
+            ~/.m2/repository
+          key: build-${{ runner.os }}-${{ hashFiles('**/pom.xml') }}-${{ github.sha }}
+          restore-keys: |
+            build-${{ runner.os }}-${{ hashFiles('**/pom.xml') }}-
+            build-${{ runner.os }}-
+
+      - name: 📊 Build Summary
+        run: |
+          echo "✅ Build completed successfully!"
+          echo "📦 JAR Size: $(du -h target/*.jar | cut -f1)"
+          echo "🕒 Build Time: $(date)"
+
+  # ============================================================================
+  # JOB 2: CODE STYLE CHECK
+  # ============================================================================
+  checkstyle:
+    name: 🎨 Code Style Check
+    runs-on: ubuntu-latest
+    needs: build
+    timeout-minutes: 5
+
+    steps:
+      - name: 📥 Checkout Code
+        uses: actions/checkout@v4
+
+      - name: ☕ Setup Java ${{ env.JAVA_VERSION }}
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: ${{ env.JAVA_DISTRIBUTION }}
+          cache: maven
+
+      - name: 💾 Restore Build Cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            target/
+            ~/.m2/repository
+          key: build-${{ runner.os }}-${{ hashFiles('**/pom.xml') }}-${{ github.sha }}
+          restore-keys: |
+            build-${{ runner.os }}-${{ hashFiles('**/pom.xml') }}-
+
+      - name: 🎨 Run Checkstyle
+        run: |
+          echo "🎨 Running Checkstyle analysis..."
+          ./mvnw checkstyle:check -B -V
+
+      - name: 📋 Format Check (Spotless)
+        run: |
+          echo "📋 Checking code formatting..."
+          ./mvnw spotless:check -B -V
+
+      - name: 📊 Style Check Summary
+        if: always()
+        run: |
+          echo "🎨 Code style check completed!"
+          if [ -f target/checkstyle-result.xml ]; then
+            echo "📄 Checkstyle report generated"
+          fi
+
+      - name: 📤 Upload Checkstyle Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: checkstyle-report
+          path: |
+            target/checkstyle-result.xml
+            target/site/checkstyle.html
+          retention-days: 2
+
+  # ============================================================================
+  # JOB 3: UNIT TESTS
+  # ============================================================================
+  unit-tests:
+    name: 🧪 Unit Tests
+    runs-on: ubuntu-latest
+    needs: build
+    timeout-minutes: 10
+
+    steps:
+      - name: 📥 Checkout Code
+        uses: actions/checkout@v4
+
+      - name: ☕ Setup Java ${{ env.JAVA_VERSION }}
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: ${{ env.JAVA_DISTRIBUTION }}
+          cache: maven
+
+      - name: 💾 Restore Build Cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            target/
+            ~/.m2/repository
+          key: build-${{ runner.os }}-${{ hashFiles('**/pom.xml') }}-${{ github.sha }}
+          restore-keys: |
+            build-${{ runner.os }}-${{ hashFiles('**/pom.xml') }}-
+
+      - name: 🧪 Run Unit Tests
+        run: |
+          echo "🧪 Running unit tests..."
+          ./mvnw test -Dtest="!**/*IntegrationTest" -B -V
+
+      - name: 📊 Generate Test Report
+        if: always()
+        run: |
+          echo "📊 Generating test reports..."
+          ./mvnw surefire-report:report-only -B
+
+      - name: 📈 Test Results Summary
+        if: always()
+        run: |
+          echo "📊 Unit Test Results:"
+          if [ -f target/surefire-reports/TEST-*.xml ]; then
+            echo "✅ Test reports generated"
+            find target/surefire-reports -name "TEST-*.xml" -exec basename {} \; | wc -l | xargs echo "📄 Test files:"
+          fi
+
+      - name: 📤 Upload Test Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: unit-test-results
+          path: |
+            target/surefire-reports/
+            target/site/surefire-report.html
+          retention-days: 7
+
+      - name: 📋 Publish Unit Test Results
+        if: always()
+        uses: dorny/test-reporter@v1
+        with:
+          name: 🧪 Unit Test Results
+          path: target/surefire-reports/TEST-*.xml
+          reporter: java-junit
+          fail-on-error: true
+
+  # ============================================================================
+  # JOB 4: INTEGRATION TESTS
+  # ============================================================================
+  integration-tests:
+    name: 🔗 Integration Tests
+    runs-on: ubuntu-latest
+    needs: build
+    timeout-minutes: 15
+
+    services:
+      mongodb:
+        image: mongo:8
+        env:
+          MONGO_INITDB_ROOT_USERNAME: admin
+          MONGO_INITDB_ROOT_PASSWORD: password
+          MONGO_INITDB_DATABASE: holiday_test
+        ports:
+          - 27017:27017
+        options: >-
+          --health-cmd "mongosh --eval 'db.runCommand({ping: 1})'"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: 📥 Checkout Code
+        uses: actions/checkout@v4
+
+      - name: ☕ Setup Java ${{ env.JAVA_VERSION }}
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: ${{ env.JAVA_DISTRIBUTION }}
+          cache: maven
+
+      - name: 💾 Restore Build Cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            target/
+            ~/.m2/repository
+          key: build-${{ runner.os }}-${{ hashFiles('**/pom.xml') }}-${{ github.sha }}
+          restore-keys: |
+            build-${{ runner.os }}-${{ hashFiles('**/pom.xml') }}-
+
+      - name: 🔍 Verify MongoDB Connection
+        run: |
+          echo "🔍 Testing MongoDB connection..."
+          timeout 30 bash -c 'until mongosh --host localhost:27017 --eval "db.runCommand({ping: 1})" --quiet; do sleep 2; done'
+          echo "✅ MongoDB is ready!"
+
+      - name: 🔗 Run Integration Tests
+        env:
+          SPRING_DATA_MONGODB_URI: mongodb://admin:password@localhost:27017/holiday_test?authSource=admin
+          SPRING_PROFILES_ACTIVE: test
+        run: |
+          echo "🔗 Running integration tests..."
+          ./mvnw test -Dtest="**/*IntegrationTest" -B -V
+
+      - name: 📊 Generate Integration Test Report
+        if: always()
+        run: |
+          echo "📊 Generating integration test reports..."
+          ./mvnw surefire-report:report-only -B
+
+      - name: 📈 Integration Test Results Summary
+        if: always()
+        run: |
+          echo "📊 Integration Test Results:"
+          if [ -f target/surefire-reports/TEST-*.xml ]; then
+            echo "✅ Integration test reports generated"
+            find target/surefire-reports -name "TEST-*IntegrationTest.xml" -exec basename {} \; | wc -l | xargs echo "📄 Integration test files:"
+          fi
+
+      - name: 📤 Upload Integration Test Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: integration-test-results
+          path: |
+            target/surefire-reports/
+            target/site/surefire-report.html
+          retention-days: 7
+
+      - name: 📋 Publish Integration Test Results
+        if: always()
+        uses: dorny/test-reporter@v1
+        with:
+          name: 🔗 Integration Test Results
+          path: target/surefire-reports/TEST-*IntegrationTest.xml
+          reporter: java-junit
+          fail-on-error: true
+
+  # ============================================================================
+  # JOB 5: QUALITY GATE
+  # ============================================================================
+  quality-gate:
+    name: 🚪 Quality Gate
+    runs-on: ubuntu-latest
+    needs: [build, checkstyle, unit-tests, integration-tests]
+    if: always()
+    timeout-minutes: 5
+
+    steps:
+      - name: 📊 Check Job Results
+        run: |
+          echo "🔍 Checking all job results..."
+          echo "Build: ${{ needs.build.result }}"
+          echo "Checkstyle: ${{ needs.checkstyle.result }}"
+          echo "Unit Tests: ${{ needs.unit-tests.result }}"
+          echo "Integration Tests: ${{ needs.integration-tests.result }}"
+
+      - name: ✅ Quality Gate Passed
+        if: |
+          needs.build.result == 'success' &&
+          needs.checkstyle.result == 'success' &&
+          needs.unit-tests.result == 'success' &&
+          needs.integration-tests.result == 'success'
+        run: |
+          echo "🎉 All quality checks passed!"
+          echo "✅ Build: SUCCESS"
+          echo "✅ Code Style: SUCCESS"
+          echo "✅ Unit Tests: SUCCESS"
+          echo "✅ Integration Tests: SUCCESS"
+          echo ""
+          echo "🚀 Pull Request is ready for merge!"
+
+      - name: ❌ Quality Gate Failed
+        if: |
+          needs.build.result != 'success' ||
+          needs.checkstyle.result != 'success' ||
+          needs.unit-tests.result != 'success' ||
+          needs.integration-tests.result != 'success'
+        run: |
+          echo "❌ Quality gate failed!"
+          echo "Build: ${{ needs.build.result }}"
+          echo "Checkstyle: ${{ needs.checkstyle.result }}"
+          echo "Unit Tests: ${{ needs.unit-tests.result }}"
+          echo "Integration Tests: ${{ needs.integration-tests.result }}"
+          echo ""
+          echo "🚫 Pull Request cannot be merged until all checks pass."
+          exit 1
+
+      - name: 📋 Quality Summary
+        if: always()
+        run: |
+          echo "📊 QUALITY ASSURANCE SUMMARY"
+          echo "================================"
+          echo "🏗️  Build: ${{ needs.build.result }}"
+          echo "🎨 Code Style: ${{ needs.checkstyle.result }}"
+          echo "🧪 Unit Tests: ${{ needs.unit-tests.result }}"
+          echo "🔗 Integration Tests: ${{ needs.integration-tests.result }}"
+          echo "================================"
+          echo "📅 Date: $(date)"
+          echo "🔗 Workflow: ${{ github.workflow }}"
+          echo "📝 PR: #${{ github.event.pull_request.number }}"
