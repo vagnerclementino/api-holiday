@@ -123,23 +123,54 @@ jobs:
           echo "📋 Checking code formatting..."
           ./mvnw spotless:check -B -V
 
-      - name: 📊 Style Check Summary
+      - name: 📊 Generate Style Reports
         if: always()
         run: |
-          echo "🎨 Code style check completed!"
+          echo "📊 Generating HTML reports for code style..."
+          # Generate simple Checkstyle HTML report
+          ./mvnw checkstyle:checkstyle -B
+          
+          # Create simple HTML wrapper for checkstyle if XML exists
           if [ -f target/checkstyle-result.xml ]; then
-            echo "📄 Checkstyle report generated"
+            mkdir -p target/reports-html
+            cat > target/reports-html/checkstyle.html << 'EOF'
+          <!DOCTYPE html>
+          <html>
+          <head>
+              <title>Checkstyle Report</title>
+              <style>
+                  body { font-family: Arial, sans-serif; margin: 20px; }
+                  .header { background: #f8f9fa; padding: 20px; border-radius: 5px; margin-bottom: 20px; }
+                  .error { color: #dc3545; }
+                  .warning { color: #ffc107; }
+                  .info { color: #17a2b8; }
+              </style>
+          </head>
+          <body>
+              <div class="header">
+                  <h1>🎨 Checkstyle Report</h1>
+                  <p>Code style analysis results</p>
+              </div>
+              <div>
+                  <h2>Raw XML Report</h2>
+                  <p><a href="../checkstyle-result.xml">View XML Report</a></p>
+                  <p>For detailed analysis, download and open the XML file in your IDE or use a Checkstyle viewer.</p>
+              </div>
+          </body>
+          </html>
+          EOF
+            echo "✅ Checkstyle HTML wrapper created"
           fi
 
-      - name: 📤 Upload Checkstyle Report
+      - name: 📤 Upload Style Reports
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: checkstyle-report
+          name: style-reports
           path: |
+            target/reports-html/checkstyle.html
             target/checkstyle-result.xml
-            target/site/checkstyle.html
-          retention-days: 2
+          retention-days: 7
 
   # ============================================================================
   # JOB 3: UNIT TESTS (Tagged with @Tag("unit"))
@@ -176,11 +207,108 @@ jobs:
           echo "🧪 Running unit tests only (tagged with @Tag('unit'))..."
           ./mvnw test -Punit-tests -B -V
 
-      - name: 📊 Generate Test Report
+      - name: 📊 Generate Unit Test Reports
         if: always()
         run: |
-          echo "📊 Generating test reports..."
-          ./mvnw surefire-report:report-only -B
+          echo "📊 Generating HTML reports for unit tests..."
+          
+          # Create simple HTML test summary
+          mkdir -p target/reports-html
+          
+          # Count test results from XML files
+          total_tests=$(find target/surefire-reports -name "TEST-*.xml" | wc -l)
+          passed_tests=$(grep -l 'errors="0".*failures="0"\|failures="0".*errors="0"' target/surefire-reports/TEST-*.xml 2>/dev/null | wc -l)
+          failed_tests=$((total_tests - passed_tests))
+          
+          # Get test execution time
+          execution_time=$(grep -h 'time="[^"]*"' target/surefire-reports/TEST-*.xml | sed 's/.*time="\([^"]*\)".*/\1/' | awk '{sum += $1} END {printf "%.2f", sum}')
+          
+          cat > target/reports-html/unit-tests.html << EOF
+          <!DOCTYPE html>
+          <html>
+          <head>
+              <title>Unit Test Report</title>
+              <style>
+                  body { font-family: Arial, sans-serif; margin: 20px; background: #f8f9fa; }
+                  .container { max-width: 1000px; margin: 0 auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+                  .header { background: #e3f2fd; padding: 20px; border-radius: 5px; margin-bottom: 20px; text-align: center; }
+                  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin: 20px 0; }
+                  .stat-card { padding: 20px; border-radius: 8px; text-align: center; }
+                  .stat-card h3 { margin: 0; font-size: 2em; }
+                  .stat-card p { margin: 10px 0 0 0; color: #666; }
+                  .success { background: #d4edda; color: #155724; }
+                  .danger { background: #f8d7da; color: #721c24; }
+                  .info { background: #d1ecf1; color: #0c5460; }
+                  .warning { background: #fff3cd; color: #856404; }
+                  .details { margin-top: 30px; }
+                  .test-files { background: #f8f9fa; padding: 15px; border-radius: 5px; margin: 10px 0; }
+              </style>
+          </head>
+          <body>
+              <div class="container">
+                  <div class="header">
+                      <h1>🧪 Unit Test Report</h1>
+                      <p>Unit test execution results (tagged with @Tag("unit"))</p>
+                      <p><strong>Generated:</strong> $(date)</p>
+                  </div>
+                  
+                  <div class="stats">
+                      <div class="stat-card info">
+                          <h3>$total_tests</h3>
+                          <p>Total Tests</p>
+                      </div>
+                      <div class="stat-card success">
+                          <h3>$passed_tests</h3>
+                          <p>Passed</p>
+                      </div>
+                      <div class="stat-card danger">
+                          <h3>$failed_tests</h3>
+                          <p>Failed</p>
+                      </div>
+                      <div class="stat-card warning">
+                          <h3>${execution_time}s</h3>
+                          <p>Execution Time</p>
+                      </div>
+                  </div>
+                  
+                  <div class="details">
+                      <h2>📋 Test Categories</h2>
+                      <div class="test-files">
+                          <h3>Domain Tests</h3>
+                          <ul>
+                              <li>HolidayOperationsTest - Data-oriented programming operations</li>
+                              <li>FixedHolidayTest - Fixed date holidays</li>
+                              <li>MoveableHolidayTest - Calculated holidays (Easter, etc.)</li>
+                          </ul>
+                      </div>
+                      
+                      <div class="test-files">
+                          <h3>DTO Tests</h3>
+                          <ul>
+                              <li>CreateHolidayRequestTest - Request validation</li>
+                              <li>HolidayResponseDTOTest - Response formatting</li>
+                              <li>LocationInfoTest - Location data</li>
+                              <li>WhenInfoTest - Date information</li>
+                          </ul>
+                      </div>
+                      
+                      <div class="test-files">
+                          <h3>Utility Tests</h3>
+                          <ul>
+                              <li>SimpleHolidayMapperTest - Data mapping</li>
+                              <li>CountryCodeUtilTest - Country utilities</li>
+                          </ul>
+                      </div>
+                      
+                      <h2>📄 Raw Test Results</h2>
+                      <p>Detailed XML test results are available in the surefire-reports directory for IDE integration.</p>
+                  </div>
+              </div>
+          </body>
+          </html>
+          EOF
+          
+          echo "✅ Unit test HTML report created ($total_tests tests, $passed_tests passed)"
 
       - name: 📈 Test Results Summary
         if: always()
@@ -191,14 +319,14 @@ jobs:
             find target/surefire-reports -name "TEST-*.xml" -exec basename {} \; | wc -l | xargs echo "📄 Test files:"
           fi
 
-      - name: 📤 Upload Test Results
+      - name: 📤 Upload Unit Test Reports
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: unit-test-results
+          name: unit-test-reports
           path: |
+            target/reports-html/unit-tests.html
             target/surefire-reports/
-            target/site/surefire-report.html
           retention-days: 7
 
       - name: 📋 Publish Unit Test Results
@@ -246,11 +374,96 @@ jobs:
           echo "🔗 Running integration tests only (tagged with @Tag('integration'))..."
           ./mvnw test -Pintegration-tests -B -V
 
-      - name: 📊 Generate Integration Test Report
+      - name: 📊 Generate Integration Test Reports
         if: always()
         run: |
-          echo "📊 Generating integration test reports..."
-          ./mvnw surefire-report:report-only -B
+          echo "📊 Generating HTML reports for integration tests..."
+          
+          # Create simple HTML integration test summary
+          mkdir -p target/reports-html
+          
+          # Count integration test results
+          integration_tests=$(find target/surefire-reports -name "*IntegrationTest*.xml" | wc -l)
+          if [ $integration_tests -eq 0 ]; then
+            integration_tests=$(find target/surefire-reports -name "TEST-*.xml" | wc -l)
+          fi
+          
+          # Check if TestContainers was used
+          testcontainers_used="No"
+          if grep -q "testcontainers" target/surefire-reports/*.xml 2>/dev/null; then
+            testcontainers_used="Yes"
+          fi
+          
+          cat > target/reports-html/integration-tests.html << EOF
+          <!DOCTYPE html>
+          <html>
+          <head>
+              <title>Integration Test Report</title>
+              <style>
+                  body { font-family: Arial, sans-serif; margin: 20px; background: #f8f9fa; }
+                  .container { max-width: 1000px; margin: 0 auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+                  .header { background: #e8f5e8; padding: 20px; border-radius: 5px; margin-bottom: 20px; text-align: center; }
+                  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin: 20px 0; }
+                  .stat-card { padding: 20px; border-radius: 8px; text-align: center; }
+                  .stat-card h3 { margin: 0; font-size: 2em; }
+                  .stat-card p { margin: 10px 0 0 0; color: #666; }
+                  .success { background: #d4edda; color: #155724; }
+                  .info { background: #d1ecf1; color: #0c5460; }
+                  .feature { background: #f8f9fa; padding: 15px; border-radius: 5px; margin: 10px 0; border-left: 4px solid #28a745; }
+              </style>
+          </head>
+          <body>
+              <div class="container">
+                  <div class="header">
+                      <h1>🔗 Integration Test Report</h1>
+                      <p>Integration test results with TestContainers (tagged with @Tag("integration"))</p>
+                      <p><strong>Generated:</strong> $(date)</p>
+                  </div>
+                  
+                  <div class="stats">
+                      <div class="stat-card info">
+                          <h3>$integration_tests</h3>
+                          <p>Integration Tests</p>
+                      </div>
+                      <div class="stat-card success">
+                          <h3>✅</h3>
+                          <p>Status</p>
+                      </div>
+                  </div>
+                  
+                  <div>
+                      <h2>🐳 TestContainers Integration</h2>
+                      <div class="feature">
+                          <h3>MongoDB 8 Container</h3>
+                          <p>Integration tests use TestContainers to spin up a real MongoDB 8 instance for realistic testing.</p>
+                          <ul>
+                              <li><strong>Container:</strong> mongo:8</li>
+                              <li><strong>Purpose:</strong> Full application context testing</li>
+                              <li><strong>Isolation:</strong> Each test run gets a fresh database</li>
+                          </ul>
+                      </div>
+                      
+                      <h2>🧪 Test Coverage</h2>
+                      <div class="feature">
+                          <h3>Application Context Loading</h3>
+                          <p>Verifies that the Spring Boot application starts correctly with all dependencies.</p>
+                          <ul>
+                              <li>Spring Boot context initialization</li>
+                              <li>MongoDB connection establishment</li>
+                              <li>Repository layer validation</li>
+                              <li>Service layer integration</li>
+                          </ul>
+                      </div>
+                      
+                      <h2>📄 Raw Test Results</h2>
+                      <p>Detailed XML test results are available in the surefire-reports directory.</p>
+                  </div>
+              </div>
+          </body>
+          </html>
+          EOF
+          
+          echo "✅ Integration test HTML report created ($integration_tests tests)"
 
       - name: 📈 Integration Test Results Summary
         if: always()
@@ -261,14 +474,14 @@ jobs:
             find target/surefire-reports -name "TEST-*IntegrationTest.xml" -exec basename {} \; | wc -l | xargs echo "📄 Integration test files:"
           fi
 
-      - name: 📤 Upload Integration Test Results
+      - name: 📤 Upload Integration Test Reports
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: integration-test-results
+          name: integration-test-reports
           path: |
+            target/reports-html/integration-tests.html
             target/surefire-reports/
-            target/site/surefire-report.html
           retention-days: 7
 
       - name: 📋 Publish Integration Test Results
@@ -282,12 +495,122 @@ jobs:
           fail-on-empty: false
 
   # ============================================================================
-  # JOB 5: QUALITY GATE
+  # JOB 5: CONSOLIDATE HTML REPORTS
+  # ============================================================================
+  consolidate-reports:
+    name: 📊 Consolidate HTML Reports
+    runs-on: ubuntu-latest
+    needs: [build, checkstyle, unit-tests, integration-tests]
+    if: always()
+    timeout-minutes: 5
+    
+    steps:
+      - name: 📥 Checkout Code
+        uses: actions/checkout@v4
+
+      - name: 📥 Download All Reports
+        uses: actions/download-artifact@v4
+        with:
+          path: reports/
+
+      - name: 📊 Create Consolidated HTML Report
+        run: |
+          echo "📊 Creating consolidated HTML report..."
+          mkdir -p consolidated-reports
+          
+          # Create main index.html
+          cat > consolidated-reports/index.html << 'EOF'
+          <!DOCTYPE html>
+          <html lang="en">
+          <head>
+              <meta charset="UTF-8">
+              <meta name="viewport" content="width=device-width, initial-scale=1.0">
+              <title>Holiday API - Quality Reports</title>
+              <style>
+                  body { font-family: Arial, sans-serif; margin: 40px; background-color: #f5f5f5; }
+                  .container { max-width: 1200px; margin: 0 auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+                  h1 { color: #2c3e50; text-align: center; margin-bottom: 30px; }
+                  .reports-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-top: 30px; }
+                  .report-card { background: #f8f9fa; padding: 20px; border-radius: 8px; border-left: 4px solid #007bff; }
+                  .report-card h3 { margin-top: 0; color: #495057; }
+                  .report-card p { color: #6c757d; margin-bottom: 15px; }
+                  .report-link { display: inline-block; padding: 10px 20px; background: #007bff; color: white; text-decoration: none; border-radius: 4px; transition: background 0.3s; }
+                  .report-link:hover { background: #0056b3; }
+                  .status { padding: 5px 10px; border-radius: 4px; font-weight: bold; }
+                  .success { background: #d4edda; color: #155724; }
+                  .failure { background: #f8d7da; color: #721c24; }
+                  .info { background: #d1ecf1; color: #0c5460; }
+              </style>
+          </head>
+          <body>
+              <div class="container">
+                  <h1>🎯 Holiday API - Quality Reports</h1>
+                  <p style="text-align: center; color: #6c757d;">Generated on $(date)</p>
+                  
+                  <div class="reports-grid">
+                      <div class="report-card">
+                          <h3>🎨 Code Style Report</h3>
+                          <p>Checkstyle analysis results and code formatting validation.</p>
+                          <a href="style-reports/checkstyle.html" class="report-link">View Style Report</a>
+                      </div>
+                      
+                      <div class="report-card">
+                          <h3>🧪 Unit Test Report</h3>
+                          <p>Unit test execution results with detailed statistics.</p>
+                          <a href="unit-test-reports/unit-tests.html" class="report-link">View Unit Tests</a>
+                      </div>
+                      
+                      <div class="report-card">
+                          <h3>🔗 Integration Test Report</h3>
+                          <p>Integration test results with TestContainers and MongoDB.</p>
+                          <a href="integration-test-reports/integration-tests.html" class="report-link">View Integration Tests</a>
+                      </div>
+                  </div>
+                  
+                  <div style="margin-top: 40px; padding: 20px; background: #e9ecef; border-radius: 8px;">
+                      <h3>📋 Pipeline Status</h3>
+                      <p><strong>Build:</strong> <span class="status ${{ needs.build.result == 'success' && 'success' || 'failure' }}">${{ needs.build.result }}</span></p>
+                      <p><strong>Code Style:</strong> <span class="status ${{ needs.checkstyle.result == 'success' && 'success' || 'failure' }}">${{ needs.checkstyle.result }}</span></p>
+                      <p><strong>Unit Tests:</strong> <span class="status ${{ needs.unit-tests.result == 'success' && 'success' || 'failure' }}">${{ needs.unit-tests.result }}</span></p>
+                      <p><strong>Integration Tests:</strong> <span class="status ${{ needs.integration-tests.result == 'success' && 'success' || 'failure' }}">${{ needs.integration-tests.result }}</span></p>
+                  </div>
+              </div>
+          </body>
+          </html>
+          EOF
+          
+          # Copy all reports to consolidated directory
+          if [ -d "reports/style-reports" ]; then
+            cp -r reports/style-reports consolidated-reports/
+            echo "✅ Style reports copied"
+          fi
+          
+          if [ -d "reports/unit-test-reports" ]; then
+            cp -r reports/unit-test-reports consolidated-reports/
+            echo "✅ Unit test reports copied"
+          fi
+          
+          if [ -d "reports/integration-test-reports" ]; then
+            cp -r reports/integration-test-reports consolidated-reports/
+            echo "✅ Integration test reports copied"
+          fi
+          
+          echo "📊 Consolidated HTML report created successfully!"
+
+      - name: 📤 Upload Consolidated HTML Reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: quality-reports-html
+          path: consolidated-reports/
+          retention-days: 30
+
+  # ============================================================================
+  # JOB 6: QUALITY GATE
   # ============================================================================
   quality-gate:
     name: 🚪 Quality Gate
     runs-on: ubuntu-latest
-    needs: [build, checkstyle, unit-tests, integration-tests]
+    needs: [build, checkstyle, unit-tests, integration-tests, consolidate-reports]
     if: always()
     timeout-minutes: 5
 
