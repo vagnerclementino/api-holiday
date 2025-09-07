@@ -567,11 +567,21 @@ By exploring this project, you'll understand:
 
 ## 🤝 Contributing
 
-This project serves as an educational example. Feel free to:
-- Fork and experiment with the code
-- Suggest improvements via issues
-- Add more examples of DOP principles
-- Enhance the documentation
+Contribuições são bem-vindas! Este projeto serve como exemplo educacional de Data-Oriented Programming.
+
+**📋 Leia o [Guia de Contribuição](CONTRIBUTING.md)** para informações detalhadas sobre:
+- Como reportar bugs e sugerir funcionalidades
+- Processo de desenvolvimento e code review
+- Padrões de código e convenções
+- Workflow de qualidade obrigatório
+- Proteção de branch e regras de merge
+
+Contribuições podem incluir:
+- 🐛 Correção de bugs
+- ✨ Novas funcionalidades DOP
+- 📚 Melhorias na documentação
+- 🧪 Testes adicionais
+- 🎨 Novos exemplos de programação orientada a dados
 
 ## 📖 Related Article
 
