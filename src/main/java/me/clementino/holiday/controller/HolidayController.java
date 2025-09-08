@@ -82,18 +82,26 @@ public class HolidayController {
       @Parameter(description = "Filter by name pattern") @RequestParam(required = false)
           String namePattern) {
 
-    try {
-      List<HolidayDataDTO> holidays =
+    List<HolidayDataDTO> holidays;
+
+    // If no filters provided, get all holidays
+    if (country == null
+        && state == null
+        && city == null
+        && type == null
+        && startDate == null
+        && endDate == null
+        && namePattern == null) {
+      holidays = holidayService.findAll();
+    } else {
+      holidays =
           holidayService.findAllWithFilters(
               country, state, city, type, startDate, endDate, null, namePattern);
-
-      List<HolidayResponseDTO> responses =
-          holidays.stream().map(holidayMapper::toResponse).toList();
-
-      return ResponseEntity.ok(responses);
-    } catch (Exception e) {
-      return ResponseEntity.ok(List.of());
     }
+
+    List<HolidayResponseDTO> responses = holidays.stream().map(holidayMapper::toResponse).toList();
+
+    return ResponseEntity.ok(responses);
   }
 
   @GetMapping("/{id}")

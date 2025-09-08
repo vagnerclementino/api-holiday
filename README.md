@@ -94,14 +94,20 @@ For detailed instructions, environment variables, and advanced usage, see:
 curl -X POST "http://localhost:8080/api/holidays" \
   -H "Content-Type: application/json" \
   -d '{
+    "type": "Fixed",
     "name": "New Year",
-    "date": "2024-01-01",
-    "country": "Brazil",
-    "state": "SP",
-    "city": "São Paulo",
-    "type": "NATIONAL",
-    "recurring": true,
-    "description": "New Year celebration"
+    "description": "New Year celebration",
+    "day": 1,
+    "month": "JANUARY",
+    "year": 2024,
+    "localities": [
+      {
+        "localityType": "Country",
+        "code": "BR",
+        "name": "Brazil"
+      }
+    ],
+    "holidayType": "NATIONAL"
   }'
 ```
 
@@ -131,7 +137,6 @@ curl -X PUT "http://localhost:8080/api/holidays/{holiday-id}" \
     "date": "2024-01-01",
     "country": "Brazil",
     "type": "NATIONAL",
-    "recurring": true,
     "description": "Updated description"
   }'
 ```

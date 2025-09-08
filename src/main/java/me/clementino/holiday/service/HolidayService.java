@@ -70,6 +70,12 @@ public class HolidayService {
     return entities.stream().map(this::toDomainData).toList();
   }
 
+  /** Find all holidays without filters. */
+  public List<HolidayDataDTO> findAll() {
+    List<HolidayEntity> entities = holidayRepository.findAll();
+    return entities.stream().map(this::toDomainData).toList();
+  }
+
   public HolidayDataDTO create(Holiday holiday) {
     return create(holiday, null);
   }
