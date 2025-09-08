@@ -1,7 +1,7 @@
 # Data-Oriented Programming Holiday API
 
-[![Quality Assurance](https://github.com/vagnerclementino/odp-api-holiday/actions/workflows/quality.yml/badge.svg)](https://github.com/vagnerclementino/odp-api-holiday/actions/workflows/quality.yml)
-[![Quality Assurance - Main](https://github.com/vagnerclementino/odp-api-holiday/actions/workflows/quality.yml/badge.svg?branch=main)](https://github.com/vagnerclementino/odp-api-holiday/actions/workflows/quality.yml)
+[![Quality Assurance](https://github.com/vagnerclementino/api-holiday/actions/workflows/quality.yml/badge.svg)](https://github.com/vagnerclementino/api-holiday/actions/workflows/quality.yml)
+[![Quality Assurance - Main](https://github.com/vagnerclementino/api-holiday/actions/workflows/quality.yml/badge.svg?branch=main)](https://github.com/vagnerclementino/api-holiday/actions/workflows/quality.yml)
 [![Java](https://img.shields.io/badge/Java-24-orange.svg)](https://openjdk.org/projects/jdk/24/)
 [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.5.4-brightgreen.svg)](https://spring.io/projects/spring-boot)
 [![MongoDB](https://img.shields.io/badge/MongoDB-8-green.svg)](https://www.mongodb.com/)
@@ -21,8 +21,8 @@ This project follows the architectural patterns from [Bootify.io](https://bootif
 
 1. **Clone and start:**
    ```bash
-   git clone https://github.com/vagnerclementino/odp-api-holiday.git
-   cd odp-api-holiday
+   git clone https://github.com/vagnerclementino/api-holiday.git
+   cd api-holiday
    ./mvnw spring-boot:run
    ```
 

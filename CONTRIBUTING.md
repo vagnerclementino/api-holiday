@@ -60,8 +60,8 @@ java --version
 
 ```bash
 # Clone the repository
-git clone https://github.com/vagnerclementino/odp-api-holiday.git
-cd odp-api-holiday
+git clone https://github.com/vagnerclementino/api-holiday.git
+cd api-holiday
 
 # Start development
 ./mvnw spring-boot:run
