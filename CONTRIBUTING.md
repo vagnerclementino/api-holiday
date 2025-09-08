@@ -86,6 +86,131 @@ make style-check
 make format-fix
 ```
 
+## 🧪 Guia de Testes
+
+O projeto utiliza uma estratégia de testes categorizada com **JUnit 5 tags** para separar testes unitários e de integração.
+
+### Categorias de Testes
+
+#### 🔵 Testes Unitários (`@Tag("unit")`)
+Testes rápidos e isolados que não requerem dependências externas:
+
+**Características:**
+- ⚡ Execução rápida (< 1 segundo por teste)
+- 🔒 Isolados (sem dependências externas)
+- 🎯 Focados (testam unidades individuais)
+- 🔄 Repetíveis (mesmo resultado sempre)
+
+**Exemplos:**
+- Testes de objetos de domínio (Holiday, Location)
+- Validação de DTOs
+- Testes de mappers com dados mock
+- Testes de classes utilitárias
+
+#### 🟢 Testes de Integração (`@Tag("integration")`)
+Verificam que diferentes componentes funcionam juntos corretamente:
+
+**Características:**
+- 🐳 Usa TestContainers para instâncias reais do MongoDB
+- 🌐 Testa contexto completo da aplicação
+- 📊 Verifica funcionalidade end-to-end
+- ⏱️ Execução mais lenta (vários segundos por teste)
+
+**Exemplos:**
+- Testes de carregamento do contexto Spring Boot
+- Testes de integração com banco de dados
+- Testes de endpoints da API
+- Testes de integração da camada de serviço
+
+### Executando Testes
+
+#### Todos os Testes (Padrão)
+```bash
+# Executar todos os testes (unitários + integração)
+./mvnw test
+
+# Ou explicitamente usar o profile all-tests
+./mvnw test -Pall-tests
+```
+
+#### Apenas Testes Unitários
+```bash
+# Execução rápida - apenas testes unitários
+./mvnw test -Punit-tests
+```
+
+#### Apenas Testes de Integração
+```bash
+# Execução mais lenta - apenas testes de integração
+./mvnw test -Pintegration-tests
+```
+
+#### Testes Específicos
+```bash
+# Executar uma classe de teste específica
+./mvnw test -Dtest=HolidayOperationsTest
+
+# Executar múltiplas classes de teste
+./mvnw test -Dtest=HolidayOperationsTest,CreateHolidayRequestTest
+```
+
+### Adicionando Novos Testes
+
+#### Para Testes Unitários
+```java
+@Tag("unit")
+class MyServiceTest {
+    
+    @Test
+    void shouldDoSomething() {
+        // Implementação do teste
+    }
+}
+```
+
+#### Para Testes de Integração
+```java
+@SpringBootTest
+@ActiveProfiles("test")
+@Testcontainers
+@Tag("integration")
+class MyIntegrationTest {
+    
+    @Container
+    static MongoDBContainer mongoDBContainer = new MongoDBContainer("mongo:8");
+    
+    @Test
+    void shouldIntegrateCorrectly() {
+        // Implementação do teste de integração
+    }
+}
+```
+
+### Boas Práticas de Testes
+
+#### Testes Unitários
+- ✅ Use anotação `@Tag("unit")`
+- ✅ Mock dependências externas
+- ✅ Teste unidades individuais de funcionalidade
+- ✅ Mantenha testes rápidos (< 1 segundo)
+- ✅ Use nomes descritivos para testes
+- ✅ Siga o padrão AAA (Arrange, Act, Assert)
+
+#### Testes de Integração
+- ✅ Use anotação `@Tag("integration")`
+- ✅ Use TestContainers para bancos de dados reais
+- ✅ Teste interações entre componentes
+- ✅ Use `@SpringBootTest` para contexto completo
+- ✅ Limpe recursos após os testes
+- ✅ Use dados de teste realistas
+
+#### Diretrizes Gerais
+- 📝 Escreva testes antes ou junto com o código (TDD/BDD)
+- 🎯 Busque alta cobertura de testes (>80%)
+- 🔄 Mantenha testes independentes e repetíveis
+- 📚 documente cenários de teste complexos
+- 🚀 Execute testes frequentemente durante desenvolvimento
+
 ## 🐛 Como Reportar Bugs
 
 ### ⚠️ Vulnerabilidades de Segurança
