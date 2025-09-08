@@ -64,8 +64,9 @@ public class HolidayService {
       Boolean recurring,
       String namePattern) {
 
-    List<HolidayEntity> entities = holidayRepository.findWithFilters(
-        country, state, city, type, startDate, endDate, recurring, namePattern);
+    List<HolidayEntity> entities =
+        holidayRepository.findWithFilters(
+            country, state, city, type, startDate, endDate, recurring, namePattern);
     return entities.stream().map(this::toDomainData).toList();
   }
 
