@@ -82,26 +82,6 @@ build-artifact: ##@application Build the Spring Boot application and generate JA
 	@echo "$(GREEN)JAR artifact created: target/$(APP_NAME)-*.jar$(NC)"
 	@echo "$(GREEN)Build completed successfully!$(NC)"
 
-build-image: build-artifact docker-check ##@application Build Docker image from local JAR
-	@echo "$(GREEN)Building Docker image from local JAR...$(NC)"
-	@if ! ls target/$(APP_NAME)-*.jar >/dev/null 2>&1; then \
-		echo "$(RED)❌ JAR file not found. Run 'make build-artifact' first.$(NC)"; \
-		exit 1; \
-	fi
-	@docker build --no-cache -t $(SERVICE_NAME):latest -f Dockerfile .
-	@echo "$(GREEN)Docker image built successfully!$(NC)"
-
-run: ##@application Build and run the complete application from source (no local Java 24 required)
-	@echo "$(GREEN)Building and starting Holiday API from source...$(NC)"
-	@echo "$(YELLOW)🔨 Building application inside Docker (OpenJDK 24)...$(NC)"
-	@echo "$(YELLOW)📦 This will take a few minutes on first run...$(NC)"
-	@echo "services:" > docker-compose.override.yml
-	@echo "  holiday-api:" >> docker-compose.override.yml
-	@echo "    build:" >> docker-compose.override.yml
-	@echo "      dockerfile: Dockerfile.dev" >> docker-compose.override.yml
-	@$(DOCKER_COMPOSE) up --build
-	@rm -f docker-compose.override.yml
-
 run-local: build-artifact ##@application Build and run with local Java (requires Java 24)
 	@echo "$(GREEN)Building and starting Holiday API with local Java...$(NC)"
 	@echo "$(YELLOW)Starting MongoDB first...$(NC)"
@@ -111,24 +91,9 @@ run-local: build-artifact ##@application Build and run with local Java (requires
 	@echo "$(GREEN)Starting Spring Boot application...$(NC)"
 	@$(MAVEN) spring-boot:run -Dspring-boot.run.profiles=local
 
-run-docker: build-image ##@application Build and run with pre-built JAR (requires local Java 24)
-	@echo "$(GREEN)Building and starting Holiday API with Docker...$(NC)"
-	@$(DOCKER_COMPOSE) up --build
-
 run-only: docker-check ##@application Run application without building (containers only)
 	@echo "$(GREEN)Starting application containers...$(NC)"
 	@$(DOCKER_COMPOSE) up
-
-run-detached: ##@application Build and run from source in background (no local Java 24 required)
-	@echo "$(GREEN)Starting Holiday API from source in background...$(NC)"
-	@echo "$(YELLOW)🔨 Building application inside Docker (OpenJDK 24)...$(NC)"
-	@echo "services:" > docker-compose.override.yml
-	@echo "  holiday-api:" >> docker-compose.override.yml
-	@echo "    build:" >> docker-compose.override.yml
-	@echo "      dockerfile: Dockerfile.dev" >> docker-compose.override.yml
-	@$(DOCKER_COMPOSE) up --build -d
-	@rm -f docker-compose.override.yml
-	@echo "$(GREEN)Application started! Check status with 'make status'$(NC)"
 
 # Infrastructure targets
 infra: docker-check ##@infra Start only the infrastructure (MongoDB)
@@ -140,12 +105,6 @@ db: docker-check ##@infra Start only MongoDB database
 	@$(DOCKER_COMPOSE) up mongodb
 
 # Development targets
-dev: ##@development Start development mode from source (no local Java 24 required)
-	@echo "$(GREEN)Starting development mode...$(NC)"
-	@echo "$(YELLOW)🔨 Building application inside Docker with Java 24...$(NC)"
-	@echo "$(YELLOW)📚 Perfect for study - no need to install Java 24 locally!$(NC)"
-	@$(MAKE) run
-
 dev-local: ##@development Start development mode with local Java (requires Java 24)
 	@echo "$(GREEN)Starting development mode with local Java...$(NC)"
 	@$(MAKE) run-local
@@ -349,17 +308,10 @@ restart: ##@control Restart all services
 clean: ##@control Clean up everything (containers, volumes, build artifacts)
 	@echo "$(YELLOW)Cleaning up everything...$(NC)"
 	@$(DOCKER_COMPOSE) down -v --remove-orphans 2>/dev/null || true
-	@docker-compose -f docker-compose.yml -f docker-compose.dev.yml down -v --remove-orphans 2>/dev/null || true
 	@docker system prune -f 2>/dev/null || true
 	@$(MAVEN) clean 2>/dev/null || true
 	@rm -f app.log app.pid
 	@echo "$(GREEN)Cleanup completed$(NC)"
-
-clean-dev: ##@control Clean up development containers and images
-	@echo "$(YELLOW)Cleaning up development environment...$(NC)"
-	@docker-compose -f docker-compose.yml -f docker-compose.dev.yml down -v --remove-orphans 2>/dev/null || true
-	@docker rmi holiday-api:dev 2>/dev/null || true
-	@echo "$(GREEN)Development cleanup completed$(NC)"
 
 # Status and monitoring targets
 status: ##@monitoring Check service status
