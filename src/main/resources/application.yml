@@ -105,34 +105,3 @@ logging:
     org.mongodb.driver: WARN
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
-
-# Application specific configuration for Java 24
-holiday-api:
-  version: 0.0.1-SNAPSHOT
-  description: "Data-Oriented Programming Holiday API with Spring Boot 3.5.4 and Java 24"
-  java24:
-    enabled: true
-    preview-features: true
-    virtual-threads: true
-    pattern-matching: enhanced
-  data-oriented-programming:
-    records: true
-    sealed-interfaces: true
-    immutable-data: true
-    pure-functions: true
-  # MapStruct Configuration
-  mapstruct:
-    default-component-model: spring
-    unmapped-target-policy: error
-    suppress-timestamp-in-generated: true
-  # Holiday Calculation Configuration
-  holiday-calculation:
-    cache-enabled: true
-    auto-calculate-missing-years: true
-    max-years-ahead: 10
-    max-years-behind: 50
-  # Validation Configuration
-  validation:
-    fail-fast: false
-    detailed-errors: true
-    validate-nested: true

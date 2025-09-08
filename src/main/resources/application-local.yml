@@ -46,10 +46,3 @@ springdoc:
   api-docs:
     path: /api-docs
     enabled: true
-
-# Enhanced development configuration
-holiday-api:
-  holiday-calculation:
-    cache-enabled: false # Disable caching in development for testing
-  validation:
-    fail-fast: true # Fail fast in development for quicker feedback
