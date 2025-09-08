@@ -162,7 +162,10 @@ test-all: ##@tests Run all tests (unit + integration)
 # Quality Assurance targets
 quality: ##@quality Run complete quality workflow (build + style + tests)
 	@echo "$(GREEN)🎯 Running complete quality workflow...$(NC)"
-	@./scripts/test-quality-workflow.sh
+	@$(MAKE) build-artifact
+	@$(MAKE) checkstyle
+	@$(MAKE) unit-test
+	@echo "$(GREEN)✅ Quality workflow completed!$(NC)"
 
 # HTML Reports targets
 reports: ##@reports Generate all HTML reports and open dashboard
@@ -263,11 +266,6 @@ report-dashboard-generate: ##@reports Generate consolidated HTML dashboard
 	@mkdir -p target/reports-html
 	@./scripts/generate-dashboard.sh
 	@echo "$(GREEN)✅ Consolidated HTML dashboard generated!$(NC)"
-
-checkstyle: ##@quality Run Checkstyle code analysis
-	@echo "$(GREEN)🎨 Running Checkstyle analysis...$(NC)"
-	@$(MAVEN) checkstyle:check -B
-	@echo "$(GREEN)Checkstyle analysis completed!$(NC)"
 
 format-check: ##@quality Check code formatting (Spotless)
 	@echo "$(GREEN)📋 Checking code formatting...$(NC)"
