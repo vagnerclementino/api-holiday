@@ -156,15 +156,6 @@ public record MoveableHoliday(
   }
 
   /**
-   * Checks if this holiday requires algorithmic calculation.
-   *
-   * @return true (moveable holidays always require calculation)
-   */
-  public boolean requiresCalculation() {
-    return true;
-  }
-
-  /**
    * Gets information about the calculation method for this holiday.
    *
    * @return description of how this holiday is calculated
@@ -224,12 +215,7 @@ public record MoveableHoliday(
    */
   public boolean hasFixedMonth() {
     return switch (knownHoliday) {
-      case THANKSGIVING_US -> true;
-      case MEMORIAL_DAY_US -> true;
-      case LABOR_DAY_US -> true;
-      case MOTHERS_DAY -> true;
-      case FATHERS_DAY -> true;
-      case EASTER -> false;
+      case THANKSGIVING_US, MEMORIAL_DAY_US, LABOR_DAY_US, MOTHERS_DAY, FATHERS_DAY -> true;
       default -> false;
     };
   }
