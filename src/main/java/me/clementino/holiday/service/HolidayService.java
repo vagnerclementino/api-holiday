@@ -14,10 +14,6 @@ import me.clementino.holiday.entity.HolidayEntity;
 import me.clementino.holiday.entity.LocalityEntity;
 import me.clementino.holiday.mapper.HolidayMapper;
 import me.clementino.holiday.repository.HolidayRepository;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.data.mongodb.core.query.Criteria;
-import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
 
 /**
@@ -30,17 +26,14 @@ import org.springframework.stereotype.Service;
 public class HolidayService {
 
   private final HolidayRepository holidayRepository;
-  private final MongoTemplate mongoTemplate;
   private final HolidayOperations holidayOperations;
   private final HolidayMapper mapper;
 
   public HolidayService(
       HolidayRepository holidayRepository,
-      MongoTemplate mongoTemplate,
       HolidayOperations holidayOperations,
       HolidayMapper mapper) {
     this.holidayRepository = holidayRepository;
-    this.mongoTemplate = mongoTemplate;
     this.holidayOperations = holidayOperations;
     this.mapper = mapper;
   }
@@ -67,35 +60,11 @@ public class HolidayService {
       HolidayType type,
       LocalDate startDate,
       LocalDate endDate,
+      Boolean recurring,
       String namePattern) {
 
-    Query query = new Query();
-
-    if (country != null && !country.isBlank()) {
-      query.addCriteria(Criteria.where("localities.countryCode").regex(country, "i"));
-    }
-    if (state != null && !state.isBlank()) {
-      query.addCriteria(Criteria.where("localities.subdivisionCode").regex(state, "i"));
-    }
-    if (city != null && !city.isBlank()) {
-      query.addCriteria(Criteria.where("localities.cityName").regex(city, "i"));
-    }
-    if (type != null) {
-      query.addCriteria(Criteria.where("type").is(type));
-    }
-    if (startDate != null) {
-      query.addCriteria(Criteria.where("date").gte(startDate));
-    }
-    if (endDate != null) {
-      query.addCriteria(Criteria.where("date").lte(endDate));
-    }
-    if (namePattern != null && !namePattern.isBlank()) {
-      query.addCriteria(Criteria.where("name").regex(namePattern, "i"));
-    }
-
-    query.with(Sort.by(Sort.Direction.ASC, "date"));
-
-    List<HolidayEntity> entities = mongoTemplate.find(query, HolidayEntity.class);
+    List<HolidayEntity> entities = holidayRepository.findWithFilters(
+        country, state, city, type, startDate, endDate, recurring, namePattern);
     return entities.stream().map(this::toDomainData).toList();
   }
 

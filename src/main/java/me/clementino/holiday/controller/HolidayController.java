@@ -85,7 +85,7 @@ public class HolidayController {
     try {
       List<HolidayDataDTO> holidays =
           holidayService.findAllWithFilters(
-              country, state, city, type, startDate, endDate, namePattern);
+              country, state, city, type, startDate, endDate, null, namePattern);
 
       List<HolidayResponseDTO> responses =
           holidays.stream().map(holidayMapper::toResponse).toList();
