@@ -76,7 +76,7 @@ public class HolidayMapper {
 
   /** Convert ObservedHoliday to HolidayEntity. */
   private HolidayEntity toEntityFromObserved(ObservedHoliday observed) {
-    Locality primaryLocality = observed.localities().get(0);
+    Locality primaryLocality = observed.localities().getFirst();
     String country = getCountryCode(primaryLocality);
 
     HolidayEntity entity =
@@ -90,7 +90,7 @@ public class HolidayMapper {
 
   /** Convert MoveableHoliday to HolidayEntity. */
   private HolidayEntity toEntityFromMoveable(MoveableHoliday moveable) {
-    Locality primaryLocality = moveable.localities().get(0);
+    Locality primaryLocality = moveable.localities().getFirst();
     String country = getCountryCode(primaryLocality);
 
     HolidayEntity entity =
@@ -104,7 +104,7 @@ public class HolidayMapper {
 
   /** Convert MoveableFromBaseHoliday to HolidayEntity. */
   private HolidayEntity toEntityFromMoveableFromBase(MoveableFromBaseHoliday moveableFromBase) {
-    Locality primaryLocality = moveableFromBase.localities().get(0);
+    Locality primaryLocality = moveableFromBase.localities().getFirst();
     String country = getCountryCode(primaryLocality);
 
     HolidayEntity entity =

@@ -3,6 +3,7 @@ package me.clementino.holiday.service;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import me.clementino.holiday.domain.dop.Holiday;
@@ -114,11 +115,11 @@ public class HolidayService {
               + entity.getId()
               + ". This indicates a data corruption issue in MongoDB.");
     }
-    if (entity.getDate() == null) {
+    if (Objects.isNull(entity.getDate())) {
       throw new IllegalStateException("HolidayEntity date is null for ID: " + entity.getId());
     }
 
-    if (entity.getType() == null) {
+    if (Objects.isNull(entity.getType())) {
       throw new IllegalStateException("HolidayEntity type is null for ID: " + entity.getId());
     }
 
