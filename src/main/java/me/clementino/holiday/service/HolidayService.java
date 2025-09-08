@@ -15,7 +15,6 @@ import me.clementino.holiday.entity.HolidayEntity;
 import me.clementino.holiday.entity.LocalityEntity;
 import me.clementino.holiday.mapper.SimpleHolidayMapper;
 import me.clementino.holiday.repository.HolidayRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -36,7 +35,6 @@ public class HolidayService {
   private final HolidayOperations holidayOperations;
   private final SimpleHolidayMapper mapper;
 
-  @Autowired
   public HolidayService(
       HolidayRepository holidayRepository,
       MongoTemplate mongoTemplate,

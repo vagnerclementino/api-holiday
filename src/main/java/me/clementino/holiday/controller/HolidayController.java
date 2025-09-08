@@ -17,7 +17,6 @@ import me.clementino.holiday.dto.UpdateHolidayRequest;
 import me.clementino.holiday.mapper.HolidayCreationMapper;
 import me.clementino.holiday.mapper.SimpleHolidayMapper;
 import me.clementino.holiday.service.HolidayService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -52,7 +51,6 @@ public class HolidayController {
   private final SimpleHolidayMapper holidayMapper;
   private final HolidayCreationMapper creationMapper;
 
-  @Autowired
   public HolidayController(
       HolidayService holidayService,
       SimpleHolidayMapper holidayMapper,
@@ -108,14 +106,11 @@ public class HolidayController {
       @Parameter(description = "Holiday ID") @PathVariable String id) {
 
     try {
-      Optional<HolidayData> holiday = holidayService.findById(id);
-
-      if (holiday.isEmpty()) {
-        return ResponseEntity.notFound().build();
-      }
-
-      HolidayResponseDTO response = holidayMapper.toResponse(holiday.get());
-      return ResponseEntity.ok(response);
+      return holidayService
+          .findById(id)
+          .map(holidayMapper::toResponse)
+          .map(ResponseEntity::ok)
+          .orElse(ResponseEntity.notFound().build());
     } catch (Exception e) {
       return ResponseEntity.notFound().build();
     }
@@ -178,15 +173,11 @@ public class HolidayController {
               current.dateCreated(),
               Optional.empty(),
               Optional.empty());
-
-      Optional<HolidayData> result = holidayService.update(id, updated);
-
-      if (result.isEmpty()) {
-        return ResponseEntity.notFound().build();
-      }
-
-      HolidayResponseDTO response = holidayMapper.toResponse(result.get());
-      return ResponseEntity.ok(response);
+      return holidayService
+          .update(id, updated)
+          .map(holidayMapper::toResponse)
+          .map(ResponseEntity::ok)
+          .orElse(ResponseEntity.notFound().build());
     } catch (Exception e) {
       return ResponseEntity.badRequest().build();
     }
@@ -205,7 +196,6 @@ public class HolidayController {
       if (!deleted) {
         return ResponseEntity.notFound().build();
       }
-
       return ResponseEntity.noContent().build();
     } catch (Exception e) {
       return ResponseEntity.notFound().build();
