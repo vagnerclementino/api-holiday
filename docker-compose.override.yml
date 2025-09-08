@@ -1,0 +1,4 @@
+services:
+  holiday-api:
+    build:
+      dockerfile: Dockerfile.dev

@@ -67,13 +67,12 @@ public record Location(
     }
 }
 
-// Sealed interface for modeling holiday status alternatives
-public sealed interface HolidayStatus 
-    permits HolidayStatus.Active, HolidayStatus.Cancelled, HolidayStatus.Proposed {
+// Sealed interface for modeling validation results
+public sealed interface ValidationResult 
+    permits ValidationResult.Success, ValidationResult.Failure {
     
-    record Active(LocalDateTime confirmedAt) implements HolidayStatus {}
-    record Cancelled(LocalDateTime cancelledAt, String reason) implements HolidayStatus {}
-    record Proposed(LocalDateTime proposedAt, String proposedBy) implements HolidayStatus {}
+    record Success(String message) implements ValidationResult {}
+    record Failure(List<String> errors) implements ValidationResult {}
 }
 ```
 
@@ -212,55 +211,6 @@ If you want to develop with local Java tools:
    cd odp-api-holiday
    ```
 
-2. **Build the application:**
-   ```bash
-   ./mvnw clean package -DskipTests
-   ```
-
-3. **Run the application (choose one):**
-   
-   **Option 1: Using Maven (recommended for development):**
-   ```bash
-   ./mvnw spring-boot:run
-   ```
-   
-   **Option 2: Using JAR directly:**
-   ```bash
-   java --enable-preview -jar target/holiday-api-*.jar
-   ```
-
-4. **Access the API:**
-   - API Base URL: http://localhost:8080
-   - Swagger UI: http://localhost:8080/swagger-ui.html
-   - API Docs: http://localhost:8080/api-docs
-   - Health Check: http://localhost:8080/actuator/health
-
-### Java 24 Configuration
-
-This project is configured by default to run with **Java 24 (Amazon Corretto)** and **Spring Boot 3.5.4**:
-
-✅ **Default Java 24 Support**: No special profiles or scripts needed
-✅ **Preview Features**: Automatically enabled via Maven configuration
-✅ **Spring Boot 3.5.4**: Latest version with enhanced Java 24 support
-✅ **Optimized Configuration**: Jackson, MongoDB, and Actuator configured for Java 24
-
-**Technical Details:**
-- **Runtime**: Java 24 (Amazon Corretto) with preview features enabled
-- **Compilation**: Java 24 (full Java 24 support)
-- **Spring Boot**: 3.5.4 with Spring Framework 6.2.9
-- **Build Tool**: Maven 3.9.11
-- **Build Tool**: Maven 3.9.11
-- Docker & Docker Compose
-- Make (optional, for convenience commands)
-
-### Setup and Run
-
-1. **Clone the repository:**
-   ```bash
-   git clone https://github.com/vagnerclementino/odp-api-holiday.git
-   cd odp-api-holiday
-   ```
-
 2. **Complete setup (one command):**
    ```bash
    make setup
@@ -276,6 +226,21 @@ This project is configured by default to run with **Java 24 (Amazon Corretto)** 
    make test
    ```
 
+### Java 24 Configuration
+
+This project is configured by default to run with **Java 24 (Amazon Corretto)** and **Spring Boot 3.5.4**:
+
+✅ **Default Java 24 Support**: No special profiles or scripts needed
+✅ **Preview Features**: Automatically enabled via Maven configuration
+✅ **Spring Boot 3.5.4**: Latest version with enhanced Java 24 support
+✅ **Optimized Configuration**: Jackson, MongoDB, and Actuator configured for Java 24
+
+**Technical Details:**
+- **Runtime**: Java 24 (Amazon Corretto) with preview features enabled
+- **Compilation**: Java 24 (full Java 24 support)
+- **Spring Boot**: 3.5.4 with Spring Framework 6.2.9
+- **Build Tool**: Maven 3.9.11
+
 ### Development Commands
 
 | Command | Description | Java Required |
@@ -285,8 +250,14 @@ This project is configured by default to run with **Java 24 (Amazon Corretto)** 
 | `make run-local` | Build and run with local Java | ✅ Java 24 |
 | `make dev-local` | Development mode with local Java | ✅ Java 24 |
 | `make run-detached` | Run in background (Docker) | ❌ No |
-| `make status` | Check application status | ❌ No |
-| `make clean-dev` | Clean development containers | ❌ No |
+| `make infra` | Start only MongoDB | ❌ No |
+| `make db` | Start only MongoDB database | ❌ No |
+| `make test` | Run integration tests | ❌ No |
+| `make unit-test` | Run unit tests | ❌ No |
+| `make quality` | Run complete quality workflow | ❌ No |
+| `make checkstyle` | Run Checkstyle analysis | ❌ No |
+| `make checkstyle-fix` | Auto-fix style violations | ❌ No |
+| `make reports` | Generate and open HTML reports | ❌ No |
 
 ### Manual Setup (if Make is not available)
 
@@ -297,7 +268,7 @@ This project is configured by default to run with **Java 24 (Amazon Corretto)** 
 
 2. **Build the application:**
    ```bash
-   mvn clean package -DskipTests
+   ./mvnw clean package -DskipTests
    ```
 
 3. **Run the Spring Boot application:**
@@ -323,15 +294,15 @@ This project includes comprehensive **Postman Collections** for testing all API 
 
 ### 📊 **Collection Structure**
 
-The Postman collection is organized into **5 main categories** with **23 comprehensive tests**:
+The Postman collection includes **46 comprehensive tests** organized into **5 main categories**:
 
 | Category | Tests | Description |
 |----------|-------|-------------|
-| **🟢 Basic CRUD Operations** | 13 | Create, Read, Update, Delete holidays |
-| **🔵 Advanced Filtering** | 1 | Complex queries and filtering |
-| **🟡 Validation & Errors** | 4 | Input validation and error handling |
-| **🟠 DOP-Specific Types** | 4 | Data-oriented holiday types |
-| **🔴 Performance Tests** | 1 | Response time and load testing |
+| **🟢 Basic CRUD Operations** | ~30 | Create, Read, Update, Delete holidays |
+| **🔵 Advanced Filtering** | ~5 | Complex queries and filtering |
+| **🟡 Validation & Errors** | ~5 | Input validation and error handling |
+| **🟠 DOP-Specific Types** | ~4 | Data-oriented holiday types |
+| **🔴 Performance Tests** | ~2 | Response time and load testing |
 
 ### 🏗️ **DOP Types Covered**
 
@@ -415,7 +386,7 @@ curl -X DELETE "http://localhost:8080/api/holidays/{holiday-id}"
 ```bash
 make unit-test
 # or
-mvn test
+./mvnw test
 ```
 
 ### Run Integration Tests
@@ -484,29 +455,9 @@ Pull requests to `main` branch require:
 
 **No code can be merged without passing the complete quality workflow.**
 
-### 📚 **Quality Documentation**
-
-For detailed information about the quality workflow:
-- **[Branch Protection Setup](./.github/BRANCH_PROTECTION.md)**
-
 ---
 
-## 🛠️ Development Commands
-
-| Command | Description |
-|---------|-------------|
-| `make setup` | Complete environment setup |
-| `make build` | Build Java application |
-| `make deploy` | Start MongoDB and Spring Boot |
-| `make test` | Run API integration tests |
-| `make unit-test` | Run unit tests |
-| `make logs` | View MongoDB logs |
-| `make clean` | Clean up everything |
-| `make start` | Start services |
-| `make stop` | Stop services |
-| `make restart` | Restart services |
-| `make url` | Show API URL |
-| `make help` | Show all commands |
+---
 
 ## 📁 Project Structure
 
@@ -514,27 +465,37 @@ For detailed information about the quality workflow:
 src/
 ├── main/java/me/clementino/holiday/
 │   ├── domain/          # Domain objects (immutable records)
-│   │   ├── Holiday.java
-│   │   ├── Location.java
-│   │   ├── HolidayType.java
-│   │   └── HolidayFilter.java
+│   │   ├── dop/         # Data-Oriented Programming approach
+│   │   │   ├── Holiday.java
+│   │   │   ├── Location.java
+│   │   │   ├── HolidayType.java
+│   │   │   ├── FixedHoliday.java
+│   │   │   ├── MoveableHoliday.java
+│   │   │   └── HolidayOperations.java
+│   │   └── oop/         # Object-Oriented Programming approach
+│   │       ├── Holiday.java
+│   │       ├── Locality.java
+│   │       └── FixedHoliday.java
 │   ├── dto/             # Data Transfer Objects
-│   │   ├── CreateHolidayRequest.java
-│   │   ├── HolidayResponse.java
-│   │   ├── LocationResponse.java
-│   │   └── ErrorResponse.java
-│   ├── validator/       # Boundary validation
-│   │   ├── ValidationResult.java
-│   │   └── HolidayValidator.java
+│   │   ├── CreateHolidayRequestDTO.java
+│   │   ├── HolidayResponseDTO.java
+│   │   ├── LocationInfoDTO.java
+│   │   └── HolidayQueryDTO.java
+│   ├── validation/      # Boundary validation
+│   │   └── ValidationResult.java
 │   ├── mapper/          # Pure transformation functions
-│   │   └── HolidayMapper.java
+│   │   ├── HolidayMapper.java
+│   │   └── HolidayCreationMapper.java
 │   ├── service/         # Business logic
 │   │   └── HolidayService.java
 │   ├── repository/      # Data persistence
-│   │   ├── HolidayRepository.java
-│   │   └── MongoHolidayRepository.java
-│   └── controller/      # REST Controllers
-│       └── HolidayController.java
+│   │   └── HolidayRepository.java
+│   ├── controller/      # REST Controllers
+│   │   └── HolidayController.java
+│   ├── entity/          # MongoDB entities
+│   │   └── HolidayEntity.java
+│   └── exception/       # Exception handling
+│       └── GlobalExceptionHandler.java
 ├── test/java/me/clementino/holiday/
 │   └── HolidayApiIntegrationTest.java
 └── postman/             # Postman Collections & Documentation
@@ -546,8 +507,8 @@ src/
 ## 🏛️ Infrastructure
 
 The project uses:
-- **Spring Boot 3**: Modern Java web framework
-- **MongoDB 8**: Document-oriented NoSQL database
+- **Spring Boot 3.5.4**: Modern Java web framework
+- **MongoDB 8.0.12**: Document-oriented NoSQL database
 - **Docker Compose**: Container orchestration
 - **Maven**: Build automation and dependency management
 - **Make**: Task automation and convenience commands
