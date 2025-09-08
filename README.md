@@ -11,270 +11,37 @@ A comprehensive example demonstrating **Data-Oriented Programming (DOP) v1.1** p
 
 This project follows the architectural patterns from [Bootify.io](https://bootify.io/) and implements a data model inspired by the [Holiday API](https://holidayapi.com/docs).
 
-## 🎯 Data-Oriented Programming v1.1 Principles Demonstrated
-
-This project showcases the four refined principles of Data-Oriented Programming v1.1:
-
-### 1. **Model Data Immutably and Transparently**
-- All domain objects are implemented as Java `records`
-- Transparent data carriers with full field access
-- Immutable by design - operations return new instances
-- Thread-safe and predictable
-
-```java
-public record Holiday(
-    String id,
-    String name,
-    LocalDate date,
-    Location location,
-    HolidayType type,
-    boolean recurring,
-    Optional<String> description
-) {
-    // Compact constructor for validation
-    public Holiday {
-        Objects.requireNonNull(name, "Holiday name cannot be null");
-        Objects.requireNonNull(date, "Holiday date cannot be null");
-        Objects.requireNonNull(location, "Holiday location cannot be null");
-        Objects.requireNonNull(type, "Holiday type cannot be null");
-    }
-    
-    // Transformation methods instead of setters
-    public Holiday withName(String newName) {
-        return new Holiday(id, newName, date, location, type, recurring, description);
-    }
-}
-```
-
-### 2. **Model the Data, the Whole Data, and Nothing but the Data**
-- Domain objects represent complete business entities
-- Tailored aggregates using records
-- Sealed interfaces for modeling alternatives
-- No artificial abstractions or unnecessary complexity
-
-```java
-public record Location(
-    String country,
-    Optional<String> state,
-    Optional<String> city
-) {
-    // Models exactly what a location is - no more, no less
-    public Location {
-        Objects.requireNonNull(country, "Country cannot be null");
-        if (country.isBlank()) {
-            throw new IllegalArgumentException("Country cannot be blank");
-        }
-    }
-}
-
-// Sealed interface for modeling validation results
-public sealed interface ValidationResult 
-    permits ValidationResult.Success, ValidationResult.Failure {
-    
-    record Success(String message) implements ValidationResult {}
-    record Failure(List<String> errors) implements ValidationResult {}
-}
-```
-
-### 3. **Make Illegal States Unrepresentable**
-- Sealed interfaces prevent invalid states
-- Enum constraints for valid values
-- Constructor validation prevents invalid objects
-- Precise type modeling
-
-```java
-public enum HolidayType {
-    NATIONAL, STATE, MUNICIPAL, RELIGIOUS, COMMERCIAL;
-    
-    public boolean isGovernmental() {
-        return this == NATIONAL || this == STATE || this == MUNICIPAL;
-    }
-}
-
-// Using sealed interfaces to prevent invalid combinations
-public sealed interface ValidationResult 
-    permits ValidationResult.Success, ValidationResult.Failure {
-    
-    record Success(String message) implements ValidationResult {}
-    record Failure(List<String> errors) implements ValidationResult {}
-}
-```
-
-### 4. **Separate Operations from Data**
-- Operations are implemented in service classes, not on records
-- Pattern matching with `switch` for type-safe operations
-- Clear separation between data and behavior
-- Operations work with immutable data
-
-```java
-@Service
-public class HolidayOperations {
-    
-    public ValidationResult validateHoliday(Holiday holiday) {
-        return switch (holiday.type()) {
-            case NATIONAL -> validateNationalHoliday(holiday);
-            case STATE -> validateStateHoliday(holiday);
-            case MUNICIPAL -> validateMunicipalHoliday(holiday);
-            case RELIGIOUS -> validateReligiousHoliday(holiday);
-            case COMMERCIAL -> validateCommercialHoliday(holiday);
-        };
-    }
-    
-    public String formatHolidayInfo(Holiday holiday) {
-        return switch (holiday.location()) {
-            case Location(var country, Optional.empty(), Optional.empty()) -> 
-                "%s - National holiday in %s".formatted(holiday.name(), country);
-            case Location(var country, Optional<String> state, Optional.empty()) when state.isPresent() -> 
-                "%s - State holiday in %s, %s".formatted(holiday.name(), state.get(), country);
-            case Location(var country, Optional<String> state, Optional<String> city) 
-                when state.isPresent() && city.isPresent() -> 
-                "%s - Municipal holiday in %s, %s, %s".formatted(holiday.name(), city.get(), state.get(), country);
-            default -> "%s - Holiday".formatted(holiday.name());
-        };
-    }
-}
-```
-
-## 🏗️ Architecture
-
-The project follows a clean, data-oriented architecture with Spring Boot 3:
-
-```
-┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
-│  REST Controller│───▶│   Validation     │───▶│     Mapping     │
-└─────────────────┘    └──────────────────┘    └─────────────────┘
-                                │                        │
-                                ▼                        ▼
-┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
-│    MongoDB      │◀───│     Service      │◀───│  Domain Objects │
-└─────────────────┘    └──────────────────┘    └─────────────────┘
-                                │                        │
-                                ▼                        ▼
-                       ┌──────────────────┐    ┌─────────────────┐
-                       │   Repository     │    │   Operations    │
-                       └──────────────────┘    └─────────────────┘
-```
-
 ## 🚀 Quick Start
 
-### 📮 **Testing with Postman (Recommended)**
-
-**Fastest way to explore the API!** No setup required.
-
-1. **Import Collections**: Use the ready-made Postman collections in [`postman/`](./postman/)
-2. **Start API**: Run `make run` to start the application
-3. **Test Everything**: 23 pre-configured requests covering all DOP patterns
-
-👉 **[Complete Postman Guide](./postman/README.md)**
-
-### 📚 For Students (No Java Installation Required)
-
-**Perfect for learning and study purposes!** You don't need Java 24 installed locally.
-
-```bash
-# Clone the repository
-git clone https://github.com/vagnerclementino/odp-api-holiday.git
-cd odp-api-holiday
-
-# Start the complete application (builds inside Docker)
-make run
-
-# Or run in background
-make run-detached
-
-# Check status
-make status
-
-# Access the API
-curl http://localhost:8080/api/holidays
-```
-
-The application will be built inside Docker using Java 24, so you only need:
-- **Docker & Docker Compose** 
-- **Make** (optional, for convenience commands)
-
-### 🛠️ For Developers (Local Java Development)
-
-If you want to develop with local Java tools:
-
 ### Prerequisites
-- **Java 24** (Amazon Corretto 24 recommended)
-- Maven 3.9.11+
-- Docker & Docker Compose
-- Make (optional, for convenience commands)
+- **Java 24** (required)
+- **Docker & Docker Compose** (for MongoDB)
 
 ### Setup and Run
 
-1. **Clone the repository:**
+1. **Clone and start:**
    ```bash
    git clone https://github.com/vagnerclementino/odp-api-holiday.git
    cd odp-api-holiday
+   ./mvnw spring-boot:run
    ```
 
-2. **Complete setup (one command):**
-   ```bash
-   make setup
-   ```
-   This will:
-   - Start MongoDB 8 container
-   - Build the Spring Boot application with Java 24
-   - Start the REST API server
-   - Display the API URL
+2. **Access the API:**
+   - API: http://localhost:8080/api/holidays
+   - Swagger: http://localhost:8080/swagger-ui.html
 
-3. **Test the API:**
-   ```bash
-   make test
-   ```
-
-### Java 24 Configuration
-
-This project is configured by default to run with **Java 24 (Amazon Corretto)** and **Spring Boot 3.5.4**:
-
-✅ **Default Java 24 Support**: No special profiles or scripts needed
-✅ **Preview Features**: Automatically enabled via Maven configuration
-✅ **Spring Boot 3.5.4**: Latest version with enhanced Java 24 support
-✅ **Optimized Configuration**: Jackson, MongoDB, and Actuator configured for Java 24
-
-**Technical Details:**
-- **Runtime**: Java 24 (Amazon Corretto) with preview features enabled
-- **Compilation**: Java 24 (full Java 24 support)
-- **Spring Boot**: 3.5.4 with Spring Framework 6.2.9
-- **Build Tool**: Maven 3.9.11
+The application automatically starts MongoDB via Docker Compose using `spring-boot-docker-compose`.
 
 ### Development Commands
 
-| Command | Description | Java Required |
-|---------|-------------|---------------|
-| `make run` | Build and run from source (Docker) | ❌ No |
-| `make dev` | Start development mode (Docker) | ❌ No |
-| `make run-local` | Build and run with local Java | ✅ Java 24 |
-| `make dev-local` | Development mode with local Java | ✅ Java 24 |
-| `make run-detached` | Run in background (Docker) | ❌ No |
-| `make infra` | Start only MongoDB | ❌ No |
-| `make db` | Start only MongoDB database | ❌ No |
-| `make test` | Run integration tests | ❌ No |
-| `make unit-test` | Run unit tests | ❌ No |
-| `make quality` | Run complete quality workflow | ❌ No |
-| `make checkstyle` | Run Checkstyle analysis | ❌ No |
-| `make checkstyle-fix` | Auto-fix style violations | ❌ No |
-| `make reports` | Generate and open HTML reports | ❌ No |
+| Command | Description |
+|---------|-------------|
+| `./mvnw spring-boot:run` | Run the application |
+| `./mvnw test` | Run unit tests |
+| `./mvnw clean package` | Build JAR |
+| `docker-compose up mongodb` | Start only MongoDB |
 
-### Manual Setup (if Make is not available)
-
-1. **Start MongoDB:**
-   ```bash
-   docker-compose up -d mongodb
-   ```
-
-2. **Build the application:**
-   ```bash
-   ./mvnw clean package -DskipTests
-   ```
-
-3. **Run the Spring Boot application:**
-   ```bash
-   java -jar target/holiday-api-*.jar
-   ```
+> **Need Java 24?** See [CONTRIBUTING.md](CONTRIBUTING.md) for installation guide.
 
 ## 📮 Postman Collections
 

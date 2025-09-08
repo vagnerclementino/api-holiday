@@ -1,52 +1,106 @@
-# 🤝 Guia de Contribuição
+# Contributing to Data-Oriented Programming Holiday API
 
-Obrigado por considerar contribuir com o **Data-Oriented Programming Holiday API**! São pessoas como você que tornam este projeto uma excelente ferramenta de aprendizado.
+## 🛠️ Development Setup
 
-Seguir estas diretrizes ajuda a comunicar que você respeita o tempo dos desenvolvedores que mantêm este projeto open source. Em troca, eles devem retribuir esse respeito ao abordar sua issue, avaliar mudanças e ajudá-lo a finalizar seus pull requests.
+### Prerequisites
 
-## 🎯 Tipos de Contribuições Bem-vindas
+This project requires **Java 24** for development. Here's how to install it:
 
-Mantemos uma mente aberta! Existem muitas maneiras de contribuir:
+#### Option 1: Using SDKMAN (Recommended)
 
-- **📚 Documentação**: Melhorar documentação, escrever tutoriais ou posts
-- **🐛 Relatórios de Bug**: Identificar e reportar problemas
-- **✨ Novas Funcionalidades**: Sugerir e implementar melhorias
-- **🧪 Testes**: Adicionar ou melhorar testes existentes
-- **🎨 Exemplos DOP**: Criar novos exemplos de Programação Orientada a Dados
-- **🔧 Refatoração**: Melhorar código existente seguindo princípios DOP
+```bash
+# Install SDKMAN if not already installed
+curl -s "https://get.sdkman.io" | bash
+source "$HOME/.sdkman/bin/sdkman-init.sh"
 
-## 🚫 Contribuições NÃO Aceitas
+# Install Java 24 (Amazon Corretto)
+sdk install java 24-amzn
+sdk use java 24-amzn
 
-- Issues de suporte técnico (use as Discussions do GitHub)
-- Mudanças que quebrem os princípios de Data-Oriented Programming
-- Código malicioso ou com vulnerabilidades de segurança
-- Alterações que não sigam os padrões de qualidade do projeto
+# Verify installation
+java --version
+```
 
-## 📋 Regras Básicas
+#### Option 2: Using asdf
 
-### Responsabilidades Técnicas
-- **✅ Compatibilidade**: Garantir compatibilidade com Java 24 e Spring Boot 3.5.4
-- **🧪 Testes**: Todo código deve ter testes unitários e de integração
-- **📐 Padrões DOP**: Seguir os 4 princípios de Data-Oriented Programming v1.1
-- **🎨 Estilo**: Manter consistência com Checkstyle e formatação existente
-- **📝 Documentação**: Documentar mudanças significativas
+```bash
+# Install asdf if not already installed
+git clone https://github.com/asdf-vm/asdf.git ~/.asdf --branch v0.14.0
 
-### Responsabilidades de Comportamento
-- Seja respeitoso e construtivo em todas as interações
-- Crie issues para mudanças significativas antes de implementar
-- Mantenha PRs pequenos e focados em uma funcionalidade
-- Seja receptivo a feedback e sugestões de melhoria
+# Add to your shell profile (.bashrc, .zshrc, etc.)
+echo '. "$HOME/.asdf/asdf.sh"' >> ~/.bashrc
+echo '. "$HOME/.asdf/completions/asdf.bash"' >> ~/.bashrc
 
-## 🚀 Sua Primeira Contribuição
+# Restart shell or source profile
+source ~/.bashrc
 
-Não sabe por onde começar? Procure por issues com as labels:
-- **`good first issue`**: Issues adequadas para iniciantes
-- **`help wanted`**: Issues que precisam de ajuda da comunidade
-- **`documentation`**: Melhorias na documentação
+# Install Java plugin and Java 24
+asdf plugin add java
+asdf install java corretto-24.0.0.36.1
+asdf global java corretto-24.0.0.36.1
 
-**Primeira vez contribuindo para open source?** Confira estes recursos:
-- [Como Contribuir para um Projeto Open Source no GitHub](https://egghead.io/series/how-to-contribute-to-an-open-source-project-on-github)
-- [First Timers Only](http://www.firsttimersonly.com/)
+# Verify installation
+java --version
+```
+
+#### Option 3: Manual Installation
+
+1. Download Amazon Corretto 24 from: https://aws.amazon.com/corretto/
+2. Install following the platform-specific instructions
+3. Set `JAVA_HOME` environment variable
+4. Add Java to your `PATH`
+
+### Additional Requirements
+
+- **Maven 3.9.11+** (included via Maven Wrapper)
+- **Docker & Docker Compose**
+- **Make** (optional, for convenience commands)
+
+### Quick Development Start
+
+```bash
+# Clone the repository
+git clone https://github.com/vagnerclementino/odp-api-holiday.git
+cd odp-api-holiday
+
+# Start development
+./mvnw spring-boot:run
+```
+
+The application uses `spring-boot-docker-compose` to automatically start MongoDB when needed.
+
+## 🎯 Types of Contributions Welcome
+
+We maintain an open mind! There are many ways to contribute:
+
+- **📚 Documentation**: Improve documentation, write tutorials or posts
+- **🐛 Bug Reports**: Identify and report problems
+- **✨ New Features**: Suggest and implement improvements
+- **🧪 Tests**: Add or improve existing tests
+- **🎨 DOP Examples**: Create new Data-Oriented Programming examples
+- **🔧 Refactoring**: Improve existing code following DOP principles
+
+## 🚫 Contributions NOT Accepted
+
+- Technical support issues (use GitHub Discussions)
+- Changes that break Data-Oriented Programming principles
+- Malicious code or security vulnerabilities
+- Changes that don't follow project quality standards
+
+## 📋 Basic Rules
+
+### Technical Responsibilities
+- **✅ Compatibility**: Ensure compatibility with Java 24 and Spring Boot 3.5.4
+- **🧪 Tests**: All code must have unit and integration tests
+- **📐 DOP Standards**: Follow the 4 principles of Data-Oriented Programming v1.1
+- **🎨 Style**: Maintain consistency with Checkstyle and existing formatting
+- **📝 Documentation**: Document significant changes
+
+### Behavioral Responsibilities
+- Be respectful and constructive in all interactions
+- Create issues for significant changes before implementing
+- Keep PRs small and focused on one functionality
+- Be receptive to feedback and improvement suggestions
 
 ## 🛠️ Como Contribuir
 
