@@ -211,6 +211,105 @@ class MyIntegrationTest {
 - 📚 documente cenários de teste complexos
 - 🚀 Execute testes frequentemente durante desenvolvimento
 
+## 📮 Testes com Postman
+
+O projeto inclui **coleções Postman abrangentes** para testar todos os endpoints da API e padrões DOP.
+
+### 🚀 Início Rápido com Postman
+
+#### 1. Importar Coleções
+1. Abra o Postman
+2. Clique em **Import**
+3. Selecione `postman/DOP-Holiday-API.postman_collection.json`
+4. Selecione `postman/DOP-Holiday-API.postman_environment.json`
+
+#### 2. Configurar Ambiente
+1. Selecione **🎯 DOP Holiday API - Master Environment** no dropdown de ambiente
+2. Certifique-se que a API está rodando em `http://localhost:8080`
+3. Atualize variáveis se necessário (porta diferente, URL, etc.)
+
+#### 3. Executar Testes
+- **Testes Individuais**: Clique em qualquer request e pressione **Send**
+- **Testes por Categoria**: Clique com botão direito em uma pasta e selecione **Run folder**
+- **Suite Completa**: Clique na coleção e selecione **Run collection**
+
+### 📊 Estrutura da Coleção
+
+A coleção está organizada em **5 categorias principais** com **23 testes abrangentes**:
+
+#### 🟢 1. Operações CRUD Básicas (13 requests)
+Operações padrão de Create, Read, Update, Delete para feriados
+- Criar feriados
+- Recuperar feriados por ID
+- Atualizar feriados existentes
+- Deletar feriados
+- Listar todos os feriados
+
+#### 🔵 2. Filtragem e Recuperação Avançada (1 request)
+Consultas complexas, filtragem e padrões de recuperação de dados
+- Filtrar por país, estado, cidade
+- Filtrar por tipo de feriado
+- Filtragem por intervalo de datas
+- Correspondência de padrões de nome
+
+#### 🟡 3. Validação e Tratamento de Erros (4 requests)
+Validação de entrada, cenários de erro e condições de contorno
+- Validação de dados inválidos
+- Validação de campos obrigatórios
+- Validação de datas
+- Teste de respostas de erro
+
+#### 🟠 4. Tipos Específicos DOP (4 subcategorias)
+Tipos de feriados específicos de Data-Oriented Programming
+
+##### 📅 Feriados Fixos (2 requests)
+Feriados de data fixa (Natal, Ano Novo, etc.)
+
+##### 👁️ Feriados Observados (1 request)
+Feriados com datas observadas e regras de segunda-feira
+
+##### 🔄 Feriados Móveis (1 request)
+Feriados calculados (Páscoa, Ação de Graças, etc.)
+
+##### 🔗 Feriados Móveis Baseados (1 request)
+Feriados calculados a partir de outros feriados
+
+#### 🔴 5. Testes de Performance (1 request)
+Testes de performance, operações em lote e testes de stress
+
+### 🌍 Variáveis de Ambiente
+
+| Variável | Valor Padrão | Descrição |
+|----------|--------------|-----------|
+| `baseUrl` | `http://localhost:8080` | URL base da Holiday API |
+| `apiVersion` | `v1` | Versão da API |
+| `contentType` | `application/json` | Tipo de conteúdo padrão |
+| `testCountry` | `BR` | País padrão para testes |
+| `testState` | `SP` | Estado padrão para testes |
+| `testCity` | `São Paulo` | Cidade padrão para testes |
+| `currentYear` | `2024` | Ano atual para testes |
+| `timeout` | `5000` | Timeout de request em milissegundos |
+
+### 📈 Ordem de Execução dos Testes
+
+Para melhores resultados, execute os testes nesta ordem:
+
+1. **🟢 Operações CRUD Básicas** - Estabelecer funcionalidade base
+2. **🟠 Tipos Específicos DOP** - Testar funcionalidades específicas do domínio
+3. **🔵 Filtragem Avançada** - Testar capacidades de consulta
+4. **🟡 Validação e Tratamento de Erros** - Testar casos extremos
+5. **🔴 Testes de Performance** - Testar performance do sistema
+
+### 🎯 Melhores Práticas para Postman
+
+1. **Sempre use a coleção principal** para novos testes
+2. **Execute a suite completa** antes de releases importantes
+3. **Atualize variáveis de ambiente** para diferentes ambientes
+4. **Adicione novos testes** às categorias apropriadas
+5. **Use nomes descritivos** para novos requests
+6. **Inclua asserções de teste** para todos os requests
+7. **Documente cenários complexos** nas descrições dos requests
+
 ## 🐛 Como Reportar Bugs
 
 ### ⚠️ Vulnerabilidades de Segurança
