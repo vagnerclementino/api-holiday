@@ -1,7 +1,7 @@
 package me.clementino.holiday.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import me.clementino.holiday.domain.Location;
+import me.clementino.holiday.domain.dop.Location;
 import me.clementino.holiday.util.CountryCodeUtil;
 
 /**
@@ -13,7 +13,7 @@ import me.clementino.holiday.util.CountryCodeUtil;
  * <p>Uses ISO 3166-1 alpha-2 country codes for standardization.
  */
 @Schema(description = "Geographical location where a holiday is observed")
-public record LocationInfo(
+public record LocationInfoDTO(
     @Schema(description = "ISO 3166-1 alpha-2 country code", example = "BR", required = true)
         String country,
     @Schema(description = "State, province or subdivision name", example = "São Paulo")
@@ -25,12 +25,12 @@ public record LocationInfo(
         String pretty) {
 
   /**
-   * Create LocationInfo from a Location domain object.
+   * Create LocationInfoDTO from a Location domain object.
    *
    * @param location the domain location
-   * @return LocationInfo DTO
+   * @return LocationInfoDTO DTO
    */
-  public static LocationInfo from(Location location) {
+  public static LocationInfoDTO from(Location location) {
     String countryCode =
         CountryCodeUtil.normalizeCountry(location.country()).orElse(location.country());
 
@@ -38,7 +38,7 @@ public record LocationInfo(
         generatePrettyName(
             countryCode, location.state().orElse(null), location.city().orElse(null));
 
-    return new LocationInfo(
+    return new LocationInfoDTO(
         countryCode, location.state().orElse(null), location.city().orElse(null), prettyName);
   }
 

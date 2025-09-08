@@ -6,11 +6,11 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Optional;
-import me.clementino.holiday.domain.HolidayData;
-import me.clementino.holiday.domain.Location;
 import me.clementino.holiday.domain.dop.HolidayType;
+import me.clementino.holiday.domain.dop.Location;
+import me.clementino.holiday.dto.HolidayDataDTO;
 import me.clementino.holiday.dto.HolidayResponseDTO;
-import me.clementino.holiday.dto.LocationInfo;
+import me.clementino.holiday.dto.LocationInfoDTO;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
@@ -28,15 +28,15 @@ class SimpleHolidayMapperTest {
   }
 
   @Test
-  @DisplayName("Should map HolidayData to HolidayResponseDTO with all fields")
+  @DisplayName("Should map HolidayDataDTO to HolidayResponseDTO with all fields")
   void shouldMapHolidayDataToHolidayResponseDTOWithAllFields() {
     LocalDate holidayDate = LocalDate.of(2024, 12, 25);
     LocalDate observedDate = LocalDate.of(2024, 12, 26);
     LocalDateTime createdDate = LocalDateTime.of(2024, 1, 15, 10, 30);
     LocalDateTime updatedDate = LocalDateTime.of(2024, 1, 16, 14, 45);
 
-    HolidayData holidayData =
-        new HolidayData(
+    HolidayDataDTO holidayDataDTO =
+        new HolidayDataDTO(
             "holiday-123",
             "Christmas Day",
             holidayDate,
@@ -49,7 +49,7 @@ class SimpleHolidayMapperTest {
             Optional.of(updatedDate),
             Optional.of(1));
 
-    HolidayResponseDTO response = mapper.toResponse(holidayData);
+    HolidayResponseDTO response = mapper.toResponse(holidayDataDTO);
 
     assertThat(response.id()).isEqualTo("holiday-123");
     assertThat(response.name()).isEqualTo("Christmas Day");
@@ -63,7 +63,7 @@ class SimpleHolidayMapperTest {
     assertThat(response.observed().weekday()).isEqualTo(DayOfWeek.THURSDAY);
 
     assertThat(response.where()).hasSize(1);
-    LocationInfo location = response.where().get(0);
+    LocationInfoDTO location = response.where().get(0);
     assertThat(location.country()).isEqualTo("BR");
     assertThat(location.subdivision()).isEqualTo("São Paulo");
     assertThat(location.city()).isEqualTo("São Paulo");
@@ -76,12 +76,12 @@ class SimpleHolidayMapperTest {
   }
 
   @Test
-  @DisplayName("Should map HolidayData to HolidayResponseDTO without observed date")
+  @DisplayName("Should map HolidayDataDTO to HolidayResponseDTO without observed date")
   void shouldMapHolidayDataToHolidayResponseDTOWithoutObservedDate() {
     LocalDate holidayDate = LocalDate.of(2024, 1, 1);
 
-    HolidayData holidayData =
-        new HolidayData(
+    HolidayDataDTO holidayDataDTO =
+        new HolidayDataDTO(
             "holiday-456",
             "New Year's Day",
             holidayDate,
@@ -94,7 +94,7 @@ class SimpleHolidayMapperTest {
             Optional.empty(),
             Optional.empty());
 
-    HolidayResponseDTO response = mapper.toResponse(holidayData);
+    HolidayResponseDTO response = mapper.toResponse(holidayDataDTO);
 
     assertThat(response.id()).isEqualTo("holiday-456");
     assertThat(response.name()).isEqualTo("New Year's Day");
@@ -106,19 +106,19 @@ class SimpleHolidayMapperTest {
     assertThat(response.observed()).isNull();
 
     assertThat(response.where()).hasSize(1);
-    LocationInfo location = response.where().get(0);
+    LocationInfoDTO location = response.where().get(0);
     assertThat(location.country()).isEqualTo("BR");
     assertThat(location.subdivision()).isNull();
     assertThat(location.city()).isNull();
   }
 
   @Test
-  @DisplayName("Should map HolidayData with minimal fields")
+  @DisplayName("Should map HolidayDataDTO with minimal fields")
   void shouldMapHolidayDataWithMinimalFields() {
     LocalDate holidayDate = LocalDate.of(2024, 6, 15);
 
-    HolidayData holidayData =
-        new HolidayData(
+    HolidayDataDTO holidayDataDTO =
+        new HolidayDataDTO(
             "holiday-789",
             "Simple Holiday",
             holidayDate,
@@ -131,7 +131,7 @@ class SimpleHolidayMapperTest {
             Optional.empty(),
             Optional.empty());
 
-    HolidayResponseDTO response = mapper.toResponse(holidayData);
+    HolidayResponseDTO response = mapper.toResponse(holidayDataDTO);
 
     assertThat(response.id()).isEqualTo("holiday-789");
     assertThat(response.name()).isEqualTo("Simple Holiday");
@@ -147,12 +147,12 @@ class SimpleHolidayMapperTest {
   }
 
   @Test
-  @DisplayName("Should map HolidayData with state but no city")
+  @DisplayName("Should map HolidayDataDTO with state but no city")
   void shouldMapHolidayDataWithStateButNoCity() {
     LocalDate holidayDate = LocalDate.of(2024, 4, 21);
 
-    HolidayData holidayData =
-        new HolidayData(
+    HolidayDataDTO holidayDataDTO =
+        new HolidayDataDTO(
             "holiday-state",
             "State Holiday",
             holidayDate,
@@ -165,10 +165,10 @@ class SimpleHolidayMapperTest {
             Optional.empty(),
             Optional.empty());
 
-    HolidayResponseDTO response = mapper.toResponse(holidayData);
+    HolidayResponseDTO response = mapper.toResponse(holidayDataDTO);
 
     assertThat(response.where()).hasSize(1);
-    LocationInfo location = response.where().get(0);
+    LocationInfoDTO location = response.where().get(0);
     assertThat(location.country()).isEqualTo("BR");
     assertThat(location.subdivision()).isEqualTo("Rio de Janeiro");
     assertThat(location.city()).isNull();
@@ -199,8 +199,8 @@ class SimpleHolidayMapperTest {
     };
 
     for (int i = 0; i < dates.length; i++) {
-      HolidayData holidayData =
-          new HolidayData(
+      HolidayDataDTO holidayDataDTO =
+          new HolidayDataDTO(
               "holiday-" + i,
               "Test Holiday " + i,
               dates[i],
@@ -213,7 +213,7 @@ class SimpleHolidayMapperTest {
               Optional.empty(),
               Optional.empty());
 
-      HolidayResponseDTO response = mapper.toResponse(holidayData);
+      HolidayResponseDTO response = mapper.toResponse(holidayDataDTO);
 
       assertThat(response.when().weekday()).isEqualTo(expectedWeekdays[i]);
     }

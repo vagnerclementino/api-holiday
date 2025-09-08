@@ -8,12 +8,12 @@ import jakarta.validation.Valid;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
-import me.clementino.holiday.domain.HolidayData;
-import me.clementino.holiday.domain.Location;
 import me.clementino.holiday.domain.dop.HolidayType;
-import me.clementino.holiday.dto.CreateHolidayRequest;
+import me.clementino.holiday.domain.dop.Location;
+import me.clementino.holiday.dto.CreateHolidayRequestDTO;
+import me.clementino.holiday.dto.HolidayDataDTO;
 import me.clementino.holiday.dto.HolidayResponseDTO;
-import me.clementino.holiday.dto.UpdateHolidayRequest;
+import me.clementino.holiday.dto.UpdateHolidayRequestDTO;
 import me.clementino.holiday.mapper.HolidayCreationMapper;
 import me.clementino.holiday.mapper.SimpleHolidayMapper;
 import me.clementino.holiday.service.HolidayService;
@@ -85,7 +85,7 @@ public class HolidayController {
           String namePattern) {
 
     try {
-      List<HolidayData> holidays =
+      List<HolidayDataDTO> holidays =
           holidayService.findAllWithFilters(
               country, state, city, type, startDate, endDate, recurring, namePattern);
 
@@ -123,7 +123,7 @@ public class HolidayController {
   @ApiResponse(responseCode = "201", description = "Holiday created successfully")
   @ApiResponse(responseCode = "400", description = "Invalid input data")
   public ResponseEntity<HolidayResponseDTO> createHoliday(
-      @Valid @RequestBody CreateHolidayRequest request) {
+      @Valid @RequestBody CreateHolidayRequestDTO request) {
 
     try {
       var holiday = creationMapper.toHoliday(request);
@@ -144,17 +144,17 @@ public class HolidayController {
   @ApiResponse(responseCode = "400", description = "Invalid input data")
   public ResponseEntity<HolidayResponseDTO> updateHoliday(
       @Parameter(description = "Holiday ID") @PathVariable String id,
-      @Valid @RequestBody UpdateHolidayRequest request) {
+      @Valid @RequestBody UpdateHolidayRequestDTO request) {
 
     try {
-      Optional<HolidayData> existingHoliday = holidayService.findById(id);
+      Optional<HolidayDataDTO> existingHoliday = holidayService.findById(id);
       if (existingHoliday.isEmpty()) {
         return ResponseEntity.notFound().build();
       }
 
-      HolidayData current = existingHoliday.get();
-      HolidayData updated =
-          new HolidayData(
+      HolidayDataDTO current = existingHoliday.get();
+      HolidayDataDTO updated =
+          new HolidayDataDTO(
               id,
               request.name() != null ? request.name() : current.name(),
               request.date() != null ? request.date() : current.date(),

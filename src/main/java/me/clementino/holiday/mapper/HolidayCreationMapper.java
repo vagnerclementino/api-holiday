@@ -6,11 +6,11 @@ import me.clementino.holiday.domain.dop.Holiday;
 import me.clementino.holiday.domain.dop.MoveableFromBaseHoliday;
 import me.clementino.holiday.domain.dop.MoveableHoliday;
 import me.clementino.holiday.domain.dop.ObservedHoliday;
-import me.clementino.holiday.dto.CreateHolidayRequest;
+import me.clementino.holiday.dto.CreateHolidayRequestDTO;
 import org.mapstruct.Mapper;
 
 /**
- * MapStruct mapper for converting CreateHolidayRequest to Holiday domain objects.
+ * MapStruct mapper for converting CreateHolidayRequestDTO to Holiday domain objects.
  *
  * <p>This mapper follows DOP principles by providing pure transformation functions that convert
  * between different data representations without side effects.
@@ -22,7 +22,7 @@ import org.mapstruct.Mapper;
 public interface HolidayCreationMapper {
 
   /**
-   * Convert CreateHolidayRequest to Holiday using pattern matching.
+   * Convert CreateHolidayRequestDTO to Holiday using pattern matching.
    *
    * <p>This method demonstrates DOP principle of separating operations from data by providing a
    * pure transformation function.
@@ -30,12 +30,12 @@ public interface HolidayCreationMapper {
    * @param request the create request (sealed interface)
    * @return the appropriate Holiday implementation
    */
-  default Holiday toHoliday(CreateHolidayRequest request) {
+  default Holiday toHoliday(CreateHolidayRequestDTO request) {
     return switch (request) {
-      case CreateHolidayRequest.Fixed fixed -> toFixedHoliday(fixed);
-      case CreateHolidayRequest.Observed observed -> toObservedHoliday(observed);
-      case CreateHolidayRequest.Moveable moveable -> toMoveableHoliday(moveable);
-      case CreateHolidayRequest.MoveableFromBase moveableFromBase ->
+      case CreateHolidayRequestDTO.Fixed fixed -> toFixedHoliday(fixed);
+      case CreateHolidayRequestDTO.Observed observed -> toObservedHoliday(observed);
+      case CreateHolidayRequestDTO.Moveable moveable -> toMoveableHoliday(moveable);
+      case CreateHolidayRequestDTO.MoveableFromBase moveableFromBase ->
           toMoveableFromBaseHoliday(moveableFromBase);
     };
   }
@@ -46,7 +46,7 @@ public interface HolidayCreationMapper {
    * @param request the fixed holiday request
    * @return FixedHoliday instance
    */
-  default FixedHoliday toFixedHoliday(CreateHolidayRequest.Fixed request) {
+  default FixedHoliday toFixedHoliday(CreateHolidayRequestDTO.Fixed request) {
     int effectiveYear = request.year() != null ? request.year() : LocalDate.now().getYear();
     LocalDate calculatedDate = LocalDate.of(effectiveYear, request.month(), request.day());
 
@@ -66,7 +66,7 @@ public interface HolidayCreationMapper {
    * @param request the observed holiday request
    * @return ObservedHoliday instance
    */
-  default ObservedHoliday toObservedHoliday(CreateHolidayRequest.Observed request) {
+  default ObservedHoliday toObservedHoliday(CreateHolidayRequestDTO.Observed request) {
     return new ObservedHoliday(
         request.name(),
         request.description(),
@@ -83,7 +83,7 @@ public interface HolidayCreationMapper {
    * @param request the moveable holiday request
    * @return MoveableHoliday instance
    */
-  default MoveableHoliday toMoveableHoliday(CreateHolidayRequest.Moveable request) {
+  default MoveableHoliday toMoveableHoliday(CreateHolidayRequestDTO.Moveable request) {
     return new MoveableHoliday(
         request.name(),
         request.description(),
@@ -101,7 +101,7 @@ public interface HolidayCreationMapper {
    * @return MoveableFromBaseHoliday instance
    */
   default MoveableFromBaseHoliday toMoveableFromBaseHoliday(
-      CreateHolidayRequest.MoveableFromBase request) {
+      CreateHolidayRequestDTO.MoveableFromBase request) {
     return new MoveableFromBaseHoliday(
         request.name(),
         request.description(),

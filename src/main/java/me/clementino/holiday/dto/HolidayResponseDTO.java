@@ -20,11 +20,11 @@ public record HolidayResponseDTO(
     @Schema(description = "Unique holiday identifier", example = "holiday-123") String id,
     @Schema(description = "Holiday name", example = "Christmas Day") String name,
     @Schema(description = "When the holiday occurs (date and weekday)", required = true)
-        WhenInfo when,
+        WhenInfoDTO when,
     @Schema(description = "When the holiday is observed (if different from actual date)")
-        WhenInfo observed,
+        WhenInfoDTO observed,
     @Schema(description = "List of locations where this holiday applies", required = true)
-        List<LocationInfo> where,
+        List<LocationInfoDTO> where,
     @Schema(description = "Type of holiday", example = "NATIONAL") HolidayType type,
     @Schema(
             description = "Additional description or notes",

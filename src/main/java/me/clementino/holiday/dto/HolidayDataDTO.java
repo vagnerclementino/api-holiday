@@ -1,10 +1,11 @@
-package me.clementino.holiday.domain;
+package me.clementino.holiday.dto;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.Optional;
 import me.clementino.holiday.domain.dop.HolidayType;
+import me.clementino.holiday.domain.dop.Location;
 
 /**
  * Immutable record representing holiday data. Following DOP v1.1 Principle 1: Model Data Immutably
@@ -12,7 +13,7 @@ import me.clementino.holiday.domain.dop.HolidayType;
  * All data is accessible through accessor methods - Thread-safe: Immutability guarantees thread
  * safety - Predictable: Operations return new instances
  */
-public record HolidayData(
+public record HolidayDataDTO(
     String id,
     String name,
     LocalDate date,
@@ -24,7 +25,7 @@ public record HolidayData(
     Optional<LocalDateTime> dateCreated,
     Optional<LocalDateTime> lastUpdated,
     Optional<Integer> version) {
-  public HolidayData {
+  public HolidayDataDTO {
     Objects.requireNonNull(name, "Holiday name cannot be null");
     if (name.isBlank()) {
       throw new IllegalArgumentException("Holiday name cannot be blank");
@@ -42,7 +43,7 @@ public record HolidayData(
   }
 
   /** Convenience constructor for creating new holidays (without persistence metadata). */
-  public HolidayData(
+  public HolidayDataDTO(
       String name, LocalDate date, Location location, HolidayType type, boolean recurring) {
     this(
         null,
@@ -59,7 +60,7 @@ public record HolidayData(
   }
 
   /** Convenience constructor with description. */
-  public HolidayData(
+  public HolidayDataDTO(
       String name,
       LocalDate date,
       Location location,
@@ -80,8 +81,8 @@ public record HolidayData(
         Optional.empty());
   }
 
-  public HolidayData withId(String newId) {
-    return new HolidayData(
+  public HolidayDataDTO withId(String newId) {
+    return new HolidayDataDTO(
         newId,
         name,
         date,
@@ -95,8 +96,8 @@ public record HolidayData(
         version);
   }
 
-  public HolidayData withName(String newName) {
-    return new HolidayData(
+  public HolidayDataDTO withName(String newName) {
+    return new HolidayDataDTO(
         id,
         newName,
         date,
@@ -110,8 +111,8 @@ public record HolidayData(
         version);
   }
 
-  public HolidayData withDate(LocalDate newDate) {
-    return new HolidayData(
+  public HolidayDataDTO withDate(LocalDate newDate) {
+    return new HolidayDataDTO(
         id,
         name,
         newDate,
@@ -125,8 +126,8 @@ public record HolidayData(
         version);
   }
 
-  public HolidayData withObserved(LocalDate observedDate) {
-    return new HolidayData(
+  public HolidayDataDTO withObserved(LocalDate observedDate) {
+    return new HolidayDataDTO(
         id,
         name,
         date,
@@ -140,8 +141,8 @@ public record HolidayData(
         version);
   }
 
-  public HolidayData withLocation(Location newLocation) {
-    return new HolidayData(
+  public HolidayDataDTO withLocation(Location newLocation) {
+    return new HolidayDataDTO(
         id,
         name,
         date,
@@ -155,8 +156,8 @@ public record HolidayData(
         version);
   }
 
-  public HolidayData withType(HolidayType newType) {
-    return new HolidayData(
+  public HolidayDataDTO withType(HolidayType newType) {
+    return new HolidayDataDTO(
         id,
         name,
         date,
@@ -170,8 +171,8 @@ public record HolidayData(
         version);
   }
 
-  public HolidayData withRecurring(boolean isRecurring) {
-    return new HolidayData(
+  public HolidayDataDTO withRecurring(boolean isRecurring) {
+    return new HolidayDataDTO(
         id,
         name,
         date,
@@ -185,8 +186,8 @@ public record HolidayData(
         version);
   }
 
-  public HolidayData withDescription(String newDescription) {
-    return new HolidayData(
+  public HolidayDataDTO withDescription(String newDescription) {
+    return new HolidayDataDTO(
         id,
         name,
         date,
@@ -200,8 +201,8 @@ public record HolidayData(
         version);
   }
 
-  public HolidayData withMetadata(LocalDateTime created, LocalDateTime updated, Integer ver) {
-    return new HolidayData(
+  public HolidayDataDTO withMetadata(LocalDateTime created, LocalDateTime updated, Integer ver) {
+    return new HolidayDataDTO(
         id,
         name,
         date,

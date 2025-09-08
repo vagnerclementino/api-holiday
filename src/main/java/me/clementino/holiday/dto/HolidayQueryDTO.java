@@ -1,4 +1,4 @@
-package me.clementino.holiday.domain;
+package me.clementino.holiday.dto;
 
 import java.time.LocalDate;
 import java.util.Objects;
@@ -13,7 +13,7 @@ import me.clementino.holiday.domain.dop.Locality;
  * <p>This record models exactly what a holiday query contains - no more, no less. It represents all
  * possible query parameters in a type-safe way, enhanced to work with the DOP domain model.
  */
-public record HolidayQuery(
+public record HolidayQueryDTO(
     Optional<String> namePattern,
     Optional<Locality> locality,
     Optional<String> countryCode,
@@ -82,7 +82,7 @@ public record HolidayQuery(
     }
   }
 
-  public HolidayQuery {
+  public HolidayQueryDTO {
     namePattern = Objects.requireNonNullElse(namePattern, Optional.empty());
     locality = Objects.requireNonNullElse(locality, Optional.empty());
     countryCode = Objects.requireNonNullElse(countryCode, Optional.empty());
@@ -113,8 +113,8 @@ public record HolidayQuery(
   }
 
   /** Empty query (no filters). */
-  public static HolidayQuery empty() {
-    return new HolidayQuery(
+  public static HolidayQueryDTO empty() {
+    return new HolidayQueryDTO(
         Optional.empty(),
         Optional.empty(),
         Optional.empty(),
@@ -132,8 +132,8 @@ public record HolidayQuery(
   }
 
   /** Query by country code only. */
-  public static HolidayQuery byCountry(String countryCode) {
-    return new HolidayQuery(
+  public static HolidayQueryDTO byCountry(String countryCode) {
+    return new HolidayQueryDTO(
         Optional.empty(),
         Optional.empty(),
         Optional.of(countryCode),
@@ -151,8 +151,8 @@ public record HolidayQuery(
   }
 
   /** Query by locality. */
-  public static HolidayQuery byLocality(Locality locality) {
-    return new HolidayQuery(
+  public static HolidayQueryDTO byLocality(Locality locality) {
+    return new HolidayQueryDTO(
         Optional.empty(),
         Optional.of(locality),
         Optional.empty(),
@@ -170,8 +170,8 @@ public record HolidayQuery(
   }
 
   /** Query by type. */
-  public static HolidayQuery byType(HolidayType type) {
-    return new HolidayQuery(
+  public static HolidayQueryDTO byType(HolidayType type) {
+    return new HolidayQueryDTO(
         Optional.empty(),
         Optional.empty(),
         Optional.empty(),
@@ -189,8 +189,8 @@ public record HolidayQuery(
   }
 
   /** Query by date range. */
-  public static HolidayQuery byDateRange(LocalDate startDate, LocalDate endDate) {
-    return new HolidayQuery(
+  public static HolidayQueryDTO byDateRange(LocalDate startDate, LocalDate endDate) {
+    return new HolidayQueryDTO(
         Optional.empty(),
         Optional.empty(),
         Optional.empty(),
@@ -208,8 +208,8 @@ public record HolidayQuery(
   }
 
   /** Query by year. */
-  public static HolidayQuery byYear(int year) {
-    return new HolidayQuery(
+  public static HolidayQueryDTO byYear(int year) {
+    return new HolidayQueryDTO(
         Optional.empty(),
         Optional.empty(),
         Optional.empty(),
@@ -227,8 +227,8 @@ public record HolidayQuery(
   }
 
   /** Query for governmental holidays only. */
-  public static HolidayQuery forGovernmentalOnly() {
-    return new HolidayQuery(
+  public static HolidayQueryDTO forGovernmentalOnly() {
+    return new HolidayQueryDTO(
         Optional.empty(),
         Optional.empty(),
         Optional.empty(),
@@ -298,8 +298,8 @@ public record HolidayQuery(
   }
 
   /** Creates a new query with pagination. */
-  public HolidayQuery withPagination(int page, int size) {
-    return new HolidayQuery(
+  public HolidayQueryDTO withPagination(int page, int size) {
+    return new HolidayQueryDTO(
         namePattern,
         locality,
         countryCode,
@@ -317,9 +317,9 @@ public record HolidayQuery(
   }
 
   /** Creates a new query with sorting. */
-  public HolidayQuery withSorting(
+  public HolidayQueryDTO withSorting(
       SortCriteria.SortField field, SortCriteria.SortDirection direction) {
-    return new HolidayQuery(
+    return new HolidayQueryDTO(
         namePattern,
         locality,
         countryCode,

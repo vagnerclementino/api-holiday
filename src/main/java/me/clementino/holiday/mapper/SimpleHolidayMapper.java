@@ -2,16 +2,16 @@ package me.clementino.holiday.mapper;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import me.clementino.holiday.domain.HolidayData;
 import me.clementino.holiday.domain.dop.FixedHoliday;
 import me.clementino.holiday.domain.dop.Holiday;
 import me.clementino.holiday.domain.dop.Locality;
 import me.clementino.holiday.domain.dop.MoveableFromBaseHoliday;
 import me.clementino.holiday.domain.dop.MoveableHoliday;
 import me.clementino.holiday.domain.dop.ObservedHoliday;
+import me.clementino.holiday.dto.HolidayDataDTO;
 import me.clementino.holiday.dto.HolidayResponseDTO;
-import me.clementino.holiday.dto.LocationInfo;
-import me.clementino.holiday.dto.WhenInfo;
+import me.clementino.holiday.dto.LocationInfoDTO;
+import me.clementino.holiday.dto.WhenInfoDTO;
 import me.clementino.holiday.entity.HolidayEntity;
 import me.clementino.holiday.entity.LocalityEntity;
 import org.springframework.stereotype.Component;
@@ -20,25 +20,25 @@ import org.springframework.stereotype.Component;
 @Component
 public class SimpleHolidayMapper {
 
-  /** Convert HolidayData to HolidayResponseDTO. */
-  public HolidayResponseDTO toResponse(HolidayData holidayData) {
-    WhenInfo when = WhenInfo.from(holidayData.date());
+  /** Convert HolidayDataDTO to HolidayResponseDTO. */
+  public HolidayResponseDTO toResponse(HolidayDataDTO holidayDataDTO) {
+    WhenInfoDTO when = WhenInfoDTO.from(holidayDataDTO.date());
 
-    WhenInfo observed = holidayData.observed().map(WhenInfo::from).orElse(null);
+    WhenInfoDTO observed = holidayDataDTO.observed().map(WhenInfoDTO::from).orElse(null);
 
-    LocationInfo locationInfo = LocationInfo.from(holidayData.location());
-    List<LocationInfo> where = List.of(locationInfo);
+    LocationInfoDTO locationInfoDTO = LocationInfoDTO.from(holidayDataDTO.location());
+    List<LocationInfoDTO> where = List.of(locationInfoDTO);
 
     return new HolidayResponseDTO(
-        holidayData.id(),
-        holidayData.name(),
+        holidayDataDTO.id(),
+        holidayDataDTO.name(),
         when,
         observed,
         where,
-        holidayData.type(),
-        holidayData.description().orElse(null),
-        holidayData.dateCreated().map(LocalDateTime::toString).orElse(null),
-        holidayData.lastUpdated().map(LocalDateTime::toString).orElse(null));
+        holidayDataDTO.type(),
+        holidayDataDTO.description().orElse(null),
+        holidayDataDTO.dateCreated().map(LocalDateTime::toString).orElse(null),
+        holidayDataDTO.lastUpdated().map(LocalDateTime::toString).orElse(null));
   }
 
   /**

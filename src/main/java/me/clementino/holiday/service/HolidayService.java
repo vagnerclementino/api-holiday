@@ -5,12 +5,12 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import me.clementino.holiday.domain.HolidayData;
-import me.clementino.holiday.domain.HolidayQuery;
-import me.clementino.holiday.domain.Location;
 import me.clementino.holiday.domain.dop.Holiday;
 import me.clementino.holiday.domain.dop.HolidayOperations;
 import me.clementino.holiday.domain.dop.HolidayType;
+import me.clementino.holiday.domain.dop.Location;
+import me.clementino.holiday.dto.HolidayDataDTO;
+import me.clementino.holiday.dto.HolidayQueryDTO;
 import me.clementino.holiday.entity.HolidayEntity;
 import me.clementino.holiday.entity.LocalityEntity;
 import me.clementino.holiday.mapper.SimpleHolidayMapper;
@@ -47,17 +47,17 @@ public class HolidayService {
   }
 
   /** Find all holidays with optional filtering using DOP query object. */
-  public List<HolidayData> findAll(HolidayQuery query) {
+  public List<HolidayDataDTO> findAll(HolidayQueryDTO query) {
     return findAllWithFilters(null, null, null, null, null, null, null, null);
   }
 
   /** Find all holidays without filters. */
-  public List<HolidayData> findAll() {
+  public List<HolidayDataDTO> findAll() {
     return findAllWithFilters(null, null, null, null, null, null, null, null);
   }
 
   /** Find holiday by ID. */
-  public Optional<HolidayData> findById(String id) {
+  public Optional<HolidayDataDTO> findById(String id) {
     return holidayRepository.findById(id).map(this::toDomainData);
   }
 
@@ -71,7 +71,7 @@ public class HolidayService {
   }
 
   /** Find all holidays with filters. */
-  public List<HolidayData> findAllWithFilters(
+  public List<HolidayDataDTO> findAllWithFilters(
       String country,
       String state,
       String city,
@@ -111,12 +111,12 @@ public class HolidayService {
     return entities.stream().map(this::toDomainData).toList();
   }
 
-  public HolidayData create(Holiday holiday) {
+  public HolidayDataDTO create(Holiday holiday) {
     return create(holiday, null);
   }
 
   /** Create a new holiday. */
-  public HolidayData create(Holiday holiday, Integer year) {
+  public HolidayDataDTO create(Holiday holiday, Integer year) {
 
     var defaultYear = Optional.ofNullable(year).orElse(LocalDate.now().getYear());
 
@@ -133,12 +133,12 @@ public class HolidayService {
   }
 
   /** Update an existing holiday. */
-  public Optional<HolidayData> update(String id, HolidayData holidayData) {
+  public Optional<HolidayDataDTO> update(String id, HolidayDataDTO holidayDataDTO) {
     return holidayRepository
         .findById(id)
         .map(
             existing -> {
-              HolidayEntity updated = toEntity(holidayData);
+              HolidayEntity updated = toEntity(holidayDataDTO);
               updated.setId(existing.getId());
               updated.setDateCreated(existing.getDateCreated());
               updated.setLastUpdated(LocalDateTime.now());
@@ -155,39 +155,39 @@ public class HolidayService {
   }
 
   /** Find holidays by country. */
-  public List<HolidayData> findByCountry(String country) {
+  public List<HolidayDataDTO> findByCountry(String country) {
     return holidayRepository.findByCountryCode(country).stream().map(this::toDomainData).toList();
   }
 
   /** Find holidays by type. */
-  public List<HolidayData> findByType(HolidayType type) {
+  public List<HolidayDataDTO> findByType(HolidayType type) {
     return holidayRepository.findByType(type).stream().map(this::toDomainData).toList();
   }
 
   /** Find holidays by date range. */
-  public List<HolidayData> findByDateRange(LocalDate startDate, LocalDate endDate) {
+  public List<HolidayDataDTO> findByDateRange(LocalDate startDate, LocalDate endDate) {
     return holidayRepository.findByDateBetween(startDate, endDate).stream()
         .map(this::toDomainData)
         .toList();
   }
 
   /** Find holidays by year and country (for year-based calculations). */
-  public List<HolidayData> findByYearAndCountry(Integer year, String country) {
+  public List<HolidayDataDTO> findByYearAndCountry(Integer year, String country) {
     return findByCountry(country);
   }
 
   /** Find calculated holidays for a specific year. */
-  public List<HolidayData> findCalculatedHolidays(Integer year) {
+  public List<HolidayDataDTO> findCalculatedHolidays(Integer year) {
     return findAll();
   }
 
   /** Find base holidays (not calculated) for a country. */
-  public List<HolidayData> findBaseHolidays(String country) {
+  public List<HolidayDataDTO> findBaseHolidays(String country) {
     return findByCountry(country);
   }
 
-  /** Convert HolidayEntity to HolidayData. */
-  private HolidayData toDomainData(HolidayEntity entity) {
+  /** Convert HolidayEntity to HolidayDataDTO. */
+  private HolidayDataDTO toDomainData(HolidayEntity entity) {
     if (entity.getName() == null || entity.getName().isBlank()) {
       throw new IllegalStateException(
           "HolidayEntity name is null or blank for ID: "
@@ -202,7 +202,7 @@ public class HolidayService {
       throw new IllegalStateException("HolidayEntity type is null for ID: " + entity.getId());
     }
 
-    return new HolidayData(
+    return new HolidayDataDTO(
         entity.getId(),
         entity.getName(),
         entity.getDate(),
@@ -223,7 +223,7 @@ public class HolidayService {
       return new Location("UNKNOWN", Optional.empty(), Optional.empty());
     }
 
-    LocalityEntity primary = localities.get(0);
+    LocalityEntity primary = localities.getFirst();
 
     return new Location(
         primary.getCountryCode() != null ? primary.getCountryCode() : "UNKNOWN",
@@ -231,21 +231,21 @@ public class HolidayService {
         Optional.ofNullable(primary.getCityName()));
   }
 
-  /** Convert HolidayData to HolidayEntity. */
-  private HolidayEntity toEntity(HolidayData data) {
+  /** Convert HolidayDataDTO to HolidayEntity. */
+  private HolidayEntity toEntity(HolidayDataDTO data) {
     if (data.name() == null || data.name().isBlank()) {
-      throw new IllegalArgumentException("HolidayData name cannot be null or blank");
+      throw new IllegalArgumentException("HolidayDataDTO name cannot be null or blank");
     }
     if (data.date() == null) {
-      throw new IllegalArgumentException("HolidayData date cannot be null");
+      throw new IllegalArgumentException("HolidayDataDTO date cannot be null");
     }
     if (data.location() == null
         || data.location().country() == null
         || data.location().country().isBlank()) {
-      throw new IllegalArgumentException("HolidayData country cannot be null or blank");
+      throw new IllegalArgumentException("HolidayDataDTO country cannot be null or blank");
     }
     if (data.type() == null) {
-      throw new IllegalArgumentException("HolidayData type cannot be null");
+      throw new IllegalArgumentException("HolidayDataDTO type cannot be null");
     }
 
     HolidayEntity entity = new HolidayEntity();
@@ -287,7 +287,7 @@ public class HolidayService {
    * @param year the target year
    * @return list of holidays for the specified year
    */
-  public List<HolidayData> findHolidaysForYear(int year) {
+  public List<HolidayDataDTO> findHolidaysForYear(int year) {
     LocalDate startOfYear = LocalDate.of(year, 1, 1);
     LocalDate endOfYear = LocalDate.of(year, 12, 31);
 
@@ -301,7 +301,7 @@ public class HolidayService {
    * @param country the country code
    * @return list of holidays for the specified year and country
    */
-  public List<HolidayData> findHolidaysForYearAndCountry(int year, String country) {
+  public List<HolidayDataDTO> findHolidaysForYearAndCountry(int year, String country) {
     LocalDate startOfYear = LocalDate.of(year, 1, 1);
     LocalDate endOfYear = LocalDate.of(year, 12, 31);
 
@@ -315,7 +315,7 @@ public class HolidayService {
    * @param type the holiday type
    * @return list of holidays for the specified year and type
    */
-  public List<HolidayData> findHolidaysForYearAndType(int year, HolidayType type) {
+  public List<HolidayDataDTO> findHolidaysForYearAndType(int year, HolidayType type) {
     LocalDate startOfYear = LocalDate.of(year, 1, 1);
     LocalDate endOfYear = LocalDate.of(year, 12, 31);
 
@@ -330,7 +330,7 @@ public class HolidayService {
    * @param type the holiday type
    * @return list of holidays for the specified criteria
    */
-  public List<HolidayData> findHolidaysForYearCountryAndType(
+  public List<HolidayDataDTO> findHolidaysForYearCountryAndType(
       int year, String country, HolidayType type) {
     LocalDate startOfYear = LocalDate.of(year, 1, 1);
     LocalDate endOfYear = LocalDate.of(year, 12, 31);
@@ -376,7 +376,7 @@ public class HolidayService {
    *
    * @return list of base holidays
    */
-  public List<HolidayData> findBaseHolidays() {
+  public List<HolidayDataDTO> findBaseHolidays() {
     return findAllWithFilters(null, null, null, null, null, null, true, null);
   }
 
@@ -385,7 +385,7 @@ public class HolidayService {
    *
    * @return list of calculated holidays
    */
-  public List<HolidayData> findCalculatedHolidays() {
+  public List<HolidayDataDTO> findCalculatedHolidays() {
     return findAllWithFilters(null, null, null, null, null, null, false, null);
   }
 }

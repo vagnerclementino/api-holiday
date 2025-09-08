@@ -29,16 +29,18 @@ import me.clementino.holiday.domain.dop.Locality;
  */
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type")
 @JsonSubTypes({
-  @JsonSubTypes.Type(value = CreateHolidayRequest.Fixed.class, name = "Fixed"),
-  @JsonSubTypes.Type(value = CreateHolidayRequest.Observed.class, name = "Observed"),
-  @JsonSubTypes.Type(value = CreateHolidayRequest.Moveable.class, name = "Moveable"),
-  @JsonSubTypes.Type(value = CreateHolidayRequest.MoveableFromBase.class, name = "MoveableFromBase")
+  @JsonSubTypes.Type(value = CreateHolidayRequestDTO.Fixed.class, name = "Fixed"),
+  @JsonSubTypes.Type(value = CreateHolidayRequestDTO.Observed.class, name = "Observed"),
+  @JsonSubTypes.Type(value = CreateHolidayRequestDTO.Moveable.class, name = "Moveable"),
+  @JsonSubTypes.Type(
+      value = CreateHolidayRequestDTO.MoveableFromBase.class,
+      name = "MoveableFromBase")
 })
-public sealed interface CreateHolidayRequest
-    permits CreateHolidayRequest.Fixed,
-        CreateHolidayRequest.Observed,
-        CreateHolidayRequest.Moveable,
-        CreateHolidayRequest.MoveableFromBase {
+public sealed interface CreateHolidayRequestDTO
+    permits CreateHolidayRequestDTO.Fixed,
+        CreateHolidayRequestDTO.Observed,
+        CreateHolidayRequestDTO.Moveable,
+        CreateHolidayRequestDTO.MoveableFromBase {
 
   /** Common data for all holiday types (except date which varies by type). */
   @NotBlank
@@ -69,7 +71,7 @@ public sealed interface CreateHolidayRequest
       @Min(1) Integer year,
       @NotNull List<Locality> localities,
       @NotNull HolidayType holidayType)
-      implements CreateHolidayRequest {
+      implements CreateHolidayRequestDTO {
 
     /** Compact constructor with validation for day/month combinations. */
     public Fixed {
@@ -106,7 +108,7 @@ public sealed interface CreateHolidayRequest
       @NotNull HolidayType holidayType,
       @NotNull LocalDate observed,
       boolean mondayisation)
-      implements CreateHolidayRequest {}
+      implements CreateHolidayRequestDTO {}
 
   /**
    * Request to create a moveable holiday. Moveable holidays are calculated based on known holiday
@@ -120,7 +122,7 @@ public sealed interface CreateHolidayRequest
       @NotNull HolidayType holidayType,
       @NotNull KnownHoliday knownHoliday,
       boolean mondayisation)
-      implements CreateHolidayRequest {}
+      implements CreateHolidayRequestDTO {}
 
   /**
    * Request to create a moveable holiday derived from a base holiday. These holidays are calculated
@@ -136,5 +138,5 @@ public sealed interface CreateHolidayRequest
       @NotNull Holiday baseHoliday,
       int dayOffset,
       boolean mondayisation)
-      implements CreateHolidayRequest {}
+      implements CreateHolidayRequestDTO {}
 }

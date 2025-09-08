@@ -10,7 +10,7 @@ import me.clementino.holiday.domain.dop.HolidayType;
  * <p>This record demonstrates DOP principles by using nullable fields instead of Optional for
  * simpler serialization and partial updates. Only non-null fields will be updated.
  */
-public record UpdateHolidayRequest(
+public record UpdateHolidayRequestDTO(
     @Size(max = 255, message = "Name must not exceed 255 characters") String name,
     LocalDate date,
     LocalDate observed,
@@ -22,7 +22,7 @@ public record UpdateHolidayRequest(
     @Size(max = 1000, message = "Description must not exceed 1000 characters") String description) {
 
   /** Creates an empty update request with all fields set to null. */
-  public static UpdateHolidayRequest empty() {
-    return new UpdateHolidayRequest(null, null, null, null, null, null, null, null, null);
+  public static UpdateHolidayRequestDTO empty() {
+    return new UpdateHolidayRequestDTO(null, null, null, null, null, null, null, null, null);
   }
 }

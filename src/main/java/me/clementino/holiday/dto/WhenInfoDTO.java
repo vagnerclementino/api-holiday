@@ -11,19 +11,19 @@ import java.time.LocalDate;
  * the data needed to represent when a holiday happens.
  */
 @Schema(description = "Information about when a holiday occurs")
-public record WhenInfo(
+public record WhenInfoDTO(
     @Schema(description = "The date when the holiday occurs", example = "2024-12-25")
         LocalDate date,
     @Schema(description = "The day of the week when the holiday occurs", example = "WEDNESDAY")
         DayOfWeek weekday) {
 
   /**
-   * Create WhenInfo from a LocalDate.
+   * Create WhenInfoDTO from a LocalDate.
    *
    * @param date the holiday date
-   * @return WhenInfo with date and calculated weekday
+   * @return WhenInfoDTO with date and calculated weekday
    */
-  public static WhenInfo from(LocalDate date) {
-    return new WhenInfo(date, date.getDayOfWeek());
+  public static WhenInfoDTO from(LocalDate date) {
+    return new WhenInfoDTO(date, date.getDayOfWeek());
   }
 }

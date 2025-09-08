@@ -17,10 +17,11 @@ class HolidayResponseDTOTest {
   @Test
   @DisplayName("Should create valid HolidayResponseDTO")
   void shouldCreateValidHolidayResponseDTO() {
-    WhenInfo when = WhenInfo.from(LocalDate.of(2024, 12, 25));
-    WhenInfo observed = WhenInfo.from(LocalDate.of(2024, 12, 26));
-    LocationInfo location = new LocationInfo("BR", "SP", "São Paulo", "São Paulo, SP, Brazil");
-    List<LocationInfo> where = List.of(location);
+    WhenInfoDTO when = WhenInfoDTO.from(LocalDate.of(2024, 12, 25));
+    WhenInfoDTO observed = WhenInfoDTO.from(LocalDate.of(2024, 12, 26));
+    LocationInfoDTO location =
+        new LocationInfoDTO("BR", "SP", "São Paulo", "São Paulo, SP, Brazil");
+    List<LocationInfoDTO> where = List.of(location);
 
     HolidayResponseDTO response =
         new HolidayResponseDTO(
@@ -47,9 +48,9 @@ class HolidayResponseDTOTest {
   @Test
   @DisplayName("Should create HolidayResponseDTO without observed date")
   void shouldCreateHolidayResponseDTOWithoutObservedDate() {
-    WhenInfo when = WhenInfo.from(LocalDate.of(2024, 1, 1));
-    LocationInfo location = new LocationInfo("BR", null, null, "Brazil");
-    List<LocationInfo> where = List.of(location);
+    WhenInfoDTO when = WhenInfoDTO.from(LocalDate.of(2024, 1, 1));
+    LocationInfoDTO location = new LocationInfoDTO("BR", null, null, "Brazil");
+    List<LocationInfoDTO> where = List.of(location);
 
     HolidayResponseDTO response =
         new HolidayResponseDTO(
@@ -70,11 +71,12 @@ class HolidayResponseDTOTest {
   @Test
   @DisplayName("Should create HolidayResponseDTO with multiple locations")
   void shouldCreateHolidayResponseDTOWithMultipleLocations() {
-    WhenInfo when = WhenInfo.from(LocalDate.of(2024, 9, 7));
-    LocationInfo location1 = new LocationInfo("BR", "SP", "São Paulo", "São Paulo, SP, Brazil");
-    LocationInfo location2 =
-        new LocationInfo("BR", "RJ", "Rio de Janeiro", "Rio de Janeiro, RJ, Brazil");
-    List<LocationInfo> where = List.of(location1, location2);
+    WhenInfoDTO when = WhenInfoDTO.from(LocalDate.of(2024, 9, 7));
+    LocationInfoDTO location1 =
+        new LocationInfoDTO("BR", "SP", "São Paulo", "São Paulo, SP, Brazil");
+    LocationInfoDTO location2 =
+        new LocationInfoDTO("BR", "RJ", "Rio de Janeiro", "Rio de Janeiro, RJ, Brazil");
+    List<LocationInfoDTO> where = List.of(location1, location2);
 
     HolidayResponseDTO response =
         new HolidayResponseDTO(
@@ -95,9 +97,9 @@ class HolidayResponseDTOTest {
   @Test
   @DisplayName("Should create HolidayResponseDTO with minimal fields")
   void shouldCreateHolidayResponseDTOWithMinimalFields() {
-    WhenInfo when = WhenInfo.from(LocalDate.of(2024, 6, 15));
-    LocationInfo location = new LocationInfo("US", null, null, "United States");
-    List<LocationInfo> where = List.of(location);
+    WhenInfoDTO when = WhenInfoDTO.from(LocalDate.of(2024, 6, 15));
+    LocationInfoDTO location = new LocationInfoDTO("US", null, null, "United States");
+    List<LocationInfoDTO> where = List.of(location);
 
     HolidayResponseDTO response =
         new HolidayResponseDTO(
@@ -125,8 +127,8 @@ class HolidayResponseDTOTest {
   @Test
   @DisplayName("Should throw exception when 'when' is null")
   void shouldThrowExceptionWhenWhenIsNull() {
-    LocationInfo location = new LocationInfo("BR", null, null, "Brazil");
-    List<LocationInfo> where = List.of(location);
+    LocationInfoDTO location = new LocationInfoDTO("BR", null, null, "Brazil");
+    List<LocationInfoDTO> where = List.of(location);
 
     assertThatThrownBy(
             () ->
@@ -147,7 +149,7 @@ class HolidayResponseDTOTest {
   @Test
   @DisplayName("Should throw exception when 'where' is null")
   void shouldThrowExceptionWhenWhereIsNull() {
-    WhenInfo when = WhenInfo.from(LocalDate.of(2024, 12, 25));
+    WhenInfoDTO when = WhenInfoDTO.from(LocalDate.of(2024, 12, 25));
 
     assertThatThrownBy(
             () ->
@@ -168,8 +170,8 @@ class HolidayResponseDTOTest {
   @Test
   @DisplayName("Should throw exception when 'where' is empty")
   void shouldThrowExceptionWhenWhereIsEmpty() {
-    WhenInfo when = WhenInfo.from(LocalDate.of(2024, 12, 25));
-    List<LocationInfo> where = List.of();
+    WhenInfoDTO when = WhenInfoDTO.from(LocalDate.of(2024, 12, 25));
+    List<LocationInfoDTO> where = List.of();
 
     assertThatThrownBy(
             () ->
@@ -190,9 +192,10 @@ class HolidayResponseDTOTest {
   @Test
   @DisplayName("Should throw exception when location has no country")
   void shouldThrowExceptionWhenLocationHasNoCountry() {
-    WhenInfo when = WhenInfo.from(LocalDate.of(2024, 12, 25));
-    LocationInfo invalidLocation = new LocationInfo(null, "SP", "São Paulo", "São Paulo, SP, null");
-    List<LocationInfo> where = List.of(invalidLocation);
+    WhenInfoDTO when = WhenInfoDTO.from(LocalDate.of(2024, 12, 25));
+    LocationInfoDTO invalidLocation =
+        new LocationInfoDTO(null, "SP", "São Paulo", "São Paulo, SP, null");
+    List<LocationInfoDTO> where = List.of(invalidLocation);
 
     assertThatThrownBy(
             () ->
@@ -213,9 +216,10 @@ class HolidayResponseDTOTest {
   @Test
   @DisplayName("Should throw exception when location has blank country")
   void shouldThrowExceptionWhenLocationHasBlankCountry() {
-    WhenInfo when = WhenInfo.from(LocalDate.of(2024, 12, 25));
-    LocationInfo invalidLocation = new LocationInfo("  ", "SP", "São Paulo", "São Paulo, SP,   ");
-    List<LocationInfo> where = List.of(invalidLocation);
+    WhenInfoDTO when = WhenInfoDTO.from(LocalDate.of(2024, 12, 25));
+    LocationInfoDTO invalidLocation =
+        new LocationInfoDTO("  ", "SP", "São Paulo", "São Paulo, SP,   ");
+    List<LocationInfoDTO> where = List.of(invalidLocation);
 
     assertThatThrownBy(
             () ->

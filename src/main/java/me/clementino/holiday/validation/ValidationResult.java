@@ -1,4 +1,4 @@
-package me.clementino.holiday.domain;
+package me.clementino.holiday.validation;
 
 import java.util.List;
 import java.util.Map;

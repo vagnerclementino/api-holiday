@@ -10,14 +10,14 @@ import me.clementino.holiday.domain.dop.Locality;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
-/** Test class demonstrating DOP principles with CreateHolidayRequest. */
+/** Test class demonstrating DOP principles with CreateHolidayRequestDTO. */
 @Tag("unit")
-class CreateHolidayRequestTest {
+class CreateHolidayRequestDTOTest {
 
   @Test
   void shouldCreateFixedHolidayWithSpecificYear() {
     var christmas2024 =
-        new CreateHolidayRequest.Fixed(
+        new CreateHolidayRequestDTO.Fixed(
             "Christmas Day",
             "Christian holiday celebrating the birth of Jesus Christ",
             25,
@@ -41,7 +41,7 @@ class CreateHolidayRequestTest {
   @Test
   void shouldCreateRecurringFixedHoliday() {
     var newYear =
-        new CreateHolidayRequest.Fixed(
+        new CreateHolidayRequestDTO.Fixed(
             "New Year's Day",
             "First day of the year",
             1,
@@ -64,7 +64,7 @@ class CreateHolidayRequestTest {
   void shouldValidateValidDayMonthCombinations() {
     assertDoesNotThrow(
         () ->
-            new CreateHolidayRequest.Fixed(
+            new CreateHolidayRequestDTO.Fixed(
                 "Valentine's Day",
                 "Day of love",
                 14,
@@ -75,7 +75,7 @@ class CreateHolidayRequestTest {
 
     assertDoesNotThrow(
         () ->
-            new CreateHolidayRequest.Fixed(
+            new CreateHolidayRequestDTO.Fixed(
                 "Leap Day",
                 "Extra day in leap year",
                 29,
@@ -86,7 +86,7 @@ class CreateHolidayRequestTest {
 
     assertDoesNotThrow(
         () ->
-            new CreateHolidayRequest.Fixed(
+            new CreateHolidayRequestDTO.Fixed(
                 "Halloween",
                 "Spooky day",
                 31,
@@ -103,7 +103,7 @@ class CreateHolidayRequestTest {
         assertThrows(
             IllegalArgumentException.class,
             () ->
-                new CreateHolidayRequest.Fixed(
+                new CreateHolidayRequestDTO.Fixed(
                     "Invalid Holiday",
                     "This should fail",
                     31,
@@ -117,7 +117,7 @@ class CreateHolidayRequestTest {
         assertThrows(
             IllegalArgumentException.class,
             () ->
-                new CreateHolidayRequest.Fixed(
+                new CreateHolidayRequestDTO.Fixed(
                     "Invalid Holiday",
                     "This should fail",
                     31,
@@ -131,7 +131,7 @@ class CreateHolidayRequestTest {
         assertThrows(
             IllegalArgumentException.class,
             () ->
-                new CreateHolidayRequest.Fixed(
+                new CreateHolidayRequestDTO.Fixed(
                     "Invalid Holiday",
                     "This should fail",
                     31,
@@ -145,7 +145,7 @@ class CreateHolidayRequestTest {
   @Test
   void shouldCreateFixedHolidayWithValidation() {
     var independenceDay =
-        new CreateHolidayRequest.Fixed(
+        new CreateHolidayRequestDTO.Fixed(
             "Independence Day",
             "Brazilian Independence Day",
             7,
@@ -163,8 +163,8 @@ class CreateHolidayRequestTest {
 
   @Test
   void shouldDemonstratePatternMatchingWithSealedInterface() {
-    CreateHolidayRequest christmas =
-        new CreateHolidayRequest.Fixed(
+    CreateHolidayRequestDTO christmas =
+        new CreateHolidayRequestDTO.Fixed(
             "Christmas",
             "Christian holiday",
             25,
@@ -173,8 +173,8 @@ class CreateHolidayRequestTest {
             List.of(new Locality.Country("US", "United States")),
             HolidayType.NATIONAL);
 
-    CreateHolidayRequest observed =
-        new CreateHolidayRequest.Observed(
+    CreateHolidayRequestDTO observed =
+        new CreateHolidayRequestDTO.Observed(
             "Christmas Observed",
             "Observed Christmas",
             LocalDate.of(2024, 12, 25),
@@ -196,7 +196,7 @@ class CreateHolidayRequestTest {
   @Test
   void shouldTestMonthEnumUsage() {
     var holiday =
-        new CreateHolidayRequest.Fixed(
+        new CreateHolidayRequestDTO.Fixed(
             "Test Holiday",
             "Testing Month enum",
             15,
@@ -216,9 +216,9 @@ class CreateHolidayRequestTest {
   }
 
   /** Demonstrates pattern matching with sealed interfaces - a key DOP principle. */
-  private String getHolidayInfo(CreateHolidayRequest request) {
+  private String getHolidayInfo(CreateHolidayRequestDTO request) {
     return switch (request) {
-      case CreateHolidayRequest.Fixed fixed ->
+      case CreateHolidayRequestDTO.Fixed fixed ->
           "Fixed holiday: "
               + fixed.name()
               + " on "
@@ -226,10 +226,10 @@ class CreateHolidayRequestTest {
               + "/"
               + fixed.month()
               + (fixed.year() != null ? "/" + fixed.year() : " (recurring)");
-      case CreateHolidayRequest.Observed observed ->
+      case CreateHolidayRequestDTO.Observed observed ->
           "Observed holiday: " + observed.name() + " observed on " + observed.observed();
-      case CreateHolidayRequest.Moveable moveable -> "Moveable holiday: " + moveable.name();
-      case CreateHolidayRequest.MoveableFromBase moveableFromBase ->
+      case CreateHolidayRequestDTO.Moveable moveable -> "Moveable holiday: " + moveable.name();
+      case CreateHolidayRequestDTO.MoveableFromBase moveableFromBase ->
           "Moveable from base holiday: " + moveableFromBase.name();
     };
   }
