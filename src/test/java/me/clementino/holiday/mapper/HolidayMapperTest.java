@@ -16,15 +16,15 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
-@DisplayName("SimpleHolidayMapper Tests")
+@DisplayName("HolidayMapper Tests")
 @Tag("unit")
-class SimpleHolidayMapperTest {
+class HolidayMapperTest {
 
-  private SimpleHolidayMapper mapper;
+  private HolidayMapper mapper;
 
   @BeforeEach
   void setUp() {
-    mapper = new SimpleHolidayMapper();
+    mapper = new HolidayMapper();
   }
 
   @Test

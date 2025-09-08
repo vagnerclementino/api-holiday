@@ -18,7 +18,7 @@ import org.springframework.stereotype.Component;
 
 /** Simple mapper for Holiday data using DOP principles. */
 @Component
-public class SimpleHolidayMapper {
+public class HolidayMapper {
 
   /** Convert HolidayDataDTO to HolidayResponseDTO. */
   public HolidayResponseDTO toResponse(HolidayDataDTO holidayDataDTO) {

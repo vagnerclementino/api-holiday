@@ -10,10 +10,9 @@ import me.clementino.holiday.domain.dop.HolidayOperations;
 import me.clementino.holiday.domain.dop.HolidayType;
 import me.clementino.holiday.domain.dop.Location;
 import me.clementino.holiday.dto.HolidayDataDTO;
-import me.clementino.holiday.dto.HolidayQueryDTO;
 import me.clementino.holiday.entity.HolidayEntity;
 import me.clementino.holiday.entity.LocalityEntity;
-import me.clementino.holiday.mapper.SimpleHolidayMapper;
+import me.clementino.holiday.mapper.HolidayMapper;
 import me.clementino.holiday.repository.HolidayRepository;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -33,27 +32,17 @@ public class HolidayService {
   private final HolidayRepository holidayRepository;
   private final MongoTemplate mongoTemplate;
   private final HolidayOperations holidayOperations;
-  private final SimpleHolidayMapper mapper;
+  private final HolidayMapper mapper;
 
   public HolidayService(
       HolidayRepository holidayRepository,
       MongoTemplate mongoTemplate,
       HolidayOperations holidayOperations,
-      SimpleHolidayMapper mapper) {
+      HolidayMapper mapper) {
     this.holidayRepository = holidayRepository;
     this.mongoTemplate = mongoTemplate;
     this.holidayOperations = holidayOperations;
     this.mapper = mapper;
-  }
-
-  /** Find all holidays with optional filtering using DOP query object. */
-  public List<HolidayDataDTO> findAll(HolidayQueryDTO query) {
-    return findAllWithFilters(null, null, null, null, null, null, null, null);
-  }
-
-  /** Find all holidays without filters. */
-  public List<HolidayDataDTO> findAll() {
-    return findAllWithFilters(null, null, null, null, null, null, null, null);
   }
 
   /** Find holiday by ID. */
@@ -78,7 +67,6 @@ public class HolidayService {
       HolidayType type,
       LocalDate startDate,
       LocalDate endDate,
-      Boolean recurring,
       String namePattern) {
 
     Query query = new Query();
@@ -118,7 +106,7 @@ public class HolidayService {
   /** Create a new holiday. */
   public HolidayDataDTO create(Holiday holiday, Integer year) {
 
-    var defaultYear = Optional.ofNullable(year).orElse(LocalDate.now().getYear());
+    int defaultYear = Optional.ofNullable(year).orElse(LocalDate.now().getYear());
 
     var holidayWithDate = holidayOperations.calculateDate(holiday, defaultYear);
     var holidayWithObserved = holidayOperations.calculateObservedDate(holidayWithDate, defaultYear);
@@ -147,43 +135,6 @@ public class HolidayService {
               HolidayEntity saved = holidayRepository.save(updated);
               return toDomainData(saved);
             });
-  }
-
-  /** Delete a holiday by ID. */
-  public boolean delete(String id) {
-    return deleteById(id);
-  }
-
-  /** Find holidays by country. */
-  public List<HolidayDataDTO> findByCountry(String country) {
-    return holidayRepository.findByCountryCode(country).stream().map(this::toDomainData).toList();
-  }
-
-  /** Find holidays by type. */
-  public List<HolidayDataDTO> findByType(HolidayType type) {
-    return holidayRepository.findByType(type).stream().map(this::toDomainData).toList();
-  }
-
-  /** Find holidays by date range. */
-  public List<HolidayDataDTO> findByDateRange(LocalDate startDate, LocalDate endDate) {
-    return holidayRepository.findByDateBetween(startDate, endDate).stream()
-        .map(this::toDomainData)
-        .toList();
-  }
-
-  /** Find holidays by year and country (for year-based calculations). */
-  public List<HolidayDataDTO> findByYearAndCountry(Integer year, String country) {
-    return findByCountry(country);
-  }
-
-  /** Find calculated holidays for a specific year. */
-  public List<HolidayDataDTO> findCalculatedHolidays(Integer year) {
-    return findAll();
-  }
-
-  /** Find base holidays (not calculated) for a country. */
-  public List<HolidayDataDTO> findBaseHolidays(String country) {
-    return findByCountry(country);
   }
 
   /** Convert HolidayEntity to HolidayDataDTO. */
@@ -279,113 +230,5 @@ public class HolidayService {
     }
 
     return List.of(localityEntity);
-  }
-
-  /**
-   * Find holidays for a specific year.
-   *
-   * @param year the target year
-   * @return list of holidays for the specified year
-   */
-  public List<HolidayDataDTO> findHolidaysForYear(int year) {
-    LocalDate startOfYear = LocalDate.of(year, 1, 1);
-    LocalDate endOfYear = LocalDate.of(year, 12, 31);
-
-    return findAllWithFilters(null, null, null, null, startOfYear, endOfYear, null, null);
-  }
-
-  /**
-   * Find holidays for a specific year and country.
-   *
-   * @param year the target year
-   * @param country the country code
-   * @return list of holidays for the specified year and country
-   */
-  public List<HolidayDataDTO> findHolidaysForYearAndCountry(int year, String country) {
-    LocalDate startOfYear = LocalDate.of(year, 1, 1);
-    LocalDate endOfYear = LocalDate.of(year, 12, 31);
-
-    return findAllWithFilters(country, null, null, null, startOfYear, endOfYear, null, null);
-  }
-
-  /**
-   * Find holidays for a specific year and type.
-   *
-   * @param year the target year
-   * @param type the holiday type
-   * @return list of holidays for the specified year and type
-   */
-  public List<HolidayDataDTO> findHolidaysForYearAndType(int year, HolidayType type) {
-    LocalDate startOfYear = LocalDate.of(year, 1, 1);
-    LocalDate endOfYear = LocalDate.of(year, 12, 31);
-
-    return findAllWithFilters(null, null, null, type, startOfYear, endOfYear, null, null);
-  }
-
-  /**
-   * Find holidays for a specific year, country, and type.
-   *
-   * @param year the target year
-   * @param country the country code
-   * @param type the holiday type
-   * @return list of holidays for the specified criteria
-   */
-  public List<HolidayDataDTO> findHolidaysForYearCountryAndType(
-      int year, String country, HolidayType type) {
-    LocalDate startOfYear = LocalDate.of(year, 1, 1);
-    LocalDate endOfYear = LocalDate.of(year, 12, 31);
-
-    return findAllWithFilters(country, null, null, type, startOfYear, endOfYear, null, null);
-  }
-
-  /**
-   * Check if any holidays exist for a specific year.
-   *
-   * @param year the target year
-   * @return true if holidays exist for the year
-   */
-  public boolean hasHolidaysForYear(int year) {
-    LocalDate startOfYear = LocalDate.of(year, 1, 1);
-    LocalDate endOfYear = LocalDate.of(year, 12, 31);
-
-    Query query = new Query();
-    query.addCriteria(Criteria.where("date").gte(startOfYear).lte(endOfYear));
-    query.limit(1);
-
-    return mongoTemplate.exists(query, HolidayEntity.class);
-  }
-
-  /**
-   * Count holidays for a specific year.
-   *
-   * @param year the target year
-   * @return number of holidays for the year
-   */
-  public long countHolidaysForYear(int year) {
-    LocalDate startOfYear = LocalDate.of(year, 1, 1);
-    LocalDate endOfYear = LocalDate.of(year, 12, 31);
-
-    Query query = new Query();
-    query.addCriteria(Criteria.where("date").gte(startOfYear).lte(endOfYear));
-
-    return mongoTemplate.count(query, HolidayEntity.class);
-  }
-
-  /**
-   * Find all base/template holidays (recurring holidays that can be calculated for any year).
-   *
-   * @return list of base holidays
-   */
-  public List<HolidayDataDTO> findBaseHolidays() {
-    return findAllWithFilters(null, null, null, null, null, null, true, null);
-  }
-
-  /**
-   * Find all calculated holidays (non-recurring holidays for specific years).
-   *
-   * @return list of calculated holidays
-   */
-  public List<HolidayDataDTO> findCalculatedHolidays() {
-    return findAllWithFilters(null, null, null, null, null, null, false, null);
   }
 }

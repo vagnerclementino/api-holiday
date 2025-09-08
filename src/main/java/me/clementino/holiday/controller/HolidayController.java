@@ -15,7 +15,7 @@ import me.clementino.holiday.dto.HolidayDataDTO;
 import me.clementino.holiday.dto.HolidayResponseDTO;
 import me.clementino.holiday.dto.UpdateHolidayRequestDTO;
 import me.clementino.holiday.mapper.HolidayCreationMapper;
-import me.clementino.holiday.mapper.SimpleHolidayMapper;
+import me.clementino.holiday.mapper.HolidayMapper;
 import me.clementino.holiday.service.HolidayService;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
@@ -48,12 +48,12 @@ import org.springframework.web.bind.annotation.RestController;
 public class HolidayController {
 
   private final HolidayService holidayService;
-  private final SimpleHolidayMapper holidayMapper;
+  private final HolidayMapper holidayMapper;
   private final HolidayCreationMapper creationMapper;
 
   public HolidayController(
       HolidayService holidayService,
-      SimpleHolidayMapper holidayMapper,
+      HolidayMapper holidayMapper,
       HolidayCreationMapper creationMapper) {
     this.holidayService = holidayService;
     this.holidayMapper = holidayMapper;
@@ -79,15 +79,13 @@ public class HolidayController {
           @RequestParam(required = false)
           @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
           LocalDate endDate,
-      @Parameter(description = "Filter by recurring holidays") @RequestParam(required = false)
-          Boolean recurring,
       @Parameter(description = "Filter by name pattern") @RequestParam(required = false)
           String namePattern) {
 
     try {
       List<HolidayDataDTO> holidays =
           holidayService.findAllWithFilters(
-              country, state, city, type, startDate, endDate, recurring, namePattern);
+              country, state, city, type, startDate, endDate, namePattern);
 
       List<HolidayResponseDTO> responses =
           holidays.stream().map(holidayMapper::toResponse).toList();
