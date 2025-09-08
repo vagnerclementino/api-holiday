@@ -81,7 +81,6 @@ public final class HolidayOperations {
         LocalDate observedDate =
             moveable.mondayisation() ? applyMondayisationRules(newDate) : newDate;
 
-        // If mondayisation is needed and dates differ, convert to ObservedHoliday
         if (moveable.mondayisation() && !newDate.equals(observedDate)) {
           yield new ObservedHoliday(
               moveable.name(),
@@ -100,7 +99,6 @@ public final class HolidayOperations {
         LocalDate observedDate =
             derived.mondayisation() ? applyMondayisationRules(newDate) : newDate;
 
-        // If mondayisation is needed and dates differ, convert to ObservedHoliday
         if (derived.mondayisation() && !newDate.equals(observedDate)) {
           yield new ObservedHoliday(
               derived.name(),
@@ -228,10 +226,7 @@ public final class HolidayOperations {
         .anyMatch(holidayLocality -> localityMatches(holidayLocality, targetLocality));
   }
 
-  // Private helper methods
-
   private static LocalDate calculateFixedDate(Holiday holiday, int year) {
-    // For fixed holidays, adjust the year but keep the same month and day
     return holiday.date().withYear(year);
   }
 
@@ -259,9 +254,9 @@ public final class HolidayOperations {
   /** Applies mondayisation rules to a date. */
   private static LocalDate applyMondayisationRules(LocalDate date) {
     return switch (date.getDayOfWeek()) {
-      case SATURDAY -> date.minusDays(1); // Saturday -> Friday
-      case SUNDAY -> date.plusDays(1); // Sunday -> Monday
-      default -> date; // Weekdays remain unchanged
+      case SATURDAY -> date.minusDays(1);
+      case SUNDAY -> date.plusDays(1);
+      default -> date;
     };
   }
 
@@ -298,17 +293,15 @@ public final class HolidayOperations {
           };
       case Locality.Subdivision holidaySubdivision ->
           switch (targetLocality) {
-            case Locality.Country targetCountry ->
-                false; // Subdivision doesn't match broader country
+            case Locality.Country targetCountry -> false;
             case Locality.Subdivision targetSubdivision ->
                 holidaySubdivision.equals(targetSubdivision);
             case Locality.City targetCity -> holidaySubdivision.equals(targetCity.subdivision());
           };
       case Locality.City holidayCity ->
           switch (targetLocality) {
-            case Locality.Country targetCountry -> false; // City doesn't match broader country
-            case Locality.Subdivision targetSubdivision ->
-                false; // City doesn't match broader subdivision
+            case Locality.Country targetCountry -> false;
+            case Locality.Subdivision targetSubdivision -> false;
             case Locality.City targetCity -> holidayCity.equals(targetCity);
           };
     };
@@ -316,7 +309,6 @@ public final class HolidayOperations {
 
   /** Calculates Easter Sunday for a given year using the algorithm from Jean Meeus. */
   public static LocalDate calculateEaster(int year) {
-    // Algorithm from "Astronomical Algorithms" by Jean Meeus
     int a = year % 19;
     int b = year / 100;
     int c = year % 100;
@@ -340,11 +332,9 @@ public final class HolidayOperations {
     LocalDate firstOfNovember = LocalDate.of(year, Month.NOVEMBER, 1);
     DayOfWeek firstDayOfWeek = firstOfNovember.getDayOfWeek();
 
-    // Find the first Thursday
     int daysToFirstThursday = (DayOfWeek.THURSDAY.getValue() - firstDayOfWeek.getValue() + 7) % 7;
     LocalDate firstThursday = firstOfNovember.plusDays(daysToFirstThursday);
 
-    // Add 3 weeks to get the 4th Thursday
     return firstThursday.plusWeeks(3);
   }
 
@@ -353,7 +343,6 @@ public final class HolidayOperations {
     LocalDate lastOfMay = LocalDate.of(year, Month.MAY, 31);
     DayOfWeek lastDayOfWeek = lastOfMay.getDayOfWeek();
 
-    // Find the last Monday
     int daysToLastMonday = (lastDayOfWeek.getValue() - DayOfWeek.MONDAY.getValue() + 7) % 7;
     return lastOfMay.minusDays(daysToLastMonday);
   }
@@ -363,7 +352,6 @@ public final class HolidayOperations {
     LocalDate firstOfSeptember = LocalDate.of(year, Month.SEPTEMBER, 1);
     DayOfWeek firstDayOfWeek = firstOfSeptember.getDayOfWeek();
 
-    // Find the first Monday
     int daysToFirstMonday = (DayOfWeek.MONDAY.getValue() - firstDayOfWeek.getValue() + 7) % 7;
     return firstOfSeptember.plusDays(daysToFirstMonday);
   }
@@ -373,11 +361,9 @@ public final class HolidayOperations {
     LocalDate firstOfMay = LocalDate.of(year, Month.MAY, 1);
     DayOfWeek firstDayOfWeek = firstOfMay.getDayOfWeek();
 
-    // Find the first Sunday
     int daysToFirstSunday = (DayOfWeek.SUNDAY.getValue() - firstDayOfWeek.getValue() + 7) % 7;
     LocalDate firstSunday = firstOfMay.plusDays(daysToFirstSunday);
 
-    // Add 1 week to get the 2nd Sunday
     return firstSunday.plusWeeks(1);
   }
 
@@ -386,11 +372,9 @@ public final class HolidayOperations {
     LocalDate firstOfJune = LocalDate.of(year, Month.JUNE, 1);
     DayOfWeek firstDayOfWeek = firstOfJune.getDayOfWeek();
 
-    // Find the first Sunday
     int daysToFirstSunday = (DayOfWeek.SUNDAY.getValue() - firstDayOfWeek.getValue() + 7) % 7;
     LocalDate firstSunday = firstOfJune.plusDays(daysToFirstSunday);
 
-    // Add 2 weeks to get the 3rd Sunday
     return firstSunday.plusWeeks(2);
   }
 

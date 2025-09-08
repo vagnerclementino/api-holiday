@@ -77,18 +77,16 @@ public class HolidayEntity {
 
   @NotNull private List<LocalityEntity> localities;
 
-  private LocalDate observed; // Observed date (different from actual date due to mondayisation)
+  private LocalDate observed;
 
   @CreatedDate private LocalDateTime dateCreated;
 
   @LastModifiedDate private LocalDateTime lastUpdated;
 
-  @Version private Integer version; // Optimistic locking
+  @Version private Integer version;
 
-  // Default constructor for MongoDB
   public HolidayEntity() {}
 
-  // Constructor with required fields
   public HolidayEntity(
       String name, String description, LocalDate date, String country, HolidayType type) {
     this.name = Objects.requireNonNull(name, "Name cannot be null");
@@ -97,7 +95,6 @@ public class HolidayEntity {
     this.type = Objects.requireNonNull(type, "Type cannot be null");
   }
 
-  // Enhanced constructor for calculated holiday instances
   public HolidayEntity(
       String name,
       String description,
@@ -109,7 +106,6 @@ public class HolidayEntity {
     this(name, description, date, country, type);
   }
 
-  // Constructor for derived holidays with base holiday reference
   public HolidayEntity(
       String name,
       String description,

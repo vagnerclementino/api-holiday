@@ -45,14 +45,13 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
  * <p><strong>Usage Example:</strong>
  *
  * <pre>{@code
- * // Create a fixed holiday
  * Holiday newYear = new FixedHoliday("New Year's Day", "Start of the calendar year",
  *                                   1, Month.JANUARY, localities, HolidayType.NATIONAL, true);
  *
- * // Get observed date (with mondayisation)
+ *
  * LocalDate observedDate = newYear.getObserved(2024);
  *
- * // Check if it falls on weekend
+ *
  * boolean isWeekend = newYear.isWeekend(2024);
  * }</pre>
  *
@@ -75,10 +74,6 @@ public abstract class Holiday {
   private List<Locality> localities;
   private HolidayType type;
   private boolean mondayisation;
-
-  // ================================================================================================
-  // PUBLIC CONSTRUCTORS
-  // ================================================================================================
 
   /**
    * Creates a new Holiday with full specification of all properties.
@@ -150,10 +145,6 @@ public abstract class Holiday {
     this.mondayisation = mondayisation;
   }
 
-  // ================================================================================================
-  // PUBLIC ABSTRACT METHODS
-  // ================================================================================================
-
   /**
    * Calculates the actual date of this holiday for the specified year.
    *
@@ -187,32 +178,23 @@ public abstract class Holiday {
    * @throws IllegalArgumentException if year is invalid
    */
   public LocalDate getObserved(int year) {
-    // 1. If observed is already set for this year, return it
     if (observed != null && date != null && date.getYear() == year) {
       return observed;
     }
 
-    // 2. Get the actual date (this will set the date property if needed)
     LocalDate actualDate = getDate(year);
 
-    // 3. Apply mondayisation if enabled
     if (mondayisation) {
       LocalDate mondayisedDate = applyMondayisationRules(actualDate);
-      // Store the observed date and its weekday for future calls
       setObserved(mondayisedDate);
       setObservedWeekDay(mondayisedDate.getDayOfWeek());
       return mondayisedDate;
     }
 
-    // 4. If no mondayisation, observed date is the same as actual date
     setObserved(actualDate);
     setObservedWeekDay(actualDate.getDayOfWeek());
     return actualDate;
   }
-
-  // ================================================================================================
-  // PUBLIC GETTER METHODS
-  // ================================================================================================
 
   /**
    * Returns the name of this holiday.
@@ -313,10 +295,6 @@ public abstract class Holiday {
     return mondayisation;
   }
 
-  // ================================================================================================
-  // PUBLIC UTILITY METHODS
-  // ================================================================================================
-
   /**
    * Checks if this holiday falls on a weekend for the specified year.
    *
@@ -367,10 +345,6 @@ public abstract class Holiday {
     Holiday holiday = (Holiday) obj;
     return name.equals(holiday.name) && type == holiday.type;
   }
-
-  // ================================================================================================
-  // PRIVATE HELPER METHODS
-  // ================================================================================================
 
   /**
    * Sets the date property for internal state management.
@@ -424,9 +398,9 @@ public abstract class Holiday {
    */
   private LocalDate applyMondayisationRules(LocalDate date) {
     return switch (date.getDayOfWeek()) {
-      case SATURDAY -> date.minusDays(1); // Move to Friday
-      case SUNDAY -> date.plusDays(1); // Move to Monday
-      default -> date; // No change for weekdays
+      case SATURDAY -> date.minusDays(1);
+      case SUNDAY -> date.plusDays(1);
+      default -> date;
     };
   }
 }

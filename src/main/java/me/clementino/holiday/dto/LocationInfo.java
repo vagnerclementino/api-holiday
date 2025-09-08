@@ -31,7 +31,6 @@ public record LocationInfo(
    * @return LocationInfo DTO
    */
   public static LocationInfo from(Location location) {
-    // Normalize country to ISO code
     String countryCode =
         CountryCodeUtil.normalizeCountry(location.country()).orElse(location.country());
 
@@ -62,7 +61,6 @@ public record LocationInfo(
       sb.append(subdivision).append(", ");
     }
 
-    // Use pretty country name instead of code
     String countryName = CountryCodeUtil.getPrettyName(countryCode);
     sb.append(countryName);
 

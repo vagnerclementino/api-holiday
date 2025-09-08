@@ -178,7 +178,6 @@ public sealed interface ValidationResult
   /** Combines this validation result with another. */
   default ValidationResult combine(ValidationResult other) {
     if (this.isFailure() || other.isFailure()) {
-      // If either is failure, combine all errors
       List<String> allErrors = new java.util.ArrayList<>();
       Map<String, String> allFieldErrors = new java.util.HashMap<>();
 
@@ -197,7 +196,6 @@ public sealed interface ValidationResult
     }
 
     if (this.isWarning() || other.isWarning()) {
-      // If either has warnings, combine them
       List<String> allWarnings = new java.util.ArrayList<>();
 
       if (this instanceof Warning thisWarning) {
@@ -212,7 +210,6 @@ public sealed interface ValidationResult
           : Warning.of("Combined validation with warnings", allWarnings);
     }
 
-    // Both are success
     return Success.of("Combined validation successful");
   }
 }

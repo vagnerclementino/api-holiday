@@ -37,9 +37,5 @@ class HolidayApiIntegrationTest {
    * be skipped automatically by TestContainers.
    */
   @Test
-  void contextLoads() {
-    // This test will pass if the application context loads successfully
-    // with MongoDB connection established via TestContainers
-    // No additional assertions needed for this basic smoke test
-  }
+  void contextLoads() {}
 }

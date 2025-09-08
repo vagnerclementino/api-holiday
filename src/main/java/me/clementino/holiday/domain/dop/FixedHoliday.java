@@ -62,15 +62,12 @@ public record FixedHoliday(
       throw new IllegalArgumentException("Day must be between 1 and 31");
     }
 
-    // Validate day/month combination
     validateDayMonthCombination(day, month);
 
-    // Ensure date matches day/month
     if (date.getDayOfMonth() != day || date.getMonth() != month) {
       throw new IllegalArgumentException("Date must match day and month fields");
     }
 
-    // Ensure localities list is immutable
     localities = List.copyOf(localities);
   }
 
@@ -78,9 +75,7 @@ public record FixedHoliday(
    * Validates that the day/month combination is valid. Prevents illegal states like February 31st.
    */
   private static void validateDayMonthCombination(int day, Month month) {
-    // Check if the day is valid for the given month
-    // Use a leap year (2024) to allow February 29th
-    int maxDaysInMonth = month.length(true); // true = leap year
+    int maxDaysInMonth = month.length(true);
 
     if (day > maxDaysInMonth) {
       throw new IllegalArgumentException(
@@ -89,9 +84,6 @@ public record FixedHoliday(
               day, month, month, maxDaysInMonth));
     }
   }
-
-  // ===== TRANSFORMATION METHODS =====
-  // These methods return new instances, maintaining immutability
 
   /**
    * Creates a new FixedHoliday with a different name.

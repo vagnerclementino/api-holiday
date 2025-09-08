@@ -25,15 +25,14 @@ import me.clementino.holiday.domain.dop.HolidayType;
  * <p><strong>Mondayisation Example:</strong>
  *
  * <pre>{@code
- * // Christmas 2024 falls on Wednesday - no change needed
  * FixedHoliday christmas = new FixedHoliday("Christmas Day", "Birth of Jesus Christ",
  *                                          25, Month.DECEMBER, localities,
  *                                          HolidayType.NATIONAL, true);
  *
- * LocalDate actual = christmas.getDate(2024);    // 2024-12-25 (Wednesday)
- * LocalDate observed = christmas.getObserved(2024); // 2024-12-25 (same, weekday)
+ * LocalDate actual = christmas.getDate(2024);
+ * LocalDate observed = christmas.getObserved(2024);
  *
- * // If Christmas fell on Sunday, observed would be Monday
+ *
  * }</pre>
  *
  * <p><strong>Common Fixed Holidays:</strong>
@@ -56,10 +55,6 @@ import me.clementino.holiday.domain.dop.HolidayType;
  * @see HolidayType
  */
 public class FixedHoliday extends Holiday {
-
-  // ================================================================================================
-  // PUBLIC CONSTRUCTORS
-  // ================================================================================================
 
   /**
    * Creates a new FixedHoliday with complete specification of all properties.
@@ -148,10 +143,6 @@ public class FixedHoliday extends Holiday {
     validateDayForMonth(day, month);
   }
 
-  // ================================================================================================
-  // PUBLIC METHODS (IMPLEMENTATION OF ABSTRACT METHODS)
-  // ================================================================================================
-
   /**
    * Returns the date of this fixed holiday for the specified year.
    *
@@ -169,22 +160,20 @@ public class FixedHoliday extends Holiday {
    *                                          25, Month.DECEMBER, localities,
    *                                          HolidayType.RELIGIOUS, true);
    *
-   * LocalDate christmas2024 = christmas.getDate(2024); // 2024-12-25
-   * LocalDate christmas2025 = christmas.getDate(2025); // 2025-12-25
+   * LocalDate christmas2024 = christmas.getDate(2024);
+   * LocalDate christmas2025 = christmas.getDate(2025);
    * }</pre>
    */
   @Override
   public LocalDate getDate(int year) {
     validateYear(year);
 
-    // If date is already calculated for this year, return it
     if (getDate() != null && getDate().getYear() == year) {
       return getDate();
     }
 
     try {
       LocalDate calculatedDate = LocalDate.of(year, getMonth(), getDay());
-      // Set the internal state
       setDate(calculatedDate);
       setDateWeekDay(calculatedDate.getDayOfWeek());
       return calculatedDate;
@@ -207,10 +196,6 @@ public class FixedHoliday extends Holiday {
         "FixedHoliday{name='%s', date='%s %d', type=%s, mondayisation=%s}",
         getName(), getMonth(), getDay(), getType(), isMondayisation());
   }
-
-  // ================================================================================================
-  // PRIVATE HELPER METHODS
-  // ================================================================================================
 
   /**
    * Validates that the specified day is valid for the given month.

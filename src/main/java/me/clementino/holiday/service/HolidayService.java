@@ -50,7 +50,6 @@ public class HolidayService {
 
   /** Find all holidays with optional filtering using DOP query object. */
   public List<HolidayData> findAll(HolidayQuery query) {
-    // For now, delegate to findAllWithFilters with extracted parameters
     return findAllWithFilters(null, null, null, null, null, null, null, null);
   }
 
@@ -86,7 +85,6 @@ public class HolidayService {
 
     Query query = new Query();
 
-    // Updated to use new LocalityEntity structure
     if (country != null && !country.isBlank()) {
       query.addCriteria(Criteria.where("localities.countryCode").regex(country, "i"));
     }
@@ -105,8 +103,6 @@ public class HolidayService {
     if (endDate != null) {
       query.addCriteria(Criteria.where("date").lte(endDate));
     }
-    // Note: recurring field doesn't exist in new HolidayEntity structure
-    // This filter is ignored for now
     if (namePattern != null && !namePattern.isBlank()) {
       query.addCriteria(Criteria.where("name").regex(namePattern, "i"));
     }
@@ -148,7 +144,7 @@ public class HolidayService {
               updated.setId(existing.getId());
               updated.setDateCreated(existing.getDateCreated());
               updated.setLastUpdated(LocalDateTime.now());
-              updated.setVersion(existing.getVersion()); // Let Spring Data handle version increment
+              updated.setVersion(existing.getVersion());
 
               HolidayEntity saved = holidayRepository.save(updated);
               return toDomainData(saved);
@@ -179,28 +175,21 @@ public class HolidayService {
 
   /** Find holidays by year and country (for year-based calculations). */
   public List<HolidayData> findByYearAndCountry(Integer year, String country) {
-    // This functionality is not available with the new HolidayEntity structure
-    // For now, return holidays by country only
     return findByCountry(country);
   }
 
   /** Find calculated holidays for a specific year. */
   public List<HolidayData> findCalculatedHolidays(Integer year) {
-    // This functionality is not available with the new HolidayEntity structure
-    // Return all holidays for now
     return findAll();
   }
 
   /** Find base holidays (not calculated) for a country. */
   public List<HolidayData> findBaseHolidays(String country) {
-    // This functionality is not available with the new HolidayEntity structure
-    // Return holidays by country
     return findByCountry(country);
   }
 
   /** Convert HolidayEntity to HolidayData. */
   private HolidayData toDomainData(HolidayEntity entity) {
-    // Validate required fields before creating HolidayData
     if (entity.getName() == null || entity.getName().isBlank()) {
       throw new IllegalStateException(
           "HolidayEntity name is null or blank for ID: "
@@ -223,7 +212,7 @@ public class HolidayService {
             entity.getEffectiveDate().equals(entity.getDate()) ? null : entity.getEffectiveDate()),
         extractLocationFromLocalities(entity.getLocalities()),
         entity.getType(),
-        false, // Recurring logic needs to be determined from business rules
+        false,
         Optional.ofNullable(entity.getDescription()),
         Optional.ofNullable(entity.getDateCreated()),
         Optional.ofNullable(entity.getLastUpdated()),
@@ -236,7 +225,6 @@ public class HolidayService {
       return new Location("UNKNOWN", Optional.empty(), Optional.empty());
     }
 
-    // Get the first locality as primary
     LocalityEntity primary = localities.get(0);
 
     return new Location(
@@ -247,7 +235,6 @@ public class HolidayService {
 
   /** Convert HolidayData to HolidayEntity. */
   private HolidayEntity toEntity(HolidayData data) {
-    // Validate required fields before creating entity
     if (data.name() == null || data.name().isBlank()) {
       throw new IllegalArgumentException("HolidayData name cannot be null or blank");
     }
@@ -265,7 +252,7 @@ public class HolidayService {
 
     HolidayEntity entity = new HolidayEntity();
     entity.setId(data.id());
-    entity.setName(data.name().trim()); // Trim whitespace
+    entity.setName(data.name().trim());
     entity.setDate(data.date());
     entity.setType(data.type());
     entity.setDescription(data.description().map(String::trim).orElse(null));
@@ -273,7 +260,6 @@ public class HolidayService {
     entity.setLastUpdated(data.lastUpdated().orElse(null));
     entity.setVersion(data.version().orElse(null));
 
-    // Convert Location to LocalityEntity list
     entity.setLocalities(createLocalityEntitiesFromLocation(data.location()));
 
     return entity;
@@ -283,23 +269,19 @@ public class HolidayService {
   private List<LocalityEntity> createLocalityEntitiesFromLocation(Location location) {
     LocalityEntity localityEntity = new LocalityEntity();
     localityEntity.setCountryCode(location.country());
-    localityEntity.setCountryName(location.country()); // Assuming name equals code for now
+    localityEntity.setCountryName(location.country());
 
-    // Set subdivision if present
     if (location.state().isPresent()) {
       localityEntity.setSubdivisionCode(location.state().get());
       localityEntity.setSubdivisionName(location.state().get());
     }
 
-    // Set city if present
     if (location.city().isPresent()) {
       localityEntity.setCityName(location.city().get());
     }
 
     return List.of(localityEntity);
   }
-
-  // ========== Year-based Operations ==========
 
   /**
    * Find holidays for a specific year.
@@ -370,7 +352,7 @@ public class HolidayService {
 
     Query query = new Query();
     query.addCriteria(Criteria.where("date").gte(startOfYear).lte(endOfYear));
-    query.limit(1); // We only need to know if at least one exists
+    query.limit(1);
 
     return mongoTemplate.exists(query, HolidayEntity.class);
   }

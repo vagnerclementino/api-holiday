@@ -82,9 +82,7 @@ public record HolidayQuery(
     }
   }
 
-  // Compact constructor for validation and normalization
   public HolidayQuery {
-    // Ensure Optional fields are never null
     namePattern = Objects.requireNonNullElse(namePattern, Optional.empty());
     locality = Objects.requireNonNullElse(locality, Optional.empty());
     countryCode = Objects.requireNonNullElse(countryCode, Optional.empty());
@@ -100,14 +98,12 @@ public record HolidayQuery(
     sortCriteria = Objects.requireNonNullElse(sortCriteria, Optional.empty());
     paginationCriteria = Objects.requireNonNullElse(paginationCriteria, Optional.empty());
 
-    // Validate date range if both dates are present
     if (startDate.isPresent() && endDate.isPresent()) {
       if (startDate.get().isAfter(endDate.get())) {
         throw new IllegalArgumentException("Start date cannot be after end date");
       }
     }
 
-    // Validate year if present
     if (year.isPresent()) {
       int yearValue = year.get();
       if (yearValue < 1900 || yearValue > 2200) {
@@ -248,8 +244,6 @@ public record HolidayQuery(
         Optional.empty(),
         Optional.empty());
   }
-
-  // Query methods
 
   public boolean isEmpty() {
     return namePattern.isEmpty()

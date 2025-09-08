@@ -30,7 +30,6 @@ class FixedHolidayTest {
     @Test
     @DisplayName("Should create New Year's Day correctly")
     void shouldCreateNewYearsDayCorrectly() {
-      // Given
       FixedHoliday newYear =
           new FixedHoliday(
               "New Year",
@@ -41,7 +40,6 @@ class FixedHolidayTest {
               HolidayType.NATIONAL,
               true);
 
-      // When & Then
       assertEquals("New Year", newYear.getName());
       assertEquals("Start of year", newYear.getDescription());
       assertEquals(LocalDate.of(2024, 1, 1), newYear.getDate(2024));
@@ -53,7 +51,6 @@ class FixedHolidayTest {
     @Test
     @DisplayName("Should calculate dates for different years")
     void shouldCalculateDatesForDifferentYears() {
-      // Given
       FixedHoliday christmas =
           new FixedHoliday(
               "Christmas",
@@ -64,7 +61,6 @@ class FixedHolidayTest {
               HolidayType.RELIGIOUS,
               true);
 
-      // When & Then
       assertEquals(LocalDate.of(2024, 12, 25), christmas.getDate(2024));
       assertEquals(LocalDate.of(2025, 12, 25), christmas.getDate(2025));
       assertEquals(LocalDate.of(2026, 12, 25), christmas.getDate(2026));
@@ -78,7 +74,6 @@ class FixedHolidayTest {
     @Test
     @DisplayName("Should apply mondayisation for Saturday holiday")
     void shouldApplyMondayisationForSaturdayHoliday() {
-      // Given - Christmas 2021 falls on Saturday
       FixedHoliday christmas =
           new FixedHoliday(
               "Christmas",
@@ -89,18 +84,16 @@ class FixedHolidayTest {
               HolidayType.RELIGIOUS,
               true);
 
-      // When & Then
       LocalDate actualDate = christmas.getDate(2021);
       LocalDate observedDate = christmas.getObserved(2021);
 
-      assertEquals(LocalDate.of(2021, 12, 25), actualDate); // Saturday
-      assertEquals(LocalDate.of(2021, 12, 24), observedDate); // Friday
+      assertEquals(LocalDate.of(2021, 12, 25), actualDate);
+      assertEquals(LocalDate.of(2021, 12, 24), observedDate);
     }
 
     @Test
     @DisplayName("Should apply mondayisation for Sunday holiday")
     void shouldApplyMondayisationForSundayHoliday() {
-      // Given - Christmas 2022 falls on Sunday
       FixedHoliday christmas =
           new FixedHoliday(
               "Christmas",
@@ -111,18 +104,16 @@ class FixedHolidayTest {
               HolidayType.RELIGIOUS,
               true);
 
-      // When & Then
       LocalDate actualDate = christmas.getDate(2022);
       LocalDate observedDate = christmas.getObserved(2022);
 
-      assertEquals(LocalDate.of(2022, 12, 25), actualDate); // Sunday
-      assertEquals(LocalDate.of(2022, 12, 26), observedDate); // Monday
+      assertEquals(LocalDate.of(2022, 12, 25), actualDate);
+      assertEquals(LocalDate.of(2022, 12, 26), observedDate);
     }
 
     @Test
     @DisplayName("Should not apply mondayisation when disabled")
     void shouldNotApplyMondayisationWhenDisabled() {
-      // Given - Christmas with mondayisation disabled
       FixedHoliday christmas =
           new FixedHoliday(
               "Christmas",
@@ -133,18 +124,16 @@ class FixedHolidayTest {
               HolidayType.RELIGIOUS,
               false);
 
-      // When & Then
-      LocalDate actualDate = christmas.getDate(2021); // Saturday
+      LocalDate actualDate = christmas.getDate(2021);
       LocalDate observedDate = christmas.getObserved(2021);
 
-      assertEquals(actualDate, observedDate); // Should be the same
+      assertEquals(actualDate, observedDate);
       assertFalse(christmas.isMondayisation());
     }
 
     @Test
     @DisplayName("Should not change weekday holidays")
     void shouldNotChangeWeekdayHolidays() {
-      // Given - Christmas 2024 falls on Wednesday
       FixedHoliday christmas =
           new FixedHoliday(
               "Christmas",
@@ -155,11 +144,10 @@ class FixedHolidayTest {
               HolidayType.RELIGIOUS,
               true);
 
-      // When & Then
       LocalDate actualDate = christmas.getDate(2024);
       LocalDate observedDate = christmas.getObserved(2024);
 
-      assertEquals(actualDate, observedDate); // Should be the same for weekdays
+      assertEquals(actualDate, observedDate);
     }
   }
 
@@ -170,7 +158,6 @@ class FixedHolidayTest {
     @Test
     @DisplayName("Should validate day for month")
     void shouldValidateDayForMonth() {
-      // When & Then
       assertThrows(
           IllegalArgumentException.class,
           () -> {
@@ -188,16 +175,12 @@ class FixedHolidayTest {
     @Test
     @DisplayName("Should validate February 29 in non-leap year")
     void shouldValidateFebruary29InNonLeapYear() {
-      // Given
       FixedHoliday leapDay =
           new FixedHoliday(
               "Leap Day", "Extra day", 29, Month.FEBRUARY, localities, HolidayType.NATIONAL, true);
 
-      // When & Then
-      assertDoesNotThrow(() -> leapDay.getDate(2024)); // Leap year - should work
-      assertThrows(
-          IllegalArgumentException.class,
-          () -> leapDay.getDate(2023)); // Non-leap year - should fail
+      assertDoesNotThrow(() -> leapDay.getDate(2024));
+      assertThrows(IllegalArgumentException.class, () -> leapDay.getDate(2023));
     }
   }
 
@@ -208,7 +191,6 @@ class FixedHolidayTest {
     @Test
     @DisplayName("Should return correct string representation")
     void shouldReturnCorrectStringRepresentation() {
-      // Given
       FixedHoliday newYear =
           new FixedHoliday(
               "New Year",
@@ -219,10 +201,8 @@ class FixedHolidayTest {
               HolidayType.NATIONAL,
               true);
 
-      // When
       String result = newYear.toString();
 
-      // Then
       assertTrue(result.contains("New Year"));
       assertTrue(result.contains("JANUARY"));
       assertTrue(result.contains("NATIONAL"));

@@ -18,17 +18,16 @@ package me.clementino.holiday.domain.oop;
  * <p><strong>Real-world Examples:</strong>
  *
  * <pre>{@code
- * // Lunar-based holidays
  * MoveableHoliday easter = new MoveableHoliday("Easter Sunday", ..., LUNAR_BASED);
  * MoveableHoliday chineseNewYear = new MoveableHoliday("Chinese New Year", ..., LUNAR_BASED);
  *
- * // Relative holidays
- * MoveableHoliday goodFriday = new MoveableHoliday("Good Friday", ..., RELATIVE_TO_HOLIDAY);
- * // Good Friday = Easter - 2 days
  *
- * // Weekday-based holidays
+ * MoveableHoliday goodFriday = new MoveableHoliday("Good Friday", ..., RELATIVE_TO_HOLIDAY);
+ *
+ *
+ *
  * MoveableHoliday laborDay = new MoveableHoliday("Labor Day", ..., WEEKDAY_BASED);
- * // Labor Day = First Monday of September (in US)
+ *
  * }</pre>
  *
  * <p><strong>Data-Oriented Design:</strong>
@@ -44,10 +43,6 @@ package me.clementino.holiday.domain.oop;
  * @see FixedHoliday
  */
 public enum MoveableHolidayType {
-
-  // ================================================================================================
-  // ENUM CONSTANTS
-  // ================================================================================================
 
   /**
    * Holidays calculated based on lunar calendar observations and astronomical events.
@@ -134,15 +129,7 @@ public enum MoveableHolidayType {
    */
   WEEKDAY_BASED("Calculated based on specific weekday rules within a month or year");
 
-  // ================================================================================================
-  // INSTANCE FIELDS
-  // ================================================================================================
-
   private final String description;
-
-  // ================================================================================================
-  // CONSTRUCTOR
-  // ================================================================================================
 
   /**
    * Creates a new MoveableHolidayType with the specified description.
@@ -152,10 +139,6 @@ public enum MoveableHolidayType {
   MoveableHolidayType(String description) {
     this.description = description;
   }
-
-  // ================================================================================================
-  // PUBLIC METHODS
-  // ================================================================================================
 
   /**
    * Returns the detailed description of this moveable holiday type.

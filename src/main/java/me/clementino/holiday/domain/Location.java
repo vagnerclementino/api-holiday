@@ -8,14 +8,12 @@ import java.util.Optional;
  * transparently. Models the data, the whole data, and nothing but the data.
  */
 public record Location(String country, Optional<String> state, Optional<String> city) {
-  // Compact constructor for validation
   public Location {
     Objects.requireNonNull(country, "Country cannot be null");
     if (country.isBlank()) {
       throw new IllegalArgumentException("Country cannot be blank");
     }
 
-    // Ensure Optional fields are never null
     state = Objects.requireNonNullElse(state, Optional.empty());
     city = Objects.requireNonNullElse(city, Optional.empty());
   }

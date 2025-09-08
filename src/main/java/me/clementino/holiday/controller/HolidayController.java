@@ -87,18 +87,15 @@ public class HolidayController {
           String namePattern) {
 
     try {
-      // Use service to find holidays with filters
       List<HolidayData> holidays =
           holidayService.findAllWithFilters(
               country, state, city, type, startDate, endDate, recurring, namePattern);
 
-      // Convert to response DTOs
       List<HolidayResponseDTO> responses =
           holidays.stream().map(holidayMapper::toResponse).toList();
 
       return ResponseEntity.ok(responses);
     } catch (Exception e) {
-      // Return empty list on error to prevent 500
       return ResponseEntity.ok(List.of());
     }
   }
@@ -155,17 +152,15 @@ public class HolidayController {
       @Valid @RequestBody UpdateHolidayRequest request) {
 
     try {
-      // Check if holiday exists
       Optional<HolidayData> existingHoliday = holidayService.findById(id);
       if (existingHoliday.isEmpty()) {
         return ResponseEntity.notFound().build();
       }
 
-      // Create updated HolidayData with merged values (null means keep current value)
       HolidayData current = existingHoliday.get();
       HolidayData updated =
           new HolidayData(
-              id, // Keep same ID
+              id,
               request.name() != null ? request.name() : current.name(),
               request.date() != null ? request.date() : current.date(),
               request.observed() != null ? Optional.of(request.observed()) : current.observed(),
@@ -180,12 +175,10 @@ public class HolidayController {
               request.description() != null
                   ? Optional.of(request.description())
                   : current.description(),
-              current.dateCreated(), // Preserve creation date
-              Optional.empty(), // lastUpdated will be set by service
-              Optional.empty() // Let service manage version control
-              );
+              current.dateCreated(),
+              Optional.empty(),
+              Optional.empty());
 
-      // Update using service
       Optional<HolidayData> result = holidayService.update(id, updated);
 
       if (result.isEmpty()) {

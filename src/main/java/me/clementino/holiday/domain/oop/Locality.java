@@ -18,16 +18,15 @@ package me.clementino.holiday.domain.oop;
  * <p><strong>Usage Examples:</strong>
  *
  * <pre>{@code
- * // National holiday
  * Locality brazil = new Locality("Brazil", null, null);
  *
- * // State-level holiday
+ *
  * Locality saoPauloState = new Locality("Brazil", "São Paulo", null);
  *
- * // City-level holiday
+ *
  * Locality saoPauloCity = new Locality("Brazil", "São Paulo", "São Paulo");
  *
- * // Using convenience constructors
+ *
  * Locality usa = Locality.country("United States");
  * Locality california = Locality.subdivision("United States", "California");
  * Locality sanFrancisco = Locality.city("United States", "California", "San Francisco");
@@ -53,10 +52,6 @@ public class Locality {
   private final String subdivision;
   private final String city;
 
-  // ================================================================================================
-  // PUBLIC CONSTRUCTORS
-  // ================================================================================================
-
   /**
    * Creates a new Locality with the specified geographical components.
    *
@@ -73,10 +68,6 @@ public class Locality {
     this.subdivision = subdivision != null ? subdivision.trim() : null;
     this.city = city != null ? city.trim() : null;
   }
-
-  // ================================================================================================
-  // PUBLIC FACTORY METHODS
-  // ================================================================================================
 
   /**
    * Creates a country-level locality.
@@ -124,10 +115,6 @@ public class Locality {
     return new Locality(country, subdivision, city);
   }
 
-  // ================================================================================================
-  // PUBLIC GETTER METHODS
-  // ================================================================================================
-
   /**
    * Returns the country name.
    *
@@ -154,10 +141,6 @@ public class Locality {
   public String getCity() {
     return city;
   }
-
-  // ================================================================================================
-  // PUBLIC UTILITY METHODS
-  // ================================================================================================
 
   /**
    * Checks if this is a country-level locality.

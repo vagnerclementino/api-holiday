@@ -24,7 +24,6 @@ public record HolidayData(
     Optional<LocalDateTime> dateCreated,
     Optional<LocalDateTime> lastUpdated,
     Optional<Integer> version) {
-  // Compact constructor for validation and normalization
   public HolidayData {
     Objects.requireNonNull(name, "Holiday name cannot be null");
     if (name.isBlank()) {
@@ -35,7 +34,6 @@ public record HolidayData(
     Objects.requireNonNull(location, "Holiday location cannot be null");
     Objects.requireNonNull(type, "Holiday type cannot be null");
 
-    // Ensure Optional fields are never null
     observed = Objects.requireNonNullElse(observed, Optional.empty());
     description = Objects.requireNonNullElse(description, Optional.empty());
     dateCreated = Objects.requireNonNullElse(dateCreated, Optional.empty());
@@ -81,8 +79,6 @@ public record HolidayData(
         Optional.empty(),
         Optional.empty());
   }
-
-  // Transformation methods (instead of setters) - return new instances
 
   public HolidayData withId(String newId) {
     return new HolidayData(
@@ -218,8 +214,6 @@ public record HolidayData(
         Optional.ofNullable(updated),
         Optional.ofNullable(ver));
   }
-
-  // Query methods (no side effects)
 
   public boolean isNational() {
     return location.isNational();

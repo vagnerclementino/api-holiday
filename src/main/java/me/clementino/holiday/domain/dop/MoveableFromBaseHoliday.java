@@ -41,7 +41,6 @@ public record MoveableFromBaseHoliday(
     LocalDate date,
     List<Locality> localities,
     HolidayType type,
-    // Additional attributes specific to MoveableFromBaseHoliday
     KnownHoliday knownHoliday,
     Holiday baseHoliday,
     int dayOffset,
@@ -68,18 +67,13 @@ public record MoveableFromBaseHoliday(
       throw new IllegalArgumentException("Holiday must have at least one locality");
     }
 
-    // Prevent circular dependencies
     if (baseHoliday instanceof MoveableFromBaseHoliday derived && derived.baseHoliday() == this) {
       throw new IllegalArgumentException(
           "Circular dependency detected: base holiday cannot reference this holiday");
     }
 
-    // Ensure localities list is immutable
     localities = List.copyOf(localities);
   }
-
-  // ===== TRANSFORMATION METHODS =====
-  // These methods return new instances, maintaining immutability
 
   /**
    * Returns a new MoveableFromBaseHoliday with the specified name.
@@ -253,8 +247,6 @@ public record MoveableFromBaseHoliday(
         newMondayisation);
   }
 
-  // ===== DERIVED-SPECIFIC METHODS =====
-
   /**
    * Gets the year for which this holiday's date was calculated.
    *
@@ -402,10 +394,4 @@ public record MoveableFromBaseHoliday(
     }
     return base;
   }
-
-  // ===== INHERITED METHODS FROM HOLIDAY INTERFACE =====
-  // The following methods are automatically available from the Holiday interface:
-  // - name(), description(), date(), localities(), type() (record accessors)
-  // - isWeekend(), getDisplayName(), appliesTo(), getSummary(), isGovernmental(),
-  // isObservedInCountry() (default methods)
 }

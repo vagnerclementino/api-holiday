@@ -22,13 +22,10 @@ public class SimpleHolidayMapper {
 
   /** Convert HolidayData to HolidayResponseDTO. */
   public HolidayResponseDTO toResponse(HolidayData holidayData) {
-    // Create when info (required)
     WhenInfo when = WhenInfo.from(holidayData.date());
 
-    // Create observed info (optional)
     WhenInfo observed = holidayData.observed().map(WhenInfo::from).orElse(null);
 
-    // Create location info (at least one required)
     LocationInfo locationInfo = LocationInfo.from(holidayData.location());
     List<LocationInfo> where = List.of(locationInfo);
 
@@ -55,7 +52,6 @@ public class SimpleHolidayMapper {
    * @return HolidayEntity for persistence
    */
   public HolidayEntity toEntity(Holiday holiday) {
-    // Use pattern matching to handle different Holiday types
     return switch (holiday) {
       case FixedHoliday fixed -> toEntityFromFixed(fixed);
       case ObservedHoliday observed -> toEntityFromObserved(observed);
@@ -67,14 +63,12 @@ public class SimpleHolidayMapper {
 
   /** Convert FixedHoliday to HolidayEntity. */
   private HolidayEntity toEntityFromFixed(FixedHoliday fixed) {
-    // Get primary locality for basic fields
     Locality primaryLocality = fixed.localities().getFirst();
     String country = getCountryCode(primaryLocality);
 
     HolidayEntity entity =
         new HolidayEntity(fixed.name(), fixed.description(), fixed.date(), country, fixed.type());
 
-    // Convert DOP localities to LocalityEntity list
     entity.setLocalities(convertLocalitiesFromDOP(fixed.localities()));
 
     return entity;
@@ -82,7 +76,6 @@ public class SimpleHolidayMapper {
 
   /** Convert ObservedHoliday to HolidayEntity. */
   private HolidayEntity toEntityFromObserved(ObservedHoliday observed) {
-    // Get primary locality for basic fields
     Locality primaryLocality = observed.localities().get(0);
     String country = getCountryCode(primaryLocality);
 
@@ -90,7 +83,6 @@ public class SimpleHolidayMapper {
         new HolidayEntity(
             observed.name(), observed.description(), observed.date(), country, observed.type());
 
-    // Convert DOP localities to LocalityEntity list
     entity.setLocalities(convertLocalitiesFromDOP(observed.localities()));
 
     return entity;
@@ -98,7 +90,6 @@ public class SimpleHolidayMapper {
 
   /** Convert MoveableHoliday to HolidayEntity. */
   private HolidayEntity toEntityFromMoveable(MoveableHoliday moveable) {
-    // Get primary locality for basic fields
     Locality primaryLocality = moveable.localities().get(0);
     String country = getCountryCode(primaryLocality);
 
@@ -106,7 +97,6 @@ public class SimpleHolidayMapper {
         new HolidayEntity(
             moveable.name(), moveable.description(), moveable.date(), country, moveable.type());
 
-    // Convert DOP localities to LocalityEntity list
     entity.setLocalities(convertLocalitiesFromDOP(moveable.localities()));
 
     return entity;
@@ -114,7 +104,6 @@ public class SimpleHolidayMapper {
 
   /** Convert MoveableFromBaseHoliday to HolidayEntity. */
   private HolidayEntity toEntityFromMoveableFromBase(MoveableFromBaseHoliday moveableFromBase) {
-    // Get primary locality for basic fields
     Locality primaryLocality = moveableFromBase.localities().get(0);
     String country = getCountryCode(primaryLocality);
 
@@ -126,7 +115,6 @@ public class SimpleHolidayMapper {
             country,
             moveableFromBase.type());
 
-    // Convert DOP localities to LocalityEntity list
     entity.setLocalities(convertLocalitiesFromDOP(moveableFromBase.localities()));
 
     return entity;

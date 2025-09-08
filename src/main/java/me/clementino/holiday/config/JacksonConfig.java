@@ -16,14 +16,11 @@ public class JacksonConfig {
   public ObjectMapper objectMapper() {
     ObjectMapper mapper = new ObjectMapper();
 
-    // Configuração para Java Time API
     mapper.registerModule(new JavaTimeModule());
     mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 
-    // Configuração para Records
     mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
 
-    // Configuração para não incluir valores null no JSON
     mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
 
     return mapper;

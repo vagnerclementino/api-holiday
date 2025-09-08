@@ -47,7 +47,6 @@ public interface HolidayCreationMapper {
    * @return FixedHoliday instance
    */
   default FixedHoliday toFixedHoliday(CreateHolidayRequest.Fixed request) {
-    // Calculate date from day, month, and year (or current year if null)
     int effectiveYear = request.year() != null ? request.year() : LocalDate.now().getYear();
     LocalDate calculatedDate = LocalDate.of(effectiveYear, request.month(), request.day());
 

@@ -73,17 +73,16 @@ import java.util.Objects;
  * <p><strong>Usage Examples:</strong>
  *
  * <pre>{@code
- * // National holiday
  * Locality brazil = new Locality.Country("BR", "Brazil");
  *
- * // State-level holiday
+ *
  * Locality saoPauloState = new Locality.Subdivision(
  *     new Locality.Country("BR", "Brazil"),
  *     "SP",
  *     "São Paulo"
  * );
  *
- * // City-level holiday
+ *
  * Locality saoPauloCity = new Locality.City(
  *     "São Paulo",
  *     new Locality.Subdivision(
@@ -120,7 +119,6 @@ public sealed interface Locality permits Locality.Country, Locality.Subdivision,
       }
     }
 
-    // Transformation methods
     public Country withCode(String newCode) {
       return new Country(newCode, name);
     }
@@ -151,7 +149,6 @@ public sealed interface Locality permits Locality.Country, Locality.Subdivision,
       }
     }
 
-    // Transformation methods
     public Subdivision withCountry(Country newCountry) {
       return new Subdivision(newCountry, code, name);
     }
@@ -182,7 +179,6 @@ public sealed interface Locality permits Locality.Country, Locality.Subdivision,
         throw new IllegalArgumentException("City name cannot be blank");
       }
 
-      // Validate consistency: subdivision's country must match city's country
       if (!subdivision.country().equals(country)) {
         throw new IllegalArgumentException(
             "City's country must match subdivision's country. "
@@ -193,24 +189,20 @@ public sealed interface Locality permits Locality.Country, Locality.Subdivision,
       }
     }
 
-    // Transformation methods
     public City withName(String newName) {
       return new City(newName, subdivision, country);
     }
 
     public City withSubdivision(Subdivision newSubdivision) {
-      // Ensure country consistency when changing subdivision
       return new City(name, newSubdivision, newSubdivision.country());
     }
 
     public City withCountry(Country newCountry) {
-      // When changing country, update subdivision to match
       var newSubdivision = subdivision.withCountry(newCountry);
       return new City(name, newSubdivision, newCountry);
     }
   }
 
-  // Factory methods for convenience
   static Country country(String code, String name) {
     return new Country(code, name);
   }
@@ -223,7 +215,6 @@ public sealed interface Locality permits Locality.Country, Locality.Subdivision,
     return new City(name, subdivision, country);
   }
 
-  // Convenience factory methods for common patterns
   static Country brazil() {
     return new Country("BR", "Brazil");
   }

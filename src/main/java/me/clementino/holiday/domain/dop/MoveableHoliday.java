@@ -42,7 +42,6 @@ public record MoveableHoliday(
     LocalDate date,
     List<Locality> localities,
     HolidayType type,
-    // Additional attributes specific to MoveableHoliday
     KnownHoliday knownHoliday,
     boolean mondayisation)
     implements Holiday {
@@ -66,12 +65,8 @@ public record MoveableHoliday(
       throw new IllegalArgumentException("Holiday must have at least one locality");
     }
 
-    // Ensure localities list is immutable
     localities = List.copyOf(localities);
   }
-
-  // ===== TRANSFORMATION METHODS =====
-  // These methods return new instances, maintaining immutability
 
   /**
    * Returns a new MoveableHoliday with the specified name.
@@ -151,8 +146,6 @@ public record MoveableHoliday(
         name, description, date, localities, type, knownHoliday, newMondayisation);
   }
 
-  // ===== MOVEABLE-SPECIFIC METHODS =====
-
   /**
    * Gets the year for which this holiday's date was calculated.
    *
@@ -231,12 +224,12 @@ public record MoveableHoliday(
    */
   public boolean hasFixedMonth() {
     return switch (knownHoliday) {
-      case THANKSGIVING_US -> true; // Always November
-      case MEMORIAL_DAY_US -> true; // Always May
-      case LABOR_DAY_US -> true; // Always September
-      case MOTHERS_DAY -> true; // Always May
-      case FATHERS_DAY -> true; // Always June
-      case EASTER -> false; // Can be March or April
+      case THANKSGIVING_US -> true;
+      case MEMORIAL_DAY_US -> true;
+      case LABOR_DAY_US -> true;
+      case MOTHERS_DAY -> true;
+      case FATHERS_DAY -> true;
+      case EASTER -> false;
       default -> false;
     };
   }
@@ -268,10 +261,4 @@ public record MoveableHoliday(
     }
     return base;
   }
-
-  // ===== INHERITED METHODS FROM HOLIDAY INTERFACE =====
-  // The following methods are automatically available from the Holiday interface:
-  // - name(), description(), date(), localities(), type() (record accessors)
-  // - isWeekend(), getDisplayName(), appliesTo(), getSummary(), isGovernmental(),
-  // isObservedInCountry() (default methods)
 }

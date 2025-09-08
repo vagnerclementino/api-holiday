@@ -81,9 +81,6 @@ import java.util.List;
 public sealed interface Holiday
     permits FixedHoliday, ObservedHoliday, MoveableHoliday, MoveableFromBaseHoliday {
 
-  // ===== COMMON INTERFACE METHODS =====
-  // These eliminate repetition across all record implementations
-
   /**
    * The name of the holiday.
    *
@@ -118,9 +115,6 @@ public sealed interface Holiday
    * @return holiday type, never null
    */
   HolidayType type();
-
-  // ===== COMMON DEFAULT METHODS =====
-  // These provide shared functionality without repetition
 
   /**
    * Checks if this holiday falls on a weekend for its current date.
@@ -207,8 +201,6 @@ public sealed interface Holiday
                 });
   }
 
-  // ===== PRIVATE HELPER METHODS =====
-
   /** Checks if a holiday locality matches a target locality using hierarchical matching. */
   private boolean localityMatches(Locality holidayLocality, Locality targetLocality) {
     return switch (holidayLocality) {
@@ -222,17 +214,15 @@ public sealed interface Holiday
           };
       case Locality.Subdivision holidaySubdivision ->
           switch (targetLocality) {
-            case Locality.Country targetCountry ->
-                false; // Subdivision doesn't match broader country
+            case Locality.Country targetCountry -> false;
             case Locality.Subdivision targetSubdivision ->
                 holidaySubdivision.equals(targetSubdivision);
             case Locality.City targetCity -> holidaySubdivision.equals(targetCity.subdivision());
           };
       case Locality.City holidayCity ->
           switch (targetLocality) {
-            case Locality.Country targetCountry -> false; // City doesn't match broader country
-            case Locality.Subdivision targetSubdivision ->
-                false; // City doesn't match broader subdivision
+            case Locality.Country targetCountry -> false;
+            case Locality.Subdivision targetSubdivision -> false;
             case Locality.City targetCity -> holidayCity.equals(targetCity);
           };
     };

@@ -11,9 +11,7 @@ import java.util.Optional;
  */
 public final class CountryCodeUtil {
 
-  private CountryCodeUtil() {
-    // Utility class - prevent instantiation
-  }
+  private CountryCodeUtil() {}
 
   /**
    * Validate if a string is a valid ISO 3166-1 alpha-2 country code.
@@ -65,7 +63,6 @@ public final class CountryCodeUtil {
     }
 
     try {
-      // Try to find by name
       for (CountryCode code : CountryCode.values()) {
         if (code != CountryCode.UNDEFINED
             && code.getName() != null
@@ -95,12 +92,10 @@ public final class CountryCodeUtil {
 
     String trimmed = countryInput.trim();
 
-    // First, check if it's already a valid country code
     if (isValidCountryCode(trimmed)) {
       return Optional.of(trimmed.toUpperCase());
     }
 
-    // If not, try to convert from country name
     return getCountryCode(trimmed);
   }
 

@@ -46,34 +46,33 @@ import me.clementino.holiday.domain.dop.HolidayType;
  * <p><strong>Usage Examples:</strong>
  *
  * <pre>{@code
- * // Easter Sunday (lunar-based)
  * MoveableHoliday easter = new MoveableHoliday(
  *     "Easter Sunday", "Resurrection of Jesus Christ",
- *     0, Month.JANUARY, // Not used for lunar-based
+ *     0, Month.JANUARY,
  *     localities, HolidayType.RELIGIOUS, true,
  *     MoveableHolidayType.LUNAR_BASED, null, 0
  * );
  *
- * // Good Friday (relative to Easter)
+ *
  * MoveableHoliday goodFriday = new MoveableHoliday(
  *     "Good Friday", "Crucifixion of Jesus Christ",
- *     0, Month.JANUARY, // Not used for relative
+ *     0, Month.JANUARY,
  *     localities, HolidayType.RELIGIOUS, true,
  *     MoveableHolidayType.RELATIVE_TO_HOLIDAY, easter, -2
  * );
  *
- * // Labor Day (weekday-based)
+ *
  * MoveableHoliday laborDay = new MoveableHoliday(
  *     "Labor Day", "Workers' rights celebration",
- *     1, Month.SEPTEMBER, // First Monday of September
+ *     1, Month.SEPTEMBER,
  *     localities, HolidayType.NATIONAL, true,
  *     MoveableHolidayType.WEEKDAY_BASED, null, 0
  * );
  *
- * // Calculate dates for specific year
- * LocalDate easter2024 = easter.getDate(2024);      // 2024-03-31
- * LocalDate goodFriday2024 = goodFriday.getDate(2024); // 2024-03-29
- * LocalDate laborDay2024 = laborDay.getDate(2024);     // 2024-09-02
+ *
+ * LocalDate easter2024 = easter.getDate(2024);
+ * LocalDate goodFriday2024 = goodFriday.getDate(2024);
+ * LocalDate laborDay2024 = laborDay.getDate(2024);
  * }</pre>
  *
  * <p><strong>Easter Algorithm Details:</strong>
@@ -312,7 +311,6 @@ public class MoveableHoliday extends Holiday {
 
   @Override
   public LocalDate getDate(int year) {
-    // If date is already calculated for this year, return it
     if (getDate() != null && getDate().getYear() == year) {
       return getDate();
     }
@@ -324,7 +322,6 @@ public class MoveableHoliday extends Holiday {
           case WEEKDAY_BASED -> calculateWeekdayBasedDate(year);
         };
 
-    // Set the internal state
     setDate(calculatedDate);
     setDateWeekDay(calculatedDate.getDayOfWeek());
     return calculatedDate;
@@ -347,13 +344,11 @@ public class MoveableHoliday extends Holiday {
       LocalDate baseDate = baseHoliday.getDate(year);
       return baseDate.plusDays(dayOffset);
     }
-    return LocalDate.of(year, Month.JANUARY, 1); // Default fallback
+    return LocalDate.of(year, Month.JANUARY, 1);
   }
 
   /** Calculates the date for weekday-based holidays. */
   private LocalDate calculateWeekdayBasedDate(int year) {
-    // Implementation for weekday-based calculations
-    // This would depend on specific rules for each holiday
     return LocalDate.of(year, getMonth(), getDay());
   }
 
@@ -405,13 +400,12 @@ public class MoveableHoliday extends Holiday {
    * @param year the year for which to calculate Easter (must be ≥ 1583 for Gregorian accuracy)
    * @return the date of Easter Sunday for the given year
    * @throws IllegalArgumentException if year is before 1583 (pre-Gregorian calendar)
-   * @see <a href="https://en.wikipedia.org/wiki/Date_of_Easter">Date of Easter - Wikipedia</a>
-   * @see <a href="https://www.assa.org.au/edm">Easter Date Method - Astronomical Society</a>
+   * @see <a href="https:
+   * @see <a href="https:
    * @since 1.0
    * @author Based on Jean Meeus algorithm
    */
   private LocalDate calculateEasterSunday(int year) {
-    // Validate input for Gregorian calendar accuracy
     if (year < MIN_GREGORIAN_YEAR) {
       throw new IllegalArgumentException(
           "Easter calculation is only accurate for Gregorian calendar years ("
@@ -423,8 +417,8 @@ public class MoveableHoliday extends Holiday {
     int goldenNumber = year % METONIC_CYCLE_YEARS;
     int century = year / YEARS_PER_CENTURY;
     int totalDays = getTotalDays(year, century, goldenNumber);
-    int easterMonth = totalDays / MONTH_DIVISOR; // Will be 3 (March) or 4 (April)
-    int easterDay = (totalDays % MONTH_DIVISOR) + DAY_ADJUSTMENT; // Day of the month (1-31)
+    int easterMonth = totalDays / MONTH_DIVISOR;
+    int easterDay = (totalDays % MONTH_DIVISOR) + DAY_ADJUSTMENT;
 
     return LocalDate.of(year, easterMonth, easterDay);
   }
@@ -473,7 +467,6 @@ public class MoveableHoliday extends Holiday {
         % EPACT_MODULUS;
   }
 
-  // Getters
   public MoveableHolidayType getMoveableType() {
     return moveableType;
   }

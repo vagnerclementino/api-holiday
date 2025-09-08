@@ -50,7 +50,7 @@ public sealed interface CreateHolidayRequest
   List<Locality> localities();
 
   @NotNull
-  HolidayType holidayType(); // Renamed to avoid conflict with Jackson "type"
+  HolidayType holidayType();
 
   /**
    * Request to create a fixed holiday. Fixed holidays occur on the same date every year (e.g.,
@@ -66,7 +66,7 @@ public sealed interface CreateHolidayRequest
       String description,
       @NotNull @Min(1) @Max(31) Integer day,
       @NotNull Month month,
-      @Min(1) Integer year, // Optional - null means recurring every year
+      @Min(1) Integer year,
       @NotNull List<Locality> localities,
       @NotNull HolidayType holidayType)
       implements CreateHolidayRequest {
@@ -83,9 +83,7 @@ public sealed interface CreateHolidayRequest
      * 31st.
      */
     private static void validateDayMonthCombination(int day, Month month) {
-      // Check if the day is valid for the given month
-      // Use a leap year (2024) to allow February 29th
-      int maxDaysInMonth = month.length(true); // true = leap year
+      int maxDaysInMonth = month.length(true);
 
       if (day > maxDaysInMonth) {
         throw new IllegalArgumentException(

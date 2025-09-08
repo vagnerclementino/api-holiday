@@ -39,7 +39,6 @@ public record HolidayResponseDTO(
 
   /** Compact constructor for validation. */
   public HolidayResponseDTO {
-    // Ensure required fields are not null
     if (when == null) {
       throw new IllegalArgumentException("'when' information is required");
     }
@@ -48,7 +47,6 @@ public record HolidayResponseDTO(
       throw new IllegalArgumentException("At least one location must be specified");
     }
 
-    // Ensure all locations have at least a country
     where.forEach(
         location -> {
           if (location.country() == null || location.country().isBlank()) {

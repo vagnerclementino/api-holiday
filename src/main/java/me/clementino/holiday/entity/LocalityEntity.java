@@ -36,7 +36,7 @@ public class LocalityEntity {
   @NotNull
   @Size(max = 2)
   @Indexed
-  private String countryCode; // ISO 3166-1 alpha-2 country code
+  private String countryCode;
 
   @NotNull
   @Size(max = 255)
@@ -45,45 +45,38 @@ public class LocalityEntity {
 
   @Size(max = 10)
   @Indexed
-  private String subdivisionCode; // State/Province code (optional)
+  private String subdivisionCode;
 
   @Size(max = 255)
   @Indexed
-  private String subdivisionName; // State/Province name (optional)
+  private String subdivisionName;
 
   @Size(max = 255)
   @Indexed
-  private String cityName; // City name (optional)
+  private String cityName;
 
-  @NotNull @Indexed
-  private LocalityType localityType; // Type of locality (COUNTRY, SUBDIVISION, CITY)
+  @NotNull @Indexed private LocalityType localityType;
 
   @Size(max = 2000)
-  private String dopLocalityData; // Serialized DOP Locality sealed interface data
+  private String dopLocalityData;
 
-  // Additional fields for enhanced locality support
   @Size(max = 10)
-  private String timeZone; // Primary timezone for this locality
+  private String timeZone;
 
   @Size(max = 3)
-  private String currencyCode; // ISO 4217 currency code
+  private String currencyCode;
 
   @Size(max = 10)
-  private String languageCode; // Primary language code (ISO 639-1)
+  private String languageCode;
 
-  // ===== CONSTRUCTORS =====
-
-  // Default constructor for MongoDB
   public LocalityEntity() {}
 
-  // Constructor for country-level locality
   public LocalityEntity(String countryCode, String countryName) {
     this.countryCode = countryCode;
     this.countryName = countryName;
     this.localityType = LocalityType.COUNTRY;
   }
 
-  // Constructor for subdivision-level locality
   public LocalityEntity(
       String countryCode, String countryName, String subdivisionCode, String subdivisionName) {
     this.countryCode = countryCode;
@@ -93,7 +86,6 @@ public class LocalityEntity {
     this.localityType = LocalityType.SUBDIVISION;
   }
 
-  // Constructor for city-level locality
   public LocalityEntity(
       String countryCode,
       String countryName,
@@ -107,8 +99,6 @@ public class LocalityEntity {
     this.cityName = cityName;
     this.localityType = LocalityType.CITY;
   }
-
-  // ===== FACTORY METHODS FOR DOP INTEGRATION =====
 
   /**
    * Factory method to create LocalityEntity from DOP Locality sealed interface.
@@ -165,8 +155,6 @@ public class LocalityEntity {
     };
   }
 
-  // ===== BUSINESS LOGIC METHODS =====
-
   /**
    * Checks if this locality is at the country level.
    *
@@ -219,28 +207,23 @@ public class LocalityEntity {
       return false;
     }
 
-    // Must be in the same country
     if (!countryCode.equals(other.countryCode)) {
       return false;
     }
 
     return switch (this.localityType) {
-      case COUNTRY -> true; // Country contains everything in that country
+      case COUNTRY -> true;
       case SUBDIVISION -> {
         if (other.localityType == LocalityType.COUNTRY) {
-          yield false; // Subdivision doesn't contain country
+          yield false;
         }
-        // Must be in the same subdivision
         yield subdivisionCode != null && subdivisionCode.equals(other.subdivisionCode);
       }
       case CITY -> {
-        // City only matches itself exactly
         yield this.equals(other);
       }
     };
   }
-
-  // ===== GETTERS AND SETTERS =====
 
   public String getCountryCode() {
     return countryCode;
@@ -322,8 +305,6 @@ public class LocalityEntity {
     this.languageCode = languageCode;
   }
 
-  // ===== EQUALS, HASHCODE, TOSTRING =====
-
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;
@@ -373,8 +354,8 @@ public class LocalityEntity {
 
   /** Enum representing the type of locality for indexing and querying purposes. */
   public enum LocalityType {
-    COUNTRY, // National level
-    SUBDIVISION, // State/Province level
-    CITY // Municipal level
+    COUNTRY,
+    SUBDIVISION,
+    CITY
   }
 }

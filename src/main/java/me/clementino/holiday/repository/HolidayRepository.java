@@ -27,8 +27,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface HolidayRepository extends MongoRepository<HolidayEntity, String> {
 
-  // ===== BASIC QUERIES =====
-
   /** Find holidays by type. */
   List<HolidayEntity> findByType(HolidayType type);
 
@@ -40,8 +38,6 @@ public interface HolidayRepository extends MongoRepository<HolidayEntity, String
 
   /** Find holidays by date. */
   List<HolidayEntity> findByDate(LocalDate date);
-
-  // ===== LOCALITY-BASED QUERIES =====
 
   /** Find holidays by country code in localities. */
   @Query("{ 'localities.countryCode': { $regex: ?0, $options: 'i' } }")
@@ -73,8 +69,6 @@ public interface HolidayRepository extends MongoRepository<HolidayEntity, String
           + "{ 'localities.countryCode': { $regex: ?1, $options: 'i' } } "
           + "] }")
   List<HolidayEntity> findByDateAndCountryCode(LocalDate date, String countryCode);
-
-  // ===== COMPLEX CUSTOM QUERIES =====
 
   /** Custom query to find holidays by multiple criteria. */
   @Query(

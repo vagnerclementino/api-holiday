@@ -16,25 +16,22 @@ class CreateHolidayRequestTest {
 
   @Test
   void shouldCreateFixedHolidayWithSpecificYear() {
-    // Given: Christmas 2024
     var christmas2024 =
         new CreateHolidayRequest.Fixed(
             "Christmas Day",
             "Christian holiday celebrating the birth of Jesus Christ",
-            25, // day
-            Month.DECEMBER, // month using java.time.Month
-            2024, // specific year
+            25,
+            Month.DECEMBER,
+            2024,
             List.of(new Locality.Country("US", "United States")),
             HolidayType.NATIONAL);
 
-    // When: Calculate the date from day, month, year
     int effectiveYear =
         christmas2024.year() != null ? christmas2024.year() : LocalDate.now().getYear();
     LocalDate date = LocalDate.of(effectiveYear, christmas2024.month(), christmas2024.day());
 
-    // Then: Should be December 25, 2024
     assertEquals(LocalDate.of(2024, 12, 25), date);
-    assertFalse(christmas2024.year() == null); // Not recurring (has specific year)
+    assertFalse(christmas2024.year() == null);
     assertEquals("Christmas Day", christmas2024.name());
     assertEquals(25, christmas2024.day());
     assertEquals(Month.DECEMBER, christmas2024.month());
@@ -43,32 +40,28 @@ class CreateHolidayRequestTest {
 
   @Test
   void shouldCreateRecurringFixedHoliday() {
-    // Given: New Year (recurring every year)
     var newYear =
         new CreateHolidayRequest.Fixed(
             "New Year's Day",
             "First day of the year",
-            1, // day
-            Month.JANUARY, // month
-            null, // no specific year - recurring
+            1,
+            Month.JANUARY,
+            null,
             List.of(new Locality.Country("BR", "Brazil")),
             HolidayType.NATIONAL);
 
-    // When: Calculate the date from day, month, year (using current year if null)
     int effectiveYear = newYear.year() != null ? newYear.year() : LocalDate.now().getYear();
     LocalDate date = LocalDate.of(effectiveYear, newYear.month(), newYear.day());
 
-    // Then: Should use current year
     assertEquals(1, date.getDayOfMonth());
     assertEquals(Month.JANUARY, date.getMonth());
     assertEquals(LocalDate.now().getYear(), date.getYear());
-    assertTrue(newYear.year() == null); // Is recurring (no specific year)
+    assertTrue(newYear.year() == null);
     assertNull(newYear.year());
   }
 
   @Test
   void shouldValidateValidDayMonthCombinations() {
-    // Given/When/Then: Valid combinations should work
     assertDoesNotThrow(
         () ->
             new CreateHolidayRequest.Fixed(
@@ -87,7 +80,7 @@ class CreateHolidayRequestTest {
                 "Extra day in leap year",
                 29,
                 Month.FEBRUARY,
-                null, // Valid - February can have 29 days in leap years
+                null,
                 List.of(new Locality.Country("US", "United States")),
                 HolidayType.COMMERCIAL));
 
@@ -98,16 +91,14 @@ class CreateHolidayRequestTest {
                 "Spooky day",
                 31,
                 Month.OCTOBER,
-                null, // Valid - October has 31 days
+                null,
                 List.of(new Locality.Country("US", "United States")),
                 HolidayType.COMMERCIAL));
   }
 
   @Test
   void shouldRejectInvalidDayMonthCombinations() {
-    // Given/When/Then: Invalid combinations should throw exceptions
 
-    // February 31st - invalid
     IllegalArgumentException feb31Exception =
         assertThrows(
             IllegalArgumentException.class,
@@ -122,7 +113,6 @@ class CreateHolidayRequestTest {
                     HolidayType.COMMERCIAL));
     assertTrue(feb31Exception.getMessage().contains("Invalid day 31 for month FEBRUARY"));
 
-    // April 31st - invalid (April has only 30 days)
     IllegalArgumentException apr31Exception =
         assertThrows(
             IllegalArgumentException.class,
@@ -137,7 +127,6 @@ class CreateHolidayRequestTest {
                     HolidayType.COMMERCIAL));
     assertTrue(apr31Exception.getMessage().contains("Invalid day 31 for month APRIL"));
 
-    // June 31st - invalid (June has only 30 days)
     IllegalArgumentException jun31Exception =
         assertThrows(
             IllegalArgumentException.class,
@@ -155,28 +144,25 @@ class CreateHolidayRequestTest {
 
   @Test
   void shouldCreateFixedHolidayWithValidation() {
-    // Given: Valid holiday data
     var independenceDay =
         new CreateHolidayRequest.Fixed(
             "Independence Day",
             "Brazilian Independence Day",
-            7, // September 7th
+            7,
             Month.SEPTEMBER,
-            null, // recurring
+            null,
             List.of(new Locality.Country("BR", "Brazil")),
             HolidayType.NATIONAL);
 
-    // When/Then: Should create successfully
     assertNotNull(independenceDay);
     assertEquals("Independence Day", independenceDay.name());
     assertEquals(7, independenceDay.day());
     assertEquals(Month.SEPTEMBER, independenceDay.month());
-    assertTrue(independenceDay.year() == null); // Is recurring (no specific year)
+    assertTrue(independenceDay.year() == null);
   }
 
   @Test
   void shouldDemonstratePatternMatchingWithSealedInterface() {
-    // Given: Different types of holiday requests
     CreateHolidayRequest christmas =
         new CreateHolidayRequest.Fixed(
             "Christmas",
@@ -194,14 +180,12 @@ class CreateHolidayRequestTest {
             LocalDate.of(2024, 12, 25),
             List.of(new Locality.Country("US", "United States")),
             HolidayType.NATIONAL,
-            LocalDate.of(2024, 12, 26), // observed on 26th
+            LocalDate.of(2024, 12, 26),
             true);
 
-    // When: Use pattern matching to handle different types
     String christmasInfo = getHolidayInfo(christmas);
     String observedInfo = getHolidayInfo(observed);
 
-    // Then: Should handle each type appropriately
     assertTrue(christmasInfo.contains("Fixed holiday"));
     assertTrue(christmasInfo.contains("Christmas"));
     assertTrue(christmasInfo.contains("DECEMBER"));
@@ -211,7 +195,6 @@ class CreateHolidayRequestTest {
 
   @Test
   void shouldTestMonthEnumUsage() {
-    // Given: Holiday using Month enum
     var holiday =
         new CreateHolidayRequest.Fixed(
             "Test Holiday",
@@ -222,13 +205,11 @@ class CreateHolidayRequestTest {
             List.of(new Locality.Country("BR", "Brazil")),
             HolidayType.NATIONAL);
 
-    // When/Then: Should work with Month enum methods
     assertEquals(Month.MARCH, holiday.month());
     assertEquals(3, holiday.month().getValue());
     assertEquals("MARCH", holiday.month().name());
-    assertEquals(31, holiday.month().length(false)); // March has 31 days
+    assertEquals(31, holiday.month().length(false));
 
-    // Calculate date from day, month, year
     int effectiveYear = holiday.year() != null ? holiday.year() : LocalDate.now().getYear();
     LocalDate calculatedDate = LocalDate.of(effectiveYear, holiday.month(), holiday.day());
     assertEquals(LocalDate.of(2024, 3, 15), calculatedDate);

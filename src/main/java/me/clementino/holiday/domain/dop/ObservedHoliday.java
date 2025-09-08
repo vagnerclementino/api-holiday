@@ -43,7 +43,6 @@ public record ObservedHoliday(
     LocalDate date,
     List<Locality> localities,
     HolidayType type,
-    // Additional attributes specific to ObservedHoliday
     LocalDate observed,
     boolean mondayisation)
     implements Holiday {
@@ -67,7 +66,6 @@ public record ObservedHoliday(
       throw new IllegalArgumentException("Holiday must have at least one locality");
     }
 
-    // Validate mondayisation logic
     if (mondayisation && date.equals(observed)) {
       DayOfWeek dayOfWeek = date.getDayOfWeek();
       if (dayOfWeek == DayOfWeek.SATURDAY || dayOfWeek == DayOfWeek.SUNDAY) {
@@ -77,12 +75,8 @@ public record ObservedHoliday(
       }
     }
 
-    // Ensure localities list is immutable
     localities = List.copyOf(localities);
   }
-
-  // ===== TRANSFORMATION METHODS =====
-  // These methods return new instances, maintaining immutability
 
   /**
    * Returns a new ObservedHoliday with the specified name.
@@ -191,8 +185,6 @@ public record ObservedHoliday(
     return withDates(newDate, newObserved);
   }
 
-  // ===== OBSERVED-SPECIFIC METHODS =====
-
   /**
    * Checks if the observed date is different from the actual date.
    *
@@ -260,18 +252,9 @@ public record ObservedHoliday(
    */
   public static LocalDate applyMondayisationRules(LocalDate dateToAdjust) {
     return switch (dateToAdjust.getDayOfWeek()) {
-      case SATURDAY -> dateToAdjust.minusDays(1); // Saturday -> Friday
-      case SUNDAY -> dateToAdjust.plusDays(1); // Sunday -> Monday
-      default -> dateToAdjust; // Weekdays remain unchanged
+      case SATURDAY -> dateToAdjust.minusDays(1);
+      case SUNDAY -> dateToAdjust.plusDays(1);
+      default -> dateToAdjust;
     };
   }
-
-  // ===== INHERITED METHODS FROM HOLIDAY INTERFACE =====
-  // The following methods are automatically available from the Holiday interface:
-  // - name(), description(), date(), localities(), type() (record accessors)
-  // - isWeekend(), getDisplayName(), appliesTo(), getSummary(), isGovernmental(),
-  // isObservedInCountry() (default methods)
-
-  // Note: isWeekend() from the interface checks the actual date, not the observed date
-  // Use observedDateIsWeekend() if you need to check the observed date specifically
 }
