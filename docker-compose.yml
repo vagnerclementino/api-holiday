@@ -1,0 +1,21 @@
+# Data-Oriented Programming Holiday API - Infrastructure
+# MongoDB 8 for local development
+
+services:
+  mongodb:
+    image: mongo:8.0.12
+    container_name: mongodb
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: holiday_admin
+      MONGO_INITDB_ROOT_PASSWORD: holiday_admin_2024
+      MONGO_INITDB_DATABASE: holiday-api
+    ports:
+      - "27017:27017"
+    volumes:
+      - ./tools/mongo/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+      - mongodb_data:/data/db
+    restart: unless-stopped
+
+volumes:
+  mongodb_data:
+    driver: local
