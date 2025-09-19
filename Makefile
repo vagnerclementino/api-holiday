@@ -17,16 +17,6 @@ JAVA_OPTS := -Xmx512m -Xms256m
 docker-check:
 	@docker info >/dev/null 2>&1 || (echo "$(RED)❌ Docker is not running. Please start Docker first.$(NC)" && exit 1)
 
-# JShell demo
-jshell-demo: compile
-	@echo "$(BLUE)🔧 Running JShell Holiday Demo...$(NC)"
-	@jshell --class-path target/classes examples/moveable-holidays-demo.jsh
-	@echo "$(GREEN)✅ JShell demo completed!$(NC)"
-
-# Alternative JShell demo using wrapper script
-demo: compile
-	@echo "$(BLUE)🔧 Running Holiday API Demo...$(NC)"
-	@./scripts/run-jshell-demo.sh
 
 # Code quality checks
 checkstyle: ##@tests Run Google Java Checkstyle analysis
