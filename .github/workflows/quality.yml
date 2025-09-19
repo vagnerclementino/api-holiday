@@ -21,7 +21,8 @@ permissions:
 env:
   # Updated to Java 25 for consistency with local development environment
   # Changed distribution from 'corretto' to 'temurin' for better Java 25 support
-  JAVA_VERSION: "25"
+  # Using '25-ea' for Early Access build of Java 25
+  JAVA_VERSION: "25-ea"
   JAVA_DISTRIBUTION: "temurin"
   MAVEN_OPTS: "-Xmx2048m -XX:MaxMetaspaceSize=512m"
 
