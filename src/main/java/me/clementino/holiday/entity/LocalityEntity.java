@@ -2,33 +2,41 @@ package me.clementino.holiday.entity;
 
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-import me.clementino.holiday.domain.dop.Locality;
 import org.springframework.data.mongodb.core.index.Indexed;
+import me.clementino.holiday.domain.dop.Locality;
 
 /**
- * MongoDB embedded document representing locality information for holidays. This entity supports
- * both traditional flat structure and DOP Locality sealed interface serialization.
+ * MongoDB embedded document representing locality information for holidays.
+ * This entity supports
+ * both traditional flat structure and DOP Locality sealed interface
+ * serialization.
  *
- * <p>This entity can be embedded within Holiday documents or used as a standalone collection for
- * locality management. It provides efficient querying capabilities through proper indexing while
+ * <p>
+ * This entity can be embedded within Holiday documents or used as a standalone
+ * collection for
+ * locality management. It provides efficient querying capabilities through
+ * proper indexing while
  * maintaining compatibility with DOP Locality sealed interface.
  *
- * <p><strong>Key Features:</strong>
+ * <p>
+ * <strong>Key Features:</strong>
  *
  * <ul>
- *   <li>Hierarchical locality representation (Country → Subdivision → City)
- *   <li>DOP Locality sealed interface serialization support
- *   <li>Efficient MongoDB indexing for locality-based queries
- *   <li>Bidirectional conversion between entity and DOP objects
- *   <li>Backward compatibility with flat locality structure
+ * <li>Hierarchical locality representation (Country → Subdivision → City)
+ * <li>DOP Locality sealed interface serialization support
+ * <li>Efficient MongoDB indexing for locality-based queries
+ * <li>Bidirectional conversion between entity and DOP objects
+ * <li>Backward compatibility with flat locality structure
  * </ul>
  *
- * <p><strong>Locality Hierarchy:</strong>
+ * <p>
+ * <strong>Locality Hierarchy:</strong>
  *
  * <ul>
- *   <li><strong>Country</strong>: National level (e.g., "US", "Brazil")
- *   <li><strong>Subdivision</strong>: State/Province level (e.g., "CA", "SP")
- *   <li><strong>City</strong>: Municipal level (e.g., "San Francisco", "São Paulo")
+ * <li><strong>Country</strong>: National level (e.g., "US", "Brazil")
+ * <li><strong>Subdivision</strong>: State/Province level (e.g., "CA", "SP")
+ * <li><strong>City</strong>: Municipal level (e.g., "San Francisco", "São
+ * Paulo")
  * </ul>
  */
 public class LocalityEntity {
@@ -55,7 +63,9 @@ public class LocalityEntity {
   @Indexed
   private String cityName;
 
-  @NotNull @Indexed private LocalityType localityType;
+  @NotNull
+  @Indexed
+  private LocalityType localityType;
 
   @Size(max = 2000)
   private String dopLocalityData;
@@ -69,7 +79,8 @@ public class LocalityEntity {
   @Size(max = 10)
   private String languageCode;
 
-  public LocalityEntity() {}
+  public LocalityEntity() {
+  }
 
   public LocalityEntity(String countryCode, String countryName) {
     this.countryCode = countryCode;
@@ -144,14 +155,14 @@ public class LocalityEntity {
     return switch (localityType) {
       case COUNTRY -> new Locality.Country(countryCode, countryName);
       case SUBDIVISION ->
-          new Locality.Subdivision(
-              new Locality.Country(countryCode, countryName), subdivisionCode, subdivisionName);
+        new Locality.Subdivision(
+            new Locality.Country(countryCode, countryName), subdivisionCode, subdivisionName);
       case CITY ->
-          new Locality.City(
-              cityName,
-              new Locality.Subdivision(
-                  new Locality.Country(countryCode, countryName), subdivisionCode, subdivisionName),
-              new Locality.Country(countryCode, countryName));
+        new Locality.City(
+            cityName,
+            new Locality.Subdivision(
+                new Locality.Country(countryCode, countryName), subdivisionCode, subdivisionName),
+            new Locality.Country(countryCode, countryName));
     };
   }
 
@@ -196,8 +207,10 @@ public class LocalityEntity {
   }
 
   /**
-   * Checks if this locality contains or matches another locality. A country contains subdivisions
-   * and cities within it. A subdivision contains cities within it. A city only matches itself.
+   * Checks if this locality contains or matches another locality. A country
+   * contains subdivisions
+   * and cities within it. A subdivision contains cities within it. A city only
+   * matches itself.
    *
    * @param other the other locality to check
    * @return true if this locality contains the other locality
@@ -307,16 +320,21 @@ public class LocalityEntity {
 
   @Override
   public boolean equals(Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
+    if (this == o)
+      return true;
+    if (o == null || getClass() != o.getClass())
+      return false;
 
     LocalityEntity that = (LocalityEntity) o;
 
-    if (!countryCode.equals(that.countryCode)) return false;
+    if (!countryCode.equals(that.countryCode))
+      return false;
     if (subdivisionCode != null
         ? !subdivisionCode.equals(that.subdivisionCode)
-        : that.subdivisionCode != null) return false;
-    if (cityName != null ? !cityName.equals(that.cityName) : that.cityName != null) return false;
+        : that.subdivisionCode != null)
+      return false;
+    if (cityName != null ? !cityName.equals(that.cityName) : that.cityName != null)
+      return false;
     return localityType == that.localityType;
   }
 
@@ -352,7 +370,9 @@ public class LocalityEntity {
         + '}';
   }
 
-  /** Enum representing the type of locality for indexing and querying purposes. */
+  /**
+   * Enum representing the type of locality for indexing and querying purposes.
+   */
   public enum LocalityType {
     COUNTRY,
     SUBDIVISION,

@@ -1,22 +1,11 @@
 package me.clementino.holiday.controller;
 
+import module java.base;
+import jakarta.validation.Valid;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
-import java.time.LocalDate;
-import java.util.List;
-import java.util.Optional;
-import me.clementino.holiday.domain.dop.HolidayType;
-import me.clementino.holiday.domain.dop.Location;
-import me.clementino.holiday.dto.CreateHolidayRequestDTO;
-import me.clementino.holiday.dto.HolidayDataDTO;
-import me.clementino.holiday.dto.HolidayResponseDTO;
-import me.clementino.holiday.dto.UpdateHolidayRequestDTO;
-import me.clementino.holiday.mapper.HolidayCreationMapper;
-import me.clementino.holiday.mapper.HolidayMapper;
-import me.clementino.holiday.service.HolidayService;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -29,22 +18,33 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+// Application specific imports
+import me.clementino.holiday.domain.dop.HolidayType;
+import me.clementino.holiday.domain.dop.Location;
+import me.clementino.holiday.dto.CreateHolidayRequestDTO;
+import me.clementino.holiday.dto.HolidayDataDTO;
+import me.clementino.holiday.dto.HolidayResponseDTO;
+import me.clementino.holiday.dto.UpdateHolidayRequestDTO;
+import me.clementino.holiday.mapper.HolidayCreationMapper;
+import me.clementino.holiday.mapper.HolidayMapper;
+import me.clementino.holiday.service.HolidayService;
+
 /**
- * REST Controller for Holiday API operations using Data-Oriented Programming principles.
+ * REST Controller for Holiday API operations using Data-Oriented Programming
+ * principles.
  *
- * <p>This controller demonstrates DOP principles by:
+ * <p>
+ * This controller demonstrates DOP principles by:
  *
  * <ul>
- *   <li>Separating operations from data - business logic is in the service layer
- *   <li>Using immutable data structures (records) for requests and responses
- *   <li>Clear data transformation between layers
+ * <li>Separating operations from data - business logic is in the service layer
+ * <li>Using immutable data structures (records) for requests and responses
+ * <li>Clear data transformation between layers
  * </ul>
  */
 @RestController
 @RequestMapping("/api/holidays")
-@Tag(
-    name = "Holiday API",
-    description = "Operations for managing holidays using Data-Oriented Programming principles")
+@Tag(name = "Holiday API", description = "Operations for managing holidays using Data-Oriented Programming principles")
 public class HolidayController {
 
   private final HolidayService holidayService;
@@ -61,26 +61,16 @@ public class HolidayController {
   }
 
   @GetMapping
-  @Operation(
-      summary = "Get all holidays",
-      description = "Retrieve all holidays with optional filtering using DOP query patterns")
+  @Operation(summary = "Get all holidays", description = "Retrieve all holidays with optional filtering using DOP query patterns")
   @ApiResponse(responseCode = "200", description = "Successfully retrieved holidays")
   public ResponseEntity<List<HolidayResponseDTO>> getAllHolidays(
       @Parameter(description = "Filter by country") @RequestParam(required = false) String country,
       @Parameter(description = "Filter by state") @RequestParam(required = false) String state,
       @Parameter(description = "Filter by city") @RequestParam(required = false) String city,
-      @Parameter(description = "Filter by holiday type") @RequestParam(required = false)
-          HolidayType type,
-      @Parameter(description = "Filter by start date (yyyy-MM-dd)")
-          @RequestParam(required = false)
-          @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
-          LocalDate startDate,
-      @Parameter(description = "Filter by end date (yyyy-MM-dd)")
-          @RequestParam(required = false)
-          @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
-          LocalDate endDate,
-      @Parameter(description = "Filter by name pattern") @RequestParam(required = false)
-          String namePattern) {
+      @Parameter(description = "Filter by holiday type") @RequestParam(required = false) HolidayType type,
+      @Parameter(description = "Filter by start date (yyyy-MM-dd)") @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+      @Parameter(description = "Filter by end date (yyyy-MM-dd)") @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
+      @Parameter(description = "Filter by name pattern") @RequestParam(required = false) String namePattern) {
 
     List<HolidayDataDTO> holidays;
 
@@ -94,9 +84,8 @@ public class HolidayController {
         && namePattern == null) {
       holidays = holidayService.findAll();
     } else {
-      holidays =
-          holidayService.findAllWithFilters(
-              country, state, city, type, startDate, endDate, null, namePattern);
+      holidays = holidayService.findAllWithFilters(
+          country, state, city, type, startDate, endDate, null, namePattern);
     }
 
     List<HolidayResponseDTO> responses = holidays.stream().map(holidayMapper::toResponse).toList();
@@ -123,9 +112,7 @@ public class HolidayController {
   }
 
   @PostMapping
-  @Operation(
-      summary = "Create a new holiday",
-      description = "Create a new holiday using DOP principles")
+  @Operation(summary = "Create a new holiday", description = "Create a new holiday using DOP principles")
   @ApiResponse(responseCode = "201", description = "Holiday created successfully")
   @ApiResponse(responseCode = "400", description = "Invalid input data")
   public ResponseEntity<HolidayResponseDTO> createHoliday(
@@ -142,9 +129,7 @@ public class HolidayController {
   }
 
   @PutMapping("/{id}")
-  @Operation(
-      summary = "Update a holiday",
-      description = "Update an existing holiday using DOP principles")
+  @Operation(summary = "Update a holiday", description = "Update an existing holiday using DOP principles")
   @ApiResponse(responseCode = "200", description = "Holiday updated successfully")
   @ApiResponse(responseCode = "404", description = "Holiday not found")
   @ApiResponse(responseCode = "400", description = "Invalid input data")
@@ -159,26 +144,25 @@ public class HolidayController {
       }
 
       HolidayDataDTO current = existingHoliday.get();
-      HolidayDataDTO updated =
-          new HolidayDataDTO(
-              id,
-              request.name() != null ? request.name() : current.name(),
-              request.date() != null ? request.date() : current.date(),
-              request.observed() != null ? Optional.of(request.observed()) : current.observed(),
-              new Location(
-                  request.country() != null ? request.country() : current.location().country(),
-                  request.state() != null
-                      ? Optional.of(request.state())
-                      : current.location().state(),
-                  request.city() != null ? Optional.of(request.city()) : current.location().city()),
-              request.type() != null ? request.type() : current.type(),
-              request.recurring() != null ? request.recurring() : current.recurring(),
-              request.description() != null
-                  ? Optional.of(request.description())
-                  : current.description(),
-              current.dateCreated(),
-              Optional.empty(),
-              Optional.empty());
+      HolidayDataDTO updated = new HolidayDataDTO(
+          id,
+          request.name() != null ? request.name() : current.name(),
+          request.date() != null ? request.date() : current.date(),
+          request.observed() != null ? Optional.of(request.observed()) : current.observed(),
+          new Location(
+              request.country() != null ? request.country() : current.location().country(),
+              request.state() != null
+                  ? Optional.of(request.state())
+                  : current.location().state(),
+              request.city() != null ? Optional.of(request.city()) : current.location().city()),
+          request.type() != null ? request.type() : current.type(),
+          request.recurring() != null ? request.recurring() : current.recurring(),
+          request.description() != null
+              ? Optional.of(request.description())
+              : current.description(),
+          current.dateCreated(),
+          Optional.empty(),
+          Optional.empty());
       return holidayService
           .update(id, updated)
           .map(holidayMapper::toResponse)

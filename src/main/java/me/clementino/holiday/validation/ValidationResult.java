@@ -1,12 +1,12 @@
 package me.clementino.holiday.validation;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import module java.base;
 
 /**
- * Enhanced sealed interface representing validation results using comprehensive DOP principles.
- * Following DOP principle: Make illegal states unrepresentable. Can only be Success, Warning, or
+ * Enhanced sealed interface representing validation results using comprehensive
+ * DOP principles.
+ * Following DOP principle: Make illegal states unrepresentable. Can only be
+ * Success, Warning, or
  * Failure - no other states possible.
  */
 public sealed interface ValidationResult

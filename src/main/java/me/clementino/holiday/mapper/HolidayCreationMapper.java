@@ -1,21 +1,26 @@
 package me.clementino.holiday.mapper;
 
-import java.time.LocalDate;
+import module java.base;
+import org.mapstruct.Mapper;
 import me.clementino.holiday.domain.dop.FixedHoliday;
 import me.clementino.holiday.domain.dop.Holiday;
 import me.clementino.holiday.domain.dop.MoveableFromBaseHoliday;
 import me.clementino.holiday.domain.dop.MoveableHoliday;
 import me.clementino.holiday.domain.dop.ObservedHoliday;
 import me.clementino.holiday.dto.CreateHolidayRequestDTO;
-import org.mapstruct.Mapper;
 
 /**
- * MapStruct mapper for converting CreateHolidayRequestDTO to Holiday domain objects.
+ * MapStruct mapper for converting CreateHolidayRequestDTO to Holiday domain
+ * objects.
  *
- * <p>This mapper follows DOP principles by providing pure transformation functions that convert
+ * <p>
+ * This mapper follows DOP principles by providing pure transformation functions
+ * that convert
  * between different data representations without side effects.
  *
- * <p>The mapper handles the sealed interface pattern by using pattern matching to determine the
+ * <p>
+ * The mapper handles the sealed interface pattern by using pattern matching to
+ * determine the
  * correct Holiday implementation to create.
  */
 @Mapper(componentModel = "spring")
@@ -24,7 +29,9 @@ public interface HolidayCreationMapper {
   /**
    * Convert CreateHolidayRequestDTO to Holiday using pattern matching.
    *
-   * <p>This method demonstrates DOP principle of separating operations from data by providing a
+   * <p>
+   * This method demonstrates DOP principle of separating operations from data by
+   * providing a
    * pure transformation function.
    *
    * @param request the create request (sealed interface)
@@ -36,7 +43,7 @@ public interface HolidayCreationMapper {
       case CreateHolidayRequestDTO.Observed observed -> toObservedHoliday(observed);
       case CreateHolidayRequestDTO.Moveable moveable -> toMoveableHoliday(moveable);
       case CreateHolidayRequestDTO.MoveableFromBase moveableFromBase ->
-          toMoveableFromBaseHoliday(moveableFromBase);
+        toMoveableFromBaseHoliday(moveableFromBase);
     };
   }
 

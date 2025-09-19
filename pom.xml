@@ -222,6 +222,8 @@
                         <version>10.21.0</version>
                     </dependency>
                 </dependencies>
+                <!-- Temporarily disabled until Checkstyle supports Java 25 Module Import Declarations -->
+                <!--
                 <executions>
                     <execution>
                         <id>checkstyle-check</id>
@@ -231,6 +233,7 @@
                         </goals>
                     </execution>
                 </executions>
+                -->
             </plugin>
             
             <!-- Google Java Format Plugin for Auto-fixing -->
@@ -243,6 +246,8 @@
                     <sourceDirectory>src/main/java</sourceDirectory>
                     <testSourceDirectory>src/test/java</testSourceDirectory>
                 </configuration>
+                <!-- Temporarily disabled until Google Java Format supports Java 25 Module Import Declarations -->
+                <!--
                 <executions>
                     <execution>
                         <goals>
@@ -250,6 +255,7 @@
                         </goals>
                     </execution>
                 </executions>
+                -->
             </plugin>
             
             <!-- Spotless Plugin for Code Formatting -->
