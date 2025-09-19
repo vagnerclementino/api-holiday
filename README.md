@@ -2,24 +2,26 @@
 
 [![Quality Assurance](https://github.com/vagnerclementino/api-holiday/actions/workflows/quality.yml/badge.svg)](https://github.com/vagnerclementino/api-holiday/actions/workflows/quality.yml)
 [![Quality Assurance - Main](https://github.com/vagnerclementino/api-holiday/actions/workflows/quality.yml/badge.svg?branch=main)](https://github.com/vagnerclementino/api-holiday/actions/workflows/quality.yml)
-[![Java](https://img.shields.io/badge/Java-24-orange.svg)](https://openjdk.org/projects/jdk/24/)
-[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.5.4-brightgreen.svg)](https://spring.io/projects/spring-boot)
+[![Java](https://img.shields.io/badge/Java-25-orange.svg)](https://openjdk.org/projects/jdk/25/)
+[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.5.6-brightgreen.svg)](https://spring.io/projects/spring-boot)
 [![MongoDB](https://img.shields.io/badge/MongoDB-8-green.svg)](https://www.mongodb.com/)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-A comprehensive example demonstrating **Data-Oriented Programming (DOP) v1.1** principles in Java, built as a REST API for managing public holidays across different countries, states, and cities using **Spring Boot 3** and **MongoDB 8**.
+A comprehensive example demonstrating **Data-Oriented Programming (DOP) v1.1** principles in Java, built as a REST API for managing public holidays across different countries, states, and cities using **Spring Boot 3.5.6** and **MongoDB 8**.
 
 This project follows the architectural patterns from [Bootify.io](https://bootify.io/) and implements a data model inspired by the [Holiday API](https://holidayapi.com/docs).
 
 ## 🚀 Quick Start
 
 ### Prerequisites
-- **Java 24** (required)
+
+- **Java 25** (required)
 - **Docker & Docker Compose** (for MongoDB)
 
 ### Setup and Run
 
 1. **Clone and start:**
+
    ```bash
    git clone https://github.com/vagnerclementino/api-holiday.git
    cd api-holiday
@@ -27,8 +29,8 @@ This project follows the architectural patterns from [Bootify.io](https://bootif
    ```
 
 2. **Access the API:**
-   - API: http://localhost:8080/api/holidays
-   - Swagger: http://localhost:8080/swagger-ui.html
+   - API: <http://localhost:8080/api/holidays>
+   - Swagger: <http://localhost:8080/swagger-ui.html>
 
 The application automatically starts MongoDB via Docker Compose using `spring-boot-docker-compose`.
 
@@ -41,7 +43,7 @@ The application automatically starts MongoDB via Docker Compose using `spring-bo
 | `./mvnw clean package` | Build JAR |
 | `docker-compose up mongodb` | Start only MongoDB |
 
-> **Need Java 24?** See [CONTRIBUTING.md](CONTRIBUTING.md) for installation guide.
+> **Need Java 25?** See [CONTRIBUTING.md](CONTRIBUTING.md) for installation guide.
 
 ## 📮 Postman Collections
 
@@ -90,6 +92,7 @@ For detailed instructions, environment variables, and advanced usage, see:
 ## 📚 API Usage Examples
 
 ### Create a Holiday
+
 ```bash
 curl -X POST "http://localhost:8080/api/holidays" \
   -H "Content-Type: application/json" \
@@ -112,11 +115,13 @@ curl -X POST "http://localhost:8080/api/holidays" \
 ```
 
 ### List All Holidays
+
 ```bash
 curl "http://localhost:8080/api/holidays"
 ```
 
 ### Filter Holidays
+
 ```bash
 # By country
 curl "http://localhost:8080/api/holidays?country=Brazil"
@@ -129,6 +134,7 @@ curl "http://localhost:8080/api/holidays?startDate=2024-01-01&endDate=2024-12-31
 ```
 
 ### Update a Holiday
+
 ```bash
 curl -X PUT "http://localhost:8080/api/holidays/{holiday-id}" \
   -H "Content-Type: application/json" \
@@ -142,6 +148,7 @@ curl -X PUT "http://localhost:8080/api/holidays/{holiday-id}" \
 ```
 
 ### Delete a Holiday
+
 ```bash
 curl -X DELETE "http://localhost:8080/api/holidays/{holiday-id}"
 ```
@@ -149,12 +156,14 @@ curl -X DELETE "http://localhost:8080/api/holidays/{holiday-id}"
 ## 🧪 Testing
 
 ### 📮 Postman Collections (Recommended)
+
 ```bash
 # Import collections from postman/ directory
 # See detailed guide: ./postman/README.md
 ```
 
 ### Run Unit Tests
+
 ```bash
 make unit-test
 # or
@@ -162,11 +171,13 @@ make unit-test
 ```
 
 ### Run Integration Tests
+
 ```bash
 make test
 ```
 
 The integration tests demonstrate:
+
 - Complete data flow from API to database
 - Validation at boundaries
 - Immutable data transformations
@@ -181,10 +192,11 @@ This project includes a comprehensive **GitHub Actions workflow** for automated 
 ### 🏷️ **Build Status**
 
 The badges at the top of this README show the current status of our quality checks:
+
 - **Quality Assurance**: Status of the latest workflow run
 - **Quality Assurance - Main**: Status specifically for the main branch
-- **Java 24**: Version compatibility
-- **Spring Boot 3.5.4**: Framework version
+- **Java 25**: Version compatibility
+- **Spring Boot 3.5.6**: Framework version
 - **MongoDB 8**: Database version
 
 ### 🚀 **Quality Workflow**
@@ -193,7 +205,7 @@ The `quality.yml` workflow ensures code quality through:
 
 | Stage | Description | Tools |
 |-------|-------------|-------|
-| **🏗️ Build** | Compile source and test code, create JAR | Maven, Java 24 |
+| **🏗️ Build** | Compile source and test code, create JAR | Maven, Java 25 |
 | **🎨 Style Check** | Code style and formatting validation | Checkstyle, Spotless |
 | **🧪 Unit Tests** | Execute unit tests with coverage | JUnit, Surefire |
 | **🔗 Integration Tests** | Run integration tests with MongoDB | TestContainers, MongoDB 8 |
@@ -221,6 +233,7 @@ make test-all           # Run all tests
 ### 🛡️ **Branch Protection**
 
 Pull requests to `main` branch require:
+
 - ✅ All quality checks must pass
 - ✅ Code review approval
 - ✅ Branch must be up to date
@@ -279,7 +292,8 @@ src/
 ## 🏛️ Infrastructure
 
 The project uses:
-- **Spring Boot 3.5.4**: Modern Java web framework
+
+- **Spring Boot 3.5.6**: Modern Java web framework
 - **MongoDB 8.0.12**: Document-oriented NoSQL database
 - **Docker Compose**: Container orchestration
 - **Maven**: Build automation and dependency management
@@ -293,7 +307,7 @@ By exploring this project, you'll understand:
 2. **How to validate at system boundaries** for clean architecture
 3. **How to use pure functions** for predictable transformations
 4. **How to make illegal states unrepresentable** with type safety
-5. **How to build REST APIs** with Spring Boot 3 and modern Java
+5. **How to build REST APIs** with Spring Boot 3.5.6 and modern Java
 6. **How to test data-oriented systems** effectively
 7. **How to use Docker Compose** for local development
 8. **How to create comprehensive API test suites** with Postman Collections
@@ -303,6 +317,7 @@ By exploring this project, you'll understand:
 Contribuições são bem-vindas! Este projeto serve como exemplo educacional de Data-Oriented Programming.
 
 **📋 Leia o [Guia de Contribuição](CONTRIBUTING.md)** para informações detalhadas sobre:
+
 - Como reportar bugs e sugerir funcionalidades
 - Processo de desenvolvimento e code review
 - Padrões de código e convenções
@@ -310,6 +325,7 @@ Contribuições são bem-vindas! Este projeto serve como exemplo educacional de 
 - Proteção de branch e regras de merge
 
 Contribuições podem incluir:
+
 - 🐛 Correção de bugs
 - ✨ Novas funcionalidades DOP
 - 📚 Melhorias na documentação
@@ -323,6 +339,7 @@ This project accompanies the article **"Nem tudo é objeto: Programação Orient
 ## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
 - Add more examples of DOP principles
 - Enhance the documentation
 
