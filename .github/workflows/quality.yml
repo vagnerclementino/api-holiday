@@ -2,8 +2,8 @@ name: 🎯 Quality Assurance
 
 on:
   pull_request:
-    branches: [ main ]
-    types: [ opened, synchronize, reopened, ready_for_review ]
+    branches: [main]
+    types: [opened, synchronize, reopened, ready_for_review]
   workflow_dispatch:
 
 # Prevent concurrent runs on the same PR
@@ -19,9 +19,11 @@ permissions:
   pull-requests: write
 
 env:
-  JAVA_VERSION: '24'
-  JAVA_DISTRIBUTION: 'corretto'
-  MAVEN_OPTS: '-Xmx2048m -XX:MaxMetaspaceSize=512m'
+  # Updated to Java 25 for consistency with local development environment
+  # Changed distribution from 'corretto' to 'temurin' for better Java 25 support
+  JAVA_VERSION: "25"
+  JAVA_DISTRIBUTION: "temurin"
+  MAVEN_OPTS: "-Xmx2048m -XX:MaxMetaspaceSize=512m"
 
 jobs:
   # ============================================================================
@@ -39,7 +41,7 @@ jobs:
           fetch-depth: 0
 
       - name: ☕ Setup Java ${{ env.JAVA_VERSION }}
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           java-version: ${{ env.JAVA_VERSION }}
           distribution: ${{ env.JAVA_DISTRIBUTION }}
@@ -97,7 +99,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: ☕ Setup Java ${{ env.JAVA_VERSION }}
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           java-version: ${{ env.JAVA_VERSION }}
           distribution: ${{ env.JAVA_DISTRIBUTION }}
@@ -129,7 +131,7 @@ jobs:
           echo "📊 Generating HTML reports for code style..."
           # Generate simple Checkstyle HTML report
           ./mvnw checkstyle:checkstyle -B
-          
+
           # Create simple HTML wrapper for checkstyle if XML exists
           if [ -f target/checkstyle-result.xml ]; then
             mkdir -p target/reports-html
@@ -186,7 +188,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: ☕ Setup Java ${{ env.JAVA_VERSION }}
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           java-version: ${{ env.JAVA_VERSION }}
           distribution: ${{ env.JAVA_DISTRIBUTION }}
@@ -211,18 +213,18 @@ jobs:
         if: always()
         run: |
           echo "📊 Generating HTML reports for unit tests..."
-          
+
           # Create simple HTML test summary
           mkdir -p target/reports-html
-          
+
           # Count test results from XML files
           total_tests=$(find target/surefire-reports -name "TEST-*.xml" | wc -l)
           passed_tests=$(grep -l 'errors="0".*failures="0"\|failures="0".*errors="0"' target/surefire-reports/TEST-*.xml 2>/dev/null | wc -l)
           failed_tests=$((total_tests - passed_tests))
-          
+
           # Get test execution time
           execution_time=$(grep -h 'time="[^"]*"' target/surefire-reports/TEST-*.xml | sed 's/.*time="\([^"]*\)".*/\1/' | awk '{sum += $1} END {printf "%.2f", sum}')
-          
+
           cat > target/reports-html/unit-tests.html << EOF
           <!DOCTYPE html>
           <html>
@@ -307,7 +309,7 @@ jobs:
           </body>
           </html>
           EOF
-          
+
           echo "✅ Unit test HTML report created ($total_tests tests, $passed_tests passed)"
 
       - name: 📈 Test Results Summary
@@ -353,7 +355,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: ☕ Setup Java ${{ env.JAVA_VERSION }}
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           java-version: ${{ env.JAVA_VERSION }}
           distribution: ${{ env.JAVA_DISTRIBUTION }}
@@ -378,22 +380,22 @@ jobs:
         if: always()
         run: |
           echo "📊 Generating HTML reports for integration tests..."
-          
+
           # Create simple HTML integration test summary
           mkdir -p target/reports-html
-          
+
           # Count integration test results
           integration_tests=$(find target/surefire-reports -name "*IntegrationTest*.xml" | wc -l)
           if [ $integration_tests -eq 0 ]; then
             integration_tests=$(find target/surefire-reports -name "TEST-*.xml" | wc -l)
           fi
-          
+
           # Check if TestContainers was used
           testcontainers_used="No"
           if grep -q "testcontainers" target/surefire-reports/*.xml 2>/dev/null; then
             testcontainers_used="Yes"
           fi
-          
+
           cat > target/reports-html/integration-tests.html << EOF
           <!DOCTYPE html>
           <html>
@@ -462,7 +464,7 @@ jobs:
           </body>
           </html>
           EOF
-          
+
           echo "✅ Integration test HTML report created ($integration_tests tests)"
 
       - name: 📈 Integration Test Results Summary
@@ -503,7 +505,7 @@ jobs:
     needs: [build, checkstyle, unit-tests, integration-tests]
     if: always()
     timeout-minutes: 5
-    
+
     steps:
       - name: 📥 Checkout Code
         uses: actions/checkout@v4
@@ -517,7 +519,7 @@ jobs:
         run: |
           echo "📊 Creating consolidated HTML report..."
           mkdir -p consolidated-reports
-          
+
           # Create main index.html
           cat > consolidated-reports/index.html << EOF
           <!DOCTYPE html>
@@ -581,14 +583,14 @@ jobs:
           </body>
           </html>
           EOF
-          
+
           # Copy all reports to consolidated directory with correct structure
           echo "🔍 Debugging: Listing downloaded artifacts..."
           find reports/ -type f -name "*.html" 2>/dev/null || echo "No HTML files found"
-          
+
           # Create directories
           mkdir -p consolidated-reports/{style-reports,unit-test-reports,integration-test-reports}
-          
+
           # Copy style reports
           if [ -d "reports/style-reports" ]; then
             if [ -f "reports/style-reports/checkstyle.html" ]; then
@@ -601,7 +603,7 @@ jobs:
             cp reports/style-reports/checkstyle-result.xml consolidated-reports/style-reports/ 2>/dev/null || echo "XML not found"
             echo "✅ Style reports processed"
           fi
-          
+
           # Copy unit test reports
           if [ -d "reports/unit-test-reports" ]; then
             if [ -f "reports/unit-test-reports/unit-tests.html" ]; then
@@ -615,7 +617,7 @@ jobs:
           else
             echo "<html><body><h1>Unit Test Report</h1><p>Report not available</p></body></html>" > consolidated-reports/unit-test-reports/unit-tests.html
           fi
-          
+
           # Copy integration test reports
           if [ -d "reports/integration-test-reports" ]; then
             if [ -f "reports/integration-test-reports/integration-tests.html" ]; then
@@ -629,7 +631,7 @@ jobs:
           else
             echo "<html><body><h1>Integration Test Report</h1><p>Report not available</p></body></html>" > consolidated-reports/integration-test-reports/integration-tests.html
           fi
-          
+
           echo "📊 Consolidated HTML report created successfully!"
 
       - name: 📤 Upload Consolidated HTML Reports
@@ -645,7 +647,8 @@ jobs:
   quality-gate:
     name: 🚪 Quality Gate
     runs-on: ubuntu-latest
-    needs: [build, checkstyle, unit-tests, integration-tests, consolidate-reports]
+    needs:
+      [build, checkstyle, unit-tests, integration-tests, consolidate-reports]
     if: always()
     timeout-minutes: 5
 
