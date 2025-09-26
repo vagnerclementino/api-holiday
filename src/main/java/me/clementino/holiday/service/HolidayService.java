@@ -1,11 +1,7 @@
 package me.clementino.holiday.service;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.UUID;
+import module java.base;
+import org.springframework.stereotype.Service;
 import me.clementino.holiday.domain.dop.Holiday;
 import me.clementino.holiday.domain.dop.HolidayOperations;
 import me.clementino.holiday.domain.dop.HolidayType;
@@ -15,13 +11,16 @@ import me.clementino.holiday.entity.HolidayEntity;
 import me.clementino.holiday.entity.LocalityEntity;
 import me.clementino.holiday.mapper.HolidayMapper;
 import me.clementino.holiday.repository.HolidayRepository;
-import org.springframework.stereotype.Service;
 
 /**
- * Service layer that orchestrates operations on holiday data using DOP principles.
+ * Service layer that orchestrates operations on holiday data using DOP
+ * principles.
  *
- * <p>This service works with HolidayEntity for persistence while maintaining DOP Holiday domain
- * objects for business logic. It provides seamless conversion between entity and domain layers.
+ * <p>
+ * This service works with HolidayEntity for persistence while maintaining DOP
+ * Holiday domain
+ * objects for business logic. It provides seamless conversion between entity
+ * and domain layers.
  */
 @Service
 public class HolidayService {
@@ -64,9 +63,8 @@ public class HolidayService {
       Boolean recurring,
       String namePattern) {
 
-    List<HolidayEntity> entities =
-        holidayRepository.findWithFilters(
-            country, state, city, type, startDate, endDate, recurring, namePattern);
+    List<HolidayEntity> entities = holidayRepository.findWithFilters(
+        country, state, city, type, startDate, endDate, recurring, namePattern);
     return entities.stream().map(this::toDomainData).toList();
   }
 
@@ -191,7 +189,9 @@ public class HolidayService {
     return entity;
   }
 
-  /** Convert Location to List<LocalityEntity> for the new HolidayEntity structure. */
+  /**
+   * Convert Location to List<LocalityEntity> for the new HolidayEntity structure.
+   */
   private List<LocalityEntity> createLocalityEntitiesFromLocation(Location location) {
     LocalityEntity localityEntity = new LocalityEntity();
     localityEntity.setCountryCode(location.country());

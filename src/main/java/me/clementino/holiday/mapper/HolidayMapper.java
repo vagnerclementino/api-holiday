@@ -1,7 +1,7 @@
 package me.clementino.holiday.mapper;
 
-import java.time.LocalDateTime;
-import java.util.List;
+import module java.base;
+import org.springframework.stereotype.Component;
 import me.clementino.holiday.domain.dop.FixedHoliday;
 import me.clementino.holiday.domain.dop.Holiday;
 import me.clementino.holiday.domain.dop.Locality;
@@ -14,7 +14,6 @@ import me.clementino.holiday.dto.LocationInfoDTO;
 import me.clementino.holiday.dto.WhenInfoDTO;
 import me.clementino.holiday.entity.HolidayEntity;
 import me.clementino.holiday.entity.LocalityEntity;
-import org.springframework.stereotype.Component;
 
 /** Simple mapper for Holiday data using DOP principles. */
 @Component
@@ -44,8 +43,11 @@ public class HolidayMapper {
   /**
    * Convert Holiday (DOP domain object) to HolidayEntity (persistence entity).
    *
-   * <p>This method demonstrates DOP principle of separating operations from data by providing a
-   * pure transformation function that converts between different data representations using pattern
+   * <p>
+   * This method demonstrates DOP principle of separating operations from data by
+   * providing a
+   * pure transformation function that converts between different data
+   * representations using pattern
    * matching.
    *
    * @param holiday the Holiday domain object (sealed interface)
@@ -57,7 +59,7 @@ public class HolidayMapper {
       case ObservedHoliday observed -> toEntityFromObserved(observed);
       case MoveableHoliday moveable -> toEntityFromMoveable(moveable);
       case MoveableFromBaseHoliday moveableFromBase ->
-          toEntityFromMoveableFromBase(moveableFromBase);
+        toEntityFromMoveableFromBase(moveableFromBase);
     };
   }
 
@@ -66,8 +68,7 @@ public class HolidayMapper {
     Locality primaryLocality = fixed.localities().getFirst();
     String country = getCountryCode(primaryLocality);
 
-    HolidayEntity entity =
-        new HolidayEntity(fixed.name(), fixed.description(), fixed.date(), country, fixed.type());
+    HolidayEntity entity = new HolidayEntity(fixed.name(), fixed.description(), fixed.date(), country, fixed.type());
 
     entity.setLocalities(convertLocalitiesFromDOP(fixed.localities()));
 
@@ -79,9 +80,8 @@ public class HolidayMapper {
     Locality primaryLocality = observed.localities().getFirst();
     String country = getCountryCode(primaryLocality);
 
-    HolidayEntity entity =
-        new HolidayEntity(
-            observed.name(), observed.description(), observed.date(), country, observed.type());
+    HolidayEntity entity = new HolidayEntity(
+        observed.name(), observed.description(), observed.date(), country, observed.type());
 
     entity.setLocalities(convertLocalitiesFromDOP(observed.localities()));
 
@@ -93,9 +93,8 @@ public class HolidayMapper {
     Locality primaryLocality = moveable.localities().getFirst();
     String country = getCountryCode(primaryLocality);
 
-    HolidayEntity entity =
-        new HolidayEntity(
-            moveable.name(), moveable.description(), moveable.date(), country, moveable.type());
+    HolidayEntity entity = new HolidayEntity(
+        moveable.name(), moveable.description(), moveable.date(), country, moveable.type());
 
     entity.setLocalities(convertLocalitiesFromDOP(moveable.localities()));
 
@@ -107,13 +106,12 @@ public class HolidayMapper {
     Locality primaryLocality = moveableFromBase.localities().getFirst();
     String country = getCountryCode(primaryLocality);
 
-    HolidayEntity entity =
-        new HolidayEntity(
-            moveableFromBase.name(),
-            moveableFromBase.description(),
-            moveableFromBase.date(),
-            country,
-            moveableFromBase.type());
+    HolidayEntity entity = new HolidayEntity(
+        moveableFromBase.name(),
+        moveableFromBase.description(),
+        moveableFromBase.date(),
+        country,
+        moveableFromBase.type());
 
     entity.setLocalities(convertLocalitiesFromDOP(moveableFromBase.localities()));
 

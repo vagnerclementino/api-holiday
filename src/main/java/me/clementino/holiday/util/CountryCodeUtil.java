@@ -1,17 +1,20 @@
 package me.clementino.holiday.util;
 
+import module java.base;
 import com.neovisionaries.i18n.CountryCode;
-import java.util.Optional;
 
 /**
  * Utility class for working with ISO 3166-1 alpha-2 country codes.
  *
- * <p>This utility follows DOP principles by providing pure functions for country code validation
+ * <p>
+ * This utility follows DOP principles by providing pure functions for country
+ * code validation
  * and conversion operations.
  */
 public final class CountryCodeUtil {
 
-  private CountryCodeUtil() {}
+  private CountryCodeUtil() {
+  }
 
   /**
    * Validate if a string is a valid ISO 3166-1 alpha-2 country code.
@@ -79,7 +82,9 @@ public final class CountryCodeUtil {
   /**
    * Normalize a country input to ISO 3166-1 alpha-2 format.
    *
-   * <p>If the input is already a valid country code, returns it normalized. If the input is a
+   * <p>
+   * If the input is already a valid country code, returns it normalized. If the
+   * input is a
    * country name, tries to convert it to a country code.
    *
    * @param countryInput the country code or name
@@ -102,7 +107,9 @@ public final class CountryCodeUtil {
   /**
    * Get a pretty display name for a country code.
    *
-   * <p>Returns the country name if the code is valid, otherwise returns the original input.
+   * <p>
+   * Returns the country name if the code is valid, otherwise returns the original
+   * input.
    *
    * @param countryCode the ISO country code
    * @return pretty display name
@@ -114,7 +121,7 @@ public final class CountryCodeUtil {
   /**
    * Check if a country code represents a specific country.
    *
-   * @param countryCode the country code to check
+   * @param countryCode  the country code to check
    * @param expectedCode the expected country code
    * @return true if they represent the same country
    */

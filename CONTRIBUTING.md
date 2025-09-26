@@ -4,7 +4,7 @@
 
 ### Prerequisites
 
-This project requires **Java 24** for development. Here's how to install it:
+This project requires **Java 25** for development. Here's how to install it:
 
 #### Option 1: Using SDKMAN (Recommended)
 
@@ -13,9 +13,9 @@ This project requires **Java 24** for development. Here's how to install it:
 curl -s "https://get.sdkman.io" | bash
 source "$HOME/.sdkman/bin/sdkman-init.sh"
 
-# Install Java 24 (Amazon Corretto)
-sdk install java 24-amzn
-sdk use java 24-amzn
+# Install Java 25 (Amazon Corretto)
+sdk install java 25-amzn
+sdk use java 25-amzn
 
 # Verify installation
 java --version
@@ -34,10 +34,10 @@ echo '. "$HOME/.asdf/completions/asdf.bash"' >> ~/.bashrc
 # Restart shell or source profile
 source ~/.bashrc
 
-# Install Java plugin and Java 24
+# Install Java plugin and Java 25
 asdf plugin add java
-asdf install java corretto-24.0.0.36.1
-asdf global java corretto-24.0.0.36.1
+asdf install java corretto-25.0.0.37.1
+asdf global java corretto-25.0.0.37.1
 
 # Verify installation
 java --version
@@ -45,7 +45,7 @@ java --version
 
 #### Option 3: Manual Installation
 
-1. Download Amazon Corretto 24 from: https://aws.amazon.com/corretto/
+1. Download Amazon Corretto 25 from: <https://aws.amazon.com/corretto/>
 2. Install following the platform-specific instructions
 3. Set `JAVA_HOME` environment variable
 4. Add Java to your `PATH`
@@ -90,13 +90,15 @@ We maintain an open mind! There are many ways to contribute:
 ## 📋 Basic Rules
 
 ### Technical Responsibilities
-- **✅ Compatibility**: Ensure compatibility with Java 24 and Spring Boot 3.5.4
+
+- **✅ Compatibility**: Ensure compatibility with Java 25 and Spring Boot 3.5.6
 - **🧪 Tests**: All code must have unit and integration tests
 - **📐 DOP Standards**: Follow the 4 principles of Data-Oriented Programming v1.1
 - **🎨 Style**: Maintain consistency with Checkstyle and existing formatting
 - **📝 Documentation**: Document significant changes
 
 ### Behavioral Responsibilities
+
 - Be respectful and constructive in all interactions
 - Create issues for significant changes before implementing
 - Keep PRs small and focused on one functionality
@@ -105,6 +107,7 @@ We maintain an open mind! There are many ways to contribute:
 ## 🛠️ Como Contribuir
 
 ### Para Mudanças Pequenas (correções óbvias)
+
 Correções pequenas como erros de digitação, formatação ou comentários podem ser enviadas diretamente via PR:
 
 1. Fork o repositório
@@ -147,30 +150,36 @@ O projeto utiliza uma estratégia de testes categorizada com **JUnit 5 tags** pa
 ### Categorias de Testes
 
 #### 🔵 Testes Unitários (`@Tag("unit")`)
+
 Testes rápidos e isolados que não requerem dependências externas:
 
 **Características:**
+
 - ⚡ Execução rápida (< 1 segundo por teste)
 - 🔒 Isolados (sem dependências externas)
 - 🎯 Focados (testam unidades individuais)
 - 🔄 Repetíveis (mesmo resultado sempre)
 
 **Exemplos:**
+
 - Testes de objetos de domínio (Holiday, Location)
 - Validação de DTOs
 - Testes de mappers com dados mock
 - Testes de classes utilitárias
 
 #### 🟢 Testes de Integração (`@Tag("integration")`)
+
 Verificam que diferentes componentes funcionam juntos corretamente:
 
 **Características:**
+
 - 🐳 Usa TestContainers para instâncias reais do MongoDB
 - 🌐 Testa contexto completo da aplicação
 - 📊 Verifica funcionalidade end-to-end
 - ⏱️ Execução mais lenta (vários segundos por teste)
 
 **Exemplos:**
+
 - Testes de carregamento do contexto Spring Boot
 - Testes de integração com banco de dados
 - Testes de endpoints da API
@@ -179,6 +188,7 @@ Verificam que diferentes componentes funcionam juntos corretamente:
 ### Executando Testes
 
 #### Todos os Testes (Padrão)
+
 ```bash
 # Executar todos os testes (unitários + integração)
 ./mvnw test
@@ -188,18 +198,21 @@ Verificam que diferentes componentes funcionam juntos corretamente:
 ```
 
 #### Apenas Testes Unitários
+
 ```bash
 # Execução rápida - apenas testes unitários
 ./mvnw test -Punit-tests
 ```
 
 #### Apenas Testes de Integração
+
 ```bash
 # Execução mais lenta - apenas testes de integração
 ./mvnw test -Pintegration-tests
 ```
 
 #### Testes Específicos
+
 ```bash
 # Executar uma classe de teste específica
 ./mvnw test -Dtest=HolidayOperationsTest
@@ -211,6 +224,7 @@ Verificam que diferentes componentes funcionam juntos corretamente:
 ### Adicionando Novos Testes
 
 #### Para Testes Unitários
+
 ```java
 @Tag("unit")
 class MyServiceTest {
@@ -223,6 +237,7 @@ class MyServiceTest {
 ```
 
 #### Para Testes de Integração
+
 ```java
 @SpringBootTest
 @ActiveProfiles("test")
@@ -243,6 +258,7 @@ class MyIntegrationTest {
 ### Boas Práticas de Testes
 
 #### Testes Unitários
+
 - ✅ Use anotação `@Tag("unit")`
 - ✅ Mock dependências externas
 - ✅ Teste unidades individuais de funcionalidade
@@ -251,6 +267,7 @@ class MyIntegrationTest {
 - ✅ Siga o padrão AAA (Arrange, Act, Assert)
 
 #### Testes de Integração
+
 - ✅ Use anotação `@Tag("integration")`
 - ✅ Use TestContainers para bancos de dados reais
 - ✅ Teste interações entre componentes
@@ -259,6 +276,7 @@ class MyIntegrationTest {
 - ✅ Use dados de teste realistas
 
 #### Diretrizes Gerais
+
 - 📝 Escreva testes antes ou junto com o código (TDD/BDD)
 - 🎯 Busque alta cobertura de testes (>80%)
 - 🔄 Mantenha testes independentes e repetíveis
@@ -272,17 +290,20 @@ O projeto inclui **coleções Postman abrangentes** para testar todos os endpoin
 ### 🚀 Início Rápido com Postman
 
 #### 1. Importar Coleções
+
 1. Abra o Postman
 2. Clique em **Import**
 3. Selecione `postman/DOP-Holiday-API.postman_collection.json`
 4. Selecione `postman/DOP-Holiday-API.postman_environment.json`
 
 #### 2. Configurar Ambiente
+
 1. Selecione **🎯 DOP Holiday API - Master Environment** no dropdown de ambiente
 2. Certifique-se que a API está rodando em `http://localhost:8080`
 3. Atualize variáveis se necessário (porta diferente, URL, etc.)
 
 #### 3. Executar Testes
+
 - **Testes Individuais**: Clique em qualquer request e pressione **Send**
 - **Testes por Categoria**: Clique com botão direito em uma pasta e selecione **Run folder**
 - **Suite Completa**: Clique na coleção e selecione **Run collection**
@@ -292,7 +313,9 @@ O projeto inclui **coleções Postman abrangentes** para testar todos os endpoin
 A coleção está organizada em **5 categorias principais** com **23 testes abrangentes**:
 
 #### 🟢 1. Operações CRUD Básicas (13 requests)
+
 Operações padrão de Create, Read, Update, Delete para feriados
+
 - Criar feriados
 - Recuperar feriados por ID
 - Atualizar feriados existentes
@@ -300,35 +323,45 @@ Operações padrão de Create, Read, Update, Delete para feriados
 - Listar todos os feriados
 
 #### 🔵 2. Filtragem e Recuperação Avançada (1 request)
+
 Consultas complexas, filtragem e padrões de recuperação de dados
+
 - Filtrar por país, estado, cidade
 - Filtrar por tipo de feriado
 - Filtragem por intervalo de datas
 - Correspondência de padrões de nome
 
 #### 🟡 3. Validação e Tratamento de Erros (4 requests)
+
 Validação de entrada, cenários de erro e condições de contorno
+
 - Validação de dados inválidos
 - Validação de campos obrigatórios
 - Validação de datas
 - Teste de respostas de erro
 
 #### 🟠 4. Tipos Específicos DOP (4 subcategorias)
+
 Tipos de feriados específicos de Data-Oriented Programming
 
 ##### 📅 Feriados Fixos (2 requests)
+
 Feriados de data fixa (Natal, Ano Novo, etc.)
 
 ##### 👁️ Feriados Observados (1 request)
+
 Feriados com datas observadas e regras de segunda-feira
 
 ##### 🔄 Feriados Móveis (1 request)
+
 Feriados calculados (Páscoa, Ação de Graças, etc.)
 
 ##### 🔗 Feriados Móveis Baseados (1 request)
+
 Feriados calculados a partir de outros feriados
 
 #### 🔴 5. Testes de Performance (1 request)
+
 Testes de performance, operações em lote e testes de stress
 
 ### 🌍 Variáveis de Ambiente
@@ -367,9 +400,11 @@ Para melhores resultados, execute os testes nesta ordem:
 ## 🐛 Como Reportar Bugs
 
 ### ⚠️ Vulnerabilidades de Segurança
+
 **NÃO abra uma issue pública para vulnerabilidades de segurança.** Entre em contato diretamente via email.
 
 ### 🐞 Bugs Gerais
+
 Ao reportar um bug, inclua:
 
 1. **Versão do Java**: Qual versão você está usando?
@@ -382,13 +417,16 @@ Ao reportar um bug, inclua:
 ## ✨ Como Sugerir Funcionalidades
 
 ### Filosofia do Projeto
+
 Este projeto demonstra **Data-Oriented Programming v1.1** em Java, focando em:
+
 - Dados imutáveis e transparentes
 - Separação entre dados e operações
 - Estados ilegais impossíveis de representar
 - Modelagem precisa do domínio
 
 ### Processo de Sugestão
+
 1. **🔍 Verifique**: Se a funcionalidade já foi sugerida
 2. **📝 Crie Issue**: Use o template de feature request
 3. **🎯 Descreva**: Por que é necessária e como deveria funcionar
@@ -397,6 +435,7 @@ Este projeto demonstra **Data-Oriented Programming v1.1** em Java, focando em:
 ## 🔍 Processo de Code Review
 
 ### Workflow de Qualidade Obrigatório
+
 Todos os PRs devem passar pelo **workflow de qualidade automatizado**:
 
 - **🏗️ Build Application**: Compilação bem-sucedida
@@ -406,13 +445,16 @@ Todos os PRs devem passar pelo **workflow de qualidade automatizado**:
 - **🚪 Quality Gate**: Agregação de todos os resultados
 
 ### Proteção de Branch
+
 A branch `main` está protegida e requer:
+
 - ✅ Todos os status checks passando
 - ✅ Branch atualizada antes do merge
 - ✅ Aprovação de code review
 - ✅ Histórico linear (recomendado)
 
 ### Cronograma de Review
+
 - **Reviews iniciais**: Dentro de 2-3 dias úteis
 - **Feedback esperado**: Resposta em até 1 semana
 - **PRs inativos**: Podem ser fechados após 2 semanas sem atividade
@@ -420,14 +462,17 @@ A branch `main` está protegida e requer:
 ## 🏛️ Convenções do Projeto
 
 ### Estilo de Código
-- **Java 24**: Use preview features quando apropriado
+
+- **Java 25**: Use preview features quando apropriado
 - **Records**: Para todos os objetos de domínio
 - **Pattern Matching**: Para operações com sealed interfaces
 - **Checkstyle**: Configuração em `checkstyle.xml`
 - **Spotless**: Formatação automática configurada
 
 ### Mensagens de Commit
+
 Use o formato:
+
 ```
 tipo(escopo): descrição breve
 
@@ -439,6 +484,7 @@ Fixes #123
 Tipos: `feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore`
 
 ### Labels de Issues
+
 - **`bug`**: Problemas confirmados
 - **`enhancement`**: Novas funcionalidades
 - **`documentation`**: Melhorias na documentação
@@ -449,6 +495,7 @@ Tipos: `feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore`
 ## 🌟 Reconhecimento
 
 Contribuidores são reconhecidos:
+
 - **README.md**: Lista de contribuidores
 - **Releases**: Menção em notas de release
 - **Issues**: Crédito em issues relacionadas

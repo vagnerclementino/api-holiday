@@ -1,33 +1,36 @@
 package me.clementino.holiday.domain.dop;
 
-import java.time.DayOfWeek;
-import java.time.LocalDate;
-import java.time.Month;
-import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
+import module java.base;
 import org.springframework.stereotype.Component;
 
 /**
- * Operations for working with holidays. This class demonstrates the DOP principle of separating
- * operations from data - all holiday behavior is implemented here as pure functions that work with
+ * Operations for working with holidays. This class demonstrates the DOP
+ * principle of separating
+ * operations from data - all holiday behavior is implemented here as pure
+ * functions that work with
  * immutable holiday records.
  *
- * <p>DOP Principles Applied:
+ * <p>
+ * DOP Principles Applied:
  *
  * <ol>
- *   <li><strong>Separate Operations from Data</strong> - All holiday operations are pure functions
- *   <li><strong>Pattern Matching</strong> - Uses switch expressions for type-safe operations
- *   <li><strong>Immutable Operations</strong> - All operations return new instances, never modify
- *       input
+ * <li><strong>Separate Operations from Data</strong> - All holiday operations
+ * are pure functions
+ * <li><strong>Pattern Matching</strong> - Uses switch expressions for type-safe
+ * operations
+ * <li><strong>Immutable Operations</strong> - All operations return new
+ * instances, never modify
+ * input
  * </ol>
  */
 @Component
 public final class HolidayOperations {
 
   /**
-   * Calculates the date for a holiday in a specific year and returns a new holiday instance with
-   * the calculated date. This method follows DOP principles by returning new immutable instances
+   * Calculates the date for a holiday in a specific year and returns a new
+   * holiday instance with
+   * the calculated date. This method follows DOP principles by returning new
+   * immutable instances
    * rather than modifying existing ones.
    */
   public Holiday calculateDate(Holiday holiday, int year) {
@@ -41,8 +44,7 @@ public final class HolidayOperations {
       }
       case ObservedHoliday observed -> {
         LocalDate newDate = calculateFixedDate(observed, year);
-        LocalDate newObserved =
-            observed.mondayisation() ? applyMondayisationRules(newDate) : newDate;
+        LocalDate newObserved = observed.mondayisation() ? applyMondayisationRules(newDate) : newDate;
         yield observed.withDate(newDate).withObserved(newObserved);
       }
       case MoveableHoliday moveable -> {
@@ -57,8 +59,10 @@ public final class HolidayOperations {
   }
 
   /**
-   * Calculates the observed date for a holiday in a given year and returns a new holiday instance
-   * with both the original date and observed date calculated. Applies mondayisation rules if the
+   * Calculates the observed date for a holiday in a given year and returns a new
+   * holiday instance
+   * with both the original date and observed date calculated. Applies
+   * mondayisation rules if the
    * holiday supports it.
    */
   public Holiday calculateObservedDate(Holiday holiday, int year) {
@@ -72,14 +76,12 @@ public final class HolidayOperations {
       }
       case ObservedHoliday observed -> {
         LocalDate newDate = calculateFixedDate(observed, year);
-        LocalDate newObserved =
-            observed.mondayisation() ? applyMondayisationRules(newDate) : newDate;
+        LocalDate newObserved = observed.mondayisation() ? applyMondayisationRules(newDate) : newDate;
         yield observed.withDate(newDate).withObserved(newObserved);
       }
       case MoveableHoliday moveable -> {
         LocalDate newDate = calculateMoveableDate(moveable, year);
-        LocalDate observedDate =
-            moveable.mondayisation() ? applyMondayisationRules(newDate) : newDate;
+        LocalDate observedDate = moveable.mondayisation() ? applyMondayisationRules(newDate) : newDate;
 
         if (moveable.mondayisation() && !newDate.equals(observedDate)) {
           yield new ObservedHoliday(
@@ -96,8 +98,7 @@ public final class HolidayOperations {
       }
       case MoveableFromBaseHoliday derived -> {
         LocalDate newDate = calculateDerivedDate(derived, year);
-        LocalDate observedDate =
-            derived.mondayisation() ? applyMondayisationRules(newDate) : newDate;
+        LocalDate observedDate = derived.mondayisation() ? applyMondayisationRules(newDate) : newDate;
 
         if (derived.mondayisation() && !newDate.equals(observedDate)) {
           yield new ObservedHoliday(
@@ -116,7 +117,8 @@ public final class HolidayOperations {
   }
 
   /**
-   * Helper method to get just the LocalDate for a holiday in a specific year. Useful for
+   * Helper method to get just the LocalDate for a holiday in a specific year.
+   * Useful for
    * calculations that only need the date value.
    */
   public LocalDate getDateOnly(Holiday holiday, int year) {
@@ -132,7 +134,8 @@ public final class HolidayOperations {
   }
 
   /**
-   * Helper method to get just the observed LocalDate for a holiday in a specific year. Useful for
+   * Helper method to get just the observed LocalDate for a holiday in a specific
+   * year. Useful for
    * calculations that only need the observed date value.
    */
   public LocalDate getObservedDateOnly(Holiday holiday, int year) {
@@ -160,39 +163,40 @@ public final class HolidayOperations {
     return dayOfWeek == DayOfWeek.SATURDAY || dayOfWeek == DayOfWeek.SUNDAY;
   }
 
-  /** Formats holiday information for display. Uses pattern matching and destructuring. */
+  /**
+   * Formats holiday information for display. Uses pattern matching and
+   * destructuring.
+   */
   public static String formatHolidayInfo(Holiday holiday) {
     Objects.requireNonNull(holiday, "Holiday cannot be null");
 
     var localityInfo = formatLocalities(holiday.localities());
-    var typeInfo =
-        switch (holiday.type()) {
-          case NATIONAL -> "National";
-          case STATE -> "State";
-          case MUNICIPAL -> "Municipal";
-          case RELIGIOUS -> "Religious";
-          case COMMERCIAL -> "Commercial";
-        };
+    var typeInfo = switch (holiday.type()) {
+      case NATIONAL -> "National";
+      case STATE -> "State";
+      case MUNICIPAL -> "Municipal";
+      case RELIGIOUS -> "Religious";
+      case COMMERCIAL -> "Commercial";
+    };
 
     return switch (holiday) {
       case FixedHoliday fixed ->
-          "%s - %s holiday in %s on %s %d"
-              .formatted(
-                  fixed.name(),
-                  typeInfo,
-                  localityInfo,
-                  fixed.date().getMonth(),
-                  fixed.date().getDayOfMonth());
+        "%s - %s holiday in %s on %s %d"
+            .formatted(
+                fixed.name(),
+                typeInfo,
+                localityInfo,
+                fixed.date().getMonth(),
+                fixed.date().getDayOfMonth());
 
       case ObservedHoliday observed -> {
         var mondayisationInfo = observed.mondayisation() ? " (with mondayisation)" : "";
-        var dateInfo =
-            observed.date().equals(observed.observed())
-                ? "on %s %d".formatted(observed.date().getMonth(), observed.date().getDayOfMonth())
-                : "on %s %d (observed %s %d)"
-                    .formatted(
-                        observed.date().getMonth(), observed.date().getDayOfMonth(),
-                        observed.observed().getMonth(), observed.observed().getDayOfMonth());
+        var dateInfo = observed.date().equals(observed.observed())
+            ? "on %s %d".formatted(observed.date().getMonth(), observed.date().getDayOfMonth())
+            : "on %s %d (observed %s %d)"
+                .formatted(
+                    observed.date().getMonth(), observed.date().getDayOfMonth(),
+                    observed.observed().getMonth(), observed.observed().getDayOfMonth());
         yield "%s - %s holiday in %s %s%s"
             .formatted(observed.name(), typeInfo, localityInfo, dateInfo, mondayisationInfo);
       }
@@ -217,7 +221,10 @@ public final class HolidayOperations {
     };
   }
 
-  /** Checks if a holiday applies to a specific locality. Uses hierarchical locality matching. */
+  /**
+   * Checks if a holiday applies to a specific locality. Uses hierarchical
+   * locality matching.
+   */
   public static boolean appliesTo(Holiday holiday, Locality targetLocality) {
     Objects.requireNonNull(holiday, "Holiday cannot be null");
     Objects.requireNonNull(targetLocality, "Target locality cannot be null");
@@ -240,8 +247,8 @@ public final class HolidayOperations {
       case MOTHERS_DAY -> calculateMothersDay(year);
       case FATHERS_DAY -> calculateFathersDay(year);
       default ->
-          throw new IllegalArgumentException(
-              "Unsupported moveable holiday: " + moveable.knownHoliday());
+        throw new IllegalArgumentException(
+            "Unsupported moveable holiday: " + moveable.knownHoliday());
     };
   }
 
@@ -272,42 +279,48 @@ public final class HolidayOperations {
     return switch (locality) {
       case Locality.Country country -> country.name();
       case Locality.Subdivision subdivision ->
-          "%s, %s".formatted(subdivision.name(), subdivision.country().name());
+        "%s, %s".formatted(subdivision.name(), subdivision.country().name());
       case Locality.City city ->
-          "%s, %s, %s"
-              .formatted(
-                  city.name(), city.subdivision().name(), city.subdivision().country().name());
+        "%s, %s, %s"
+            .formatted(
+                city.name(), city.subdivision().name(), city.subdivision().country().name());
     };
   }
 
-  /** Checks if a holiday locality matches a target locality using hierarchical matching. */
+  /**
+   * Checks if a holiday locality matches a target locality using hierarchical
+   * matching.
+   */
   private static boolean localityMatches(Locality holidayLocality, Locality targetLocality) {
     return switch (holidayLocality) {
       case Locality.Country holidayCountry ->
-          switch (targetLocality) {
-            case Locality.Country targetCountry -> holidayCountry.equals(targetCountry);
-            case Locality.Subdivision targetSubdivision ->
-                holidayCountry.equals(targetSubdivision.country());
-            case Locality.City targetCity ->
-                holidayCountry.equals(targetCity.subdivision().country());
-          };
+        switch (targetLocality) {
+          case Locality.Country targetCountry -> holidayCountry.equals(targetCountry);
+          case Locality.Subdivision targetSubdivision ->
+            holidayCountry.equals(targetSubdivision.country());
+          case Locality.City targetCity ->
+            holidayCountry.equals(targetCity.subdivision().country());
+        };
       case Locality.Subdivision holidaySubdivision ->
-          switch (targetLocality) {
-            case Locality.Country targetCountry -> false;
-            case Locality.Subdivision targetSubdivision ->
-                holidaySubdivision.equals(targetSubdivision);
-            case Locality.City targetCity -> holidaySubdivision.equals(targetCity.subdivision());
-          };
+        switch (targetLocality) {
+          case Locality.Country targetCountry -> false;
+          case Locality.Subdivision targetSubdivision ->
+            holidaySubdivision.equals(targetSubdivision);
+          case Locality.City targetCity -> holidaySubdivision.equals(targetCity.subdivision());
+        };
       case Locality.City holidayCity ->
-          switch (targetLocality) {
-            case Locality.Country targetCountry -> false;
-            case Locality.Subdivision targetSubdivision -> false;
-            case Locality.City targetCity -> holidayCity.equals(targetCity);
-          };
+        switch (targetLocality) {
+          case Locality.Country targetCountry -> false;
+          case Locality.Subdivision targetSubdivision -> false;
+          case Locality.City targetCity -> holidayCity.equals(targetCity);
+        };
     };
   }
 
-  /** Calculates Easter Sunday for a given year using the algorithm from Jean Meeus. */
+  /**
+   * Calculates Easter Sunday for a given year using the algorithm from Jean
+   * Meeus.
+   */
   public static LocalDate calculateEaster(int year) {
     int a = year % 19;
     int b = year / 100;

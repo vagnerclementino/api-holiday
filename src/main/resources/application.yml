@@ -1,5 +1,5 @@
-# Holiday API - Default Configuration for Java 24
-# Spring Boot 3.5.4 with Java 24 Runtime
+# Holiday API - Default Configuration for Java 25
+# Spring Boot 3.5.6 with Java 25 Runtime
 
 spring:
   application:
@@ -17,7 +17,7 @@ spring:
     compose:
       lifecycle-management: start-only
 
-  # Jackson Configuration optimized for Java 24 Records
+  # Jackson Configuration optimized for Java 25 Records
   jackson:
     serialization:
       write-dates-as-timestamps: false
@@ -73,28 +73,18 @@ springdoc:
     path: /api-docs
   show-actuator: true
 
-# Actuator Configuration
+# Actuator Configuration - Only Health Endpoint Exposed
 management:
   endpoints:
     web:
       exposure:
-        include: health,info,metrics,env,beans
+        include: health
+        exclude: info, metrics, env, beans, configprops, mappings, scheduledtasks, httptrace, auditevents, conditions, flyway, liquibase, loggers, heapdump, threaddump, prometheus
       base-path: /actuator
   endpoint:
     health:
-      show-details: when-authorized
-      show-components: always
-  info:
-    java:
-      enabled: true
-    env:
-      enabled: true
-    build:
-      enabled: true
-  metrics:
-    export:
-      simple:
-        enabled: true
+      show-details: never
+      show-components: never
 
 # Logging Configuration
 logging:

@@ -7,7 +7,9 @@ import io.swagger.v3.oas.models.info.License;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-/** Swagger/OpenAPI configuration. */
+/**
+ * Swagger/OpenAPI configuration.
+ */
 @Configuration
 public class SwaggerConfig {
 
@@ -17,8 +19,7 @@ public class SwaggerConfig {
         .info(
             new Info()
                 .title("Holiday API")
-                .description(
-                    "Data-Oriented Programming Holiday API - A comprehensive example demonstrating DOP principles in Java")
+                .description("Data-Oriented Programming Holiday API - A comprehensive example demonstrating DOP principles in Java")
                 .version("1.0.0")
                 .contact(
                     new Contact()
@@ -26,6 +27,10 @@ public class SwaggerConfig {
                         .url("https://github.com/vagnerclementino")
                         .email("vagner.clementino@gmail.com"))
                 .license(
-                    new License().name("MIT License").url("https://opensource.org/licenses/MIT")));
+                    new License()
+                        .name("MIT License")
+                        .url("https://opensource.org/licenses/MIT")
+                )
+        );
   }
 }

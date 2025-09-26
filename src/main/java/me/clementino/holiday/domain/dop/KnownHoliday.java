@@ -58,18 +58,18 @@ public enum KnownHoliday {
   public boolean isFixed() {
     return switch (this) {
       case NEW_YEAR,
-              CHRISTMAS,
-              INDEPENDENCE_DAY_US,
-              INDEPENDENCE_DAY_BRAZIL,
-              LABOR_DAY_INTERNATIONAL,
-              WOMENS_DAY,
-              VALENTINES_DAY,
-              EPIPHANY,
-              ALL_SAINTS_DAY,
-              ALL_SOULS_DAY,
-              HALLOWEEN,
-              ST_PATRICKS_DAY,
-              CINCO_DE_MAYO ->
+          CHRISTMAS,
+          INDEPENDENCE_DAY_US,
+          INDEPENDENCE_DAY_BRAZIL,
+          LABOR_DAY_INTERNATIONAL,
+          WOMENS_DAY,
+          VALENTINES_DAY,
+          EPIPHANY,
+          ALL_SAINTS_DAY,
+          ALL_SOULS_DAY,
+          HALLOWEEN,
+          ST_PATRICKS_DAY,
+          CINCO_DE_MAYO ->
           true;
       default -> false;
     };

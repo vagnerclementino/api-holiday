@@ -1,12 +1,8 @@
 package me.clementino.holiday.entity;
 
+import module java.base;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Objects;
-import me.clementino.holiday.domain.dop.HolidayType;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.LastModifiedDate;
@@ -16,51 +12,57 @@ import org.springframework.data.mongodb.core.index.CompoundIndexes;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+// Application specific imports
+import me.clementino.holiday.domain.dop.HolidayType;
+
 /**
- * MongoDB document representing a holiday entity for persistence. Enhanced to support year-based
+ * MongoDB document representing a holiday entity for persistence. Enhanced to
+ * support year-based
  * calculations, caching, and DOP sealed interface serialization.
  *
- * <p>This entity is designed to persist DOP Holiday sealed interface variants while providing
- * efficient querying capabilities through proper indexing and embedded documents.
+ * <p>
+ * This entity is designed to persist DOP Holiday sealed interface variants
+ * while providing
+ * efficient querying capabilities through proper indexing and embedded
+ * documents.
  *
- * <p><strong>Key Features:</strong>
+ * <p>
+ * <strong>Key Features:</strong>
  *
  * <ul>
- *   <li>Year-based holiday calculations and caching
- *   <li>Support for DOP sealed interface serialization
- *   <li>Comprehensive MongoDB indexing for performance
- *   <li>Locality hierarchy support with embedded documents
- *   <li>Holiday variant serialization for complex types
- *   <li>Custom converters for sealed interface persistence
+ * <li>Year-based holiday calculations and caching
+ * <li>Support for DOP sealed interface serialization
+ * <li>Comprehensive MongoDB indexing for performance
+ * <li>Locality hierarchy support with embedded documents
+ * <li>Holiday variant serialization for complex types
+ * <li>Custom converters for sealed interface persistence
  * </ul>
  *
- * <p><strong>Indexing Strategy:</strong>
+ * <p>
+ * <strong>Indexing Strategy:</strong>
  *
  * <ul>
- *   <li>Country + Year: For efficient year-based queries
- *   <li>Locality + Type: For hierarchical locality filtering
- *   <li>Date + Year: For date range queries
- *   <li>Base Holiday + Year: For derived holiday lookups
- *   <li>Calculated Holidays: For cache management
+ * <li>Country + Year: For efficient year-based queries
+ * <li>Locality + Type: For hierarchical locality filtering
+ * <li>Date + Year: For date range queries
+ * <li>Base Holiday + Year: For derived holiday lookups
+ * <li>Calculated Holidays: For cache management
  * </ul>
  */
 @Document("holidays")
 @CompoundIndexes({
-  @CompoundIndex(name = "country_year_idx", def = "{'country': 1, 'year': 1}"),
-  @CompoundIndex(
-      name = "locality_type_idx",
-      def = "{'country': 1, 'state': 1, 'city': 1, 'type': 1}"),
-  @CompoundIndex(name = "date_range_idx", def = "{'date': 1, 'year': 1}"),
-  @CompoundIndex(name = "base_holiday_year_idx", def = "{'baseHolidayId': 1, 'year': 1}"),
-  @CompoundIndex(
-      name = "calculated_holidays_idx",
-      def = "{'isCalculated': 1, 'year': 1, 'country': 1}"),
-  @CompoundIndex(name = "holiday_variant_idx", def = "{'holidayVariant': 1, 'country': 1}"),
-  @CompoundIndex(name = "recurring_holidays_idx", def = "{'recurring': 1, 'country': 1, 'type': 1}")
+    @CompoundIndex(name = "country_year_idx", def = "{'country': 1, 'year': 1}"),
+    @CompoundIndex(name = "locality_type_idx", def = "{'country': 1, 'state': 1, 'city': 1, 'type': 1}"),
+    @CompoundIndex(name = "date_range_idx", def = "{'date': 1, 'year': 1}"),
+    @CompoundIndex(name = "base_holiday_year_idx", def = "{'baseHolidayId': 1, 'year': 1}"),
+    @CompoundIndex(name = "calculated_holidays_idx", def = "{'isCalculated': 1, 'year': 1, 'country': 1}"),
+    @CompoundIndex(name = "holiday_variant_idx", def = "{'holidayVariant': 1, 'country': 1}"),
+    @CompoundIndex(name = "recurring_holidays_idx", def = "{'recurring': 1, 'country': 1, 'type': 1}")
 })
 public class HolidayEntity {
 
-  @Id private String id;
+  @Id
+  private String id;
 
   @NotNull
   @Size(max = 255)
@@ -71,21 +73,30 @@ public class HolidayEntity {
   @Size(max = 1000)
   private String description;
 
-  @NotNull @Indexed private LocalDate date;
+  @NotNull
+  @Indexed
+  private LocalDate date;
 
-  @NotNull @Indexed private HolidayType type;
+  @NotNull
+  @Indexed
+  private HolidayType type;
 
-  @NotNull private List<LocalityEntity> localities;
+  @NotNull
+  private List<LocalityEntity> localities;
 
   private LocalDate observed;
 
-  @CreatedDate private LocalDateTime dateCreated;
+  @CreatedDate
+  private LocalDateTime dateCreated;
 
-  @LastModifiedDate private LocalDateTime lastUpdated;
+  @LastModifiedDate
+  private LocalDateTime lastUpdated;
 
-  @Version private Integer version;
+  @Version
+  private Integer version;
 
-  public HolidayEntity() {}
+  public HolidayEntity() {
+  }
 
   public HolidayEntity(
       String name, String description, LocalDate date, String country, HolidayType type) {
@@ -117,7 +128,8 @@ public class HolidayEntity {
   }
 
   /**
-   * Gets the effective date for this holiday (observed date if available, otherwise actual date).
+   * Gets the effective date for this holiday (observed date if available,
+   * otherwise actual date).
    *
    * @return the effective date
    */
