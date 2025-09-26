@@ -240,10 +240,6 @@ Pull requests to `main` branch require:
 
 **No code can be merged without passing the complete quality workflow.**
 
----
-
----
-
 ## 📁 Project Structure
 
 ```
@@ -331,17 +327,6 @@ Contribuições podem incluir:
 - 📚 Melhorias na documentação
 - 🧪 Testes adicionais
 - 🎨 Novos exemplos de programação orientada a dados
-
-## 📖 Related Article
-
-This project accompanies the article **"Nem tudo é objeto: Programação Orientada a Dados em Java"** which provides detailed explanations of the concepts demonstrated here.
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-- Add more examples of DOP principles
-- Enhance the documentation
 
 ## 📖 Related Article
 
