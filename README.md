@@ -328,9 +328,13 @@ Contribuições podem incluir:
 - 🧪 Testes adicionais
 - 🎨 Novos exemplos de programação orientada a dados
 
-## 📖 Related Article
+## 📖 Related Articles
 
-This project accompanies the article **"Nem tudo é objeto: Programação Orientada a Dados em Java"** which provides detailed explanations of the concepts demonstrated here.
+This project accompanies a series of 3 articles about **"Nem tudo é objeto: Programação Orientada a Dados em Java"** which provide detailed explanations of the concepts demonstrated here:
+
+- [Parte 1: Fundamentos da Programação Orientada a Dados](https://notes.clementino.me/blog/nem-tudo-eh-objeto-parte-1/)
+- [Parte 2: Implementação Prática em Java](https://notes.clementino.me/blog/nem-tudo-eh-objeto-parte-2/)
+- [Parte 3: Comparação com Programação Orientada a Objetos](https://notes.clementino.me/blog/nem-tudo-eh-objeto-parte-3/)
 
 ## 📄 License
 
